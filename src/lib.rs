@@ -6,3 +6,4 @@ pub mod buffer;
 // pub mod widget_notification;
 // pub mod widget_status;
 // pub mod widget_text;
+pub mod editor;
