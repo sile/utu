@@ -31,7 +31,7 @@ impl App {
 
     pub fn run(mut self) -> orfail::Result<()> {
         while !self.editor.exit {
-            self.editor.try_reload();
+            self.editor.try_reload().or_fail()?;
             self.render().or_fail()?;
 
             if let Some(event) = self.terminal.poll_event(None).or_fail()? {
@@ -71,13 +71,14 @@ impl App {
 
         self.terminal.draw(frame).or_fail()?;
 
-        self.editor.message = None;
         self.editor.dirty.render = false;
 
         Ok(())
     }
 
     fn handle_event(&mut self, event: TerminalEvent) -> orfail::Result<()> {
+        self.editor.clear_message();
+
         match event {
             TerminalEvent::Input(input) => {
                 let TerminalInput::Key(key) = input;
