@@ -1,16 +1,46 @@
 use std::path::PathBuf;
 
+use orfail::OrFail;
+use tuinix::{Terminal, TerminalInput};
+
 #[derive(Debug)]
 pub struct Editor {
     path: PathBuf,
+    terminal: Terminal,
+    exit: bool,
 }
 
 impl Editor {
-    pub fn new(path: PathBuf) -> Self {
-        Self { path }
+    pub fn new(path: PathBuf) -> orfail::Result<Self> {
+        let terminal = Terminal::new().or_fail()?;
+        Ok(Self {
+            path,
+            terminal,
+            exit: false,
+        })
     }
 
-    pub fn run(self) -> orfail::Result<()> {
+    pub fn run(mut self) -> orfail::Result<()> {
+        while !self.exit {
+            if let Some(event) = self.terminal.poll_event(None).or_fail()? {
+                self.handle_event(event).or_fail()?;
+            }
+        }
+        Ok(())
+    }
+
+    fn handle_event(&mut self, event: tuinix::TerminalEvent) -> orfail::Result<()> {
+        match event {
+            tuinix::TerminalEvent::Input(input) => {
+                let TerminalInput::Key(key) = input;
+                if key.ctrl && matches!(key.code, tuinix::KeyCode::Char('c')) {
+                    self.exit = true;
+                }
+            }
+            tuinix::TerminalEvent::Resize(_) => {
+                // Handle terminal resize if needed
+            }
+        }
         Ok(())
     }
 }

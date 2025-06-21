@@ -31,7 +31,7 @@ fn main() -> noargs::Result<()> {
         return Ok(());
     }
 
-    let editor = Editor::new(file_path);
+    let editor = Editor::new(file_path).or_fail()?;
     editor.run().or_fail()?;
 
     Ok(())
