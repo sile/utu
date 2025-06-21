@@ -4,13 +4,13 @@ use orfail::OrFail;
 use tuinix::{Terminal, TerminalInput};
 
 #[derive(Debug)]
-pub struct Editor {
+pub struct App {
     path: PathBuf,
     terminal: Terminal,
     exit: bool,
 }
 
-impl Editor {
+impl App {
     pub fn new(path: PathBuf) -> orfail::Result<Self> {
         let terminal = Terminal::new().or_fail()?;
         Ok(Self {

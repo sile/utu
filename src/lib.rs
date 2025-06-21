@@ -1,1 +1,1 @@
-pub mod editor;
+pub mod app;

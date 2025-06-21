@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use orfail::OrFail;
-use pixed::editor::Editor;
+use pixed::app::App;
 
 fn main() -> noargs::Result<()> {
     let mut args = noargs::raw_args();
@@ -31,8 +31,8 @@ fn main() -> noargs::Result<()> {
         return Ok(());
     }
 
-    let editor = Editor::new(file_path).or_fail()?;
-    editor.run().or_fail()?;
+    let app = App::new(file_path).or_fail()?;
+    app.run().or_fail()?;
 
     Ok(())
 }
