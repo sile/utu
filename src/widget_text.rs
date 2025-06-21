@@ -24,12 +24,11 @@ impl TextView {
         self.adjust_scroll_offset_for_cursor(editor, terminal_size.rows, terminal_size.cols);
 
         // Render visible lines
-        for (display_row, line) in editor
+        for line in editor
             .buffer
             .lines()
             .skip(self.scroll_offset.row)
             .take(terminal_size.rows)
-            .enumerate()
         {
             // Get the visible portion of the line
             let visible_chars: String = line
@@ -39,12 +38,7 @@ impl TextView {
                 .collect();
 
             // Write the line to the frame
-            if display_row < terminal_size.rows - 1 {
-                writeln!(frame, "{}", visible_chars).or_fail()?;
-            } else {
-                // Don't add newline on last row to avoid scrolling
-                write!(frame, "{}", visible_chars).or_fail()?;
-            }
+            writeln!(frame, "{}", visible_chars).or_fail()?;
         }
 
         Ok(())
