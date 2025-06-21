@@ -4,7 +4,7 @@ use std::path::PathBuf;
 pub struct Editor {
     pub path: PathBuf,
     pub exit: bool,
-    pub dirty: bool,
+    pub dirty: Dirty,
 }
 
 impl Editor {
@@ -12,7 +12,16 @@ impl Editor {
         Self {
             path,
             exit: false,
-            dirty: true,
+            dirty: Dirty {
+                content: false,
+                render: true,
+            },
         }
     }
+}
+
+#[derive(Debug)]
+pub struct Dirty {
+    pub content: bool, // File content needs to be saved
+    pub render: bool,  // Terminal needs to be re-rendered
 }
