@@ -4,7 +4,10 @@ use orfail::OrFail;
 use tuinix::{Terminal, TerminalEvent, TerminalFrame, TerminalInput};
 
 use crate::{
-    editor::Editor, widget_notification::NotificationBarWidget, widget_status::StatusBarWidget,
+    editor::Editor,
+    tuinix_ext::{TerminalFrameExt, TerminalSizeExt},
+    widget_notification::NotificationBarWidget,
+    widget_status::StatusBarWidget,
 };
 
 #[derive(Debug)]
@@ -44,12 +47,36 @@ impl App {
 
         let mut frame = TerminalFrame::new(self.terminal.size());
 
-        // Basic content - show the file path
-        use std::fmt::Write;
-        writeln!(frame, "Editing: {}", self.editor.path.display()).or_fail()?;
-        writeln!(frame, "Press Ctrl+C to exit").or_fail()?;
+        // Create regions for different UI components
+        let full_region = frame.size().to_region();
+
+        // Reserve space for status bar (bottom row)
+        let _main_region = full_region.without_bottom_rows(1);
+        let status_region = full_region.bottom_rows(1);
+
+        // Render main editor content (if you have editor rendering logic)
+        // frame.draw_in_region(main_region, |frame| {
+        //     // Editor content would go here
+        //     Ok(())
+        // })?;
+
+        // Render status bar at the bottom
+        frame.draw_in_region(status_region, |frame| {
+            self.status_bar.render(&self.editor, frame)
+        })?;
+
+        // Render notification bar if there's a notification
+        if self.editor.notification.is_some() {
+            // Notification typically overlays on top or appears above status bar
+            let notification_region = full_region.without_bottom_rows(1).bottom_rows(1);
+            frame.draw_in_region(notification_region, |frame| {
+                self.notification_bar.render(&self.editor, frame)
+            })?;
+        }
 
         self.terminal.draw(frame).or_fail()?;
+
+        self.editor.notification = None;
         self.editor.dirty.render = false;
 
         Ok(())
