@@ -3,12 +3,15 @@ use std::path::PathBuf;
 use orfail::OrFail;
 use tuinix::{Terminal, TerminalEvent, TerminalFrame, TerminalInput};
 
-use crate::{editor::Editor, widget_notification::NotificationBarWidget};
+use crate::{
+    editor::Editor, widget_notification::NotificationBarWidget, widget_status::StatusBarWidget,
+};
 
 #[derive(Debug)]
 pub struct App {
     terminal: Terminal,
     editor: Editor,
+    status_bar: StatusBarWidget,
     notification_bar: NotificationBarWidget,
 }
 
@@ -18,6 +21,7 @@ impl App {
         Ok(Self {
             terminal,
             editor: Editor::new(path),
+            status_bar: StatusBarWidget,
             notification_bar: NotificationBarWidget,
         })
     }
