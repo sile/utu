@@ -13,21 +13,16 @@ impl StatusBarWidget {
         // Create a styled status bar with reverse colors (dark background, light text)
         let style = TerminalStyle::new().reverse().bold();
         let reset = TerminalStyle::RESET;
+        let filler = " ".repeat(frame.size().cols);
 
         // Show file status, cursor position, and mode information
         writeln!(
             frame,
-            "{}{}[{}] Line: 1 Col: 1 {}{}",
-            style,
+            "{style}{}[{}:{}:{}]{filler}{reset}",
             if editor.dirty.content { '*' } else { ' ' }, // Dirty indicator
-            editor
-                .path
-                .file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or("Untitled"),
-            // Fill the rest of the line with spaces for consistent background
-            " ".repeat(frame.size().cols.saturating_sub(20)), // Approximate width adjustment
-            reset
+            editor.path.file_name().and_then(|n| n.to_str()).or_fail()?,
+            editor.cursor.row + 1,
+            editor.cursor.col + 1,
         )
         .or_fail()?;
 

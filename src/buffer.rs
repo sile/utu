@@ -6,3 +6,9 @@ impl TextBuffer {
         Self {}
     }
 }
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct TextPosition {
+    pub row: usize,
+    pub col: usize,
+}

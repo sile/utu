@@ -1,12 +1,13 @@
 use std::path::PathBuf;
 
-use crate::buffer::TextBuffer;
+use crate::buffer::{TextBuffer, TextPosition};
 
 #[derive(Debug)]
 pub struct Editor {
     pub path: PathBuf,
     pub exit: bool,
     pub dirty: Dirty,
+    pub cursor: TextPosition,
     pub buffer: TextBuffer,
     pub notification: Option<String>,
 }
@@ -20,6 +21,7 @@ impl Editor {
                 content: false,
                 render: true,
             },
+            cursor: TextPosition::default(),
             buffer: TextBuffer::new(),
             notification: None,
         }
