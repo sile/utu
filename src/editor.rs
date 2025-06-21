@@ -45,10 +45,24 @@ impl Editor {
     pub fn try_reload(&mut self) -> orfail::Result<()> {
         let metadata = self.path.metadata().or_fail()?;
         let mtime = metadata.modified().or_fail()?;
-        if self.mtime.is_none() {
-            self.mtime = Some(mtime);
-            self.set_message(format!("Opened {}", self.path.display()));
+
+        if self.mtime == Some(mtime) {
+            return Ok(());
         }
+
+        let text = std::fs::read_to_string(&self.path).or_fail()?;
+        self.buffer.set_text(text);
+
+        if self.mtime.is_none() {
+            self.set_message(format!("Opened {}", self.path.display()));
+        } else {
+            self.set_message(format!("Reloaded {}", self.path.display()));
+        }
+
+        self.mtime = Some(mtime);
+        self.dirty.content = false;
+        self.dirty.render = true;
+
         Ok(())
     }
 }
