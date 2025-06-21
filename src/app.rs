@@ -1,19 +1,21 @@
 use std::path::PathBuf;
 
 use orfail::OrFail;
-use tuinix::{Terminal, TerminalEvent, TerminalFrame, TerminalInput};
+use tuinix::{KeyCode, Terminal, TerminalEvent, TerminalFrame, TerminalInput};
 
 use crate::{
     editor::Editor,
     tuinix_ext::{TerminalFrameExt, TerminalSizeExt},
     widget_message::MessageLine,
     widget_status::StatusLine,
+    widget_text::TextWidget,
 };
 
 #[derive(Debug)]
 pub struct App {
     terminal: Terminal,
     editor: Editor,
+    text_widget: TextWidget,
     status_line: StatusLine,
     message_line: MessageLine,
 }
@@ -24,6 +26,7 @@ impl App {
         Ok(Self {
             terminal,
             editor: Editor::new(path),
+            text_widget: TextWidget::new(),
             status_line: StatusLine,
             message_line: MessageLine,
         })
@@ -52,14 +55,14 @@ impl App {
         let full_region = frame.size().to_region();
 
         // Reserve space for status bar (bottom row) and notification bar (above status bar)
-        let _main_region = full_region.without_bottom_rows(2);
+        let main_region = full_region.without_bottom_rows(2);
         let status_region = full_region.without_bottom_rows(1).bottom_rows(1);
         let message_region = full_region.bottom_rows(1);
 
-        // Render main editor content (if you have editor rendering logic)
-        // frame.draw_in_region(main_region, |frame| {
-        //     // Editor content would go here
-        //     Ok(())\n        // })?;
+        // Render main editor content
+        frame.draw_in_region(main_region, |frame| {
+            self.text_widget.render(&self.editor, frame)
+        })?;
 
         frame.draw_in_region(status_region, |frame| {
             self.status_line.render(&self.editor, frame)
@@ -68,6 +71,10 @@ impl App {
         frame.draw_in_region(message_region, |frame| {
             self.message_line.render(&self.editor, frame)
         })?;
+
+        // Set cursor position for text editing
+        let cursor_pos = self.text_widget.cursor_terminal_position(&self.editor);
+        self.terminal.set_cursor(Some(cursor_pos));
 
         self.terminal.draw(frame).or_fail()?;
 
@@ -84,6 +91,36 @@ impl App {
                 let TerminalInput::Key(key) = input;
                 if key.ctrl && matches!(key.code, tuinix::KeyCode::Char('c')) {
                     self.editor.exit = true;
+                } else {
+                    // Handle basic cursor movement for now
+                    match key.code {
+                        KeyCode::Up => {
+                            if self.editor.cursor.row > 0 {
+                                self.editor.cursor.row -= 1;
+                                self.editor.dirty.render = true;
+                            }
+                        }
+                        KeyCode::Down => {
+                            // Limit to buffer length - 1
+                            let max_row = self.editor.buffer.lines().count().saturating_sub(1);
+                            if self.editor.cursor.row < max_row {
+                                self.editor.cursor.row += 1;
+                                self.editor.dirty.render = true;
+                            }
+                        }
+                        KeyCode::Left => {
+                            if self.editor.cursor.col > 0 {
+                                self.editor.cursor.col -= 1;
+                                self.editor.dirty.render = true;
+                            }
+                        }
+                        KeyCode::Right => {
+                            // Allow cursor to move one position past end of line for editing
+                            self.editor.cursor.col += 1;
+                            self.editor.dirty.render = true;
+                        }
+                        _ => {}
+                    }
                 }
             }
             TerminalEvent::Resize(_) => {
