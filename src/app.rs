@@ -6,18 +6,16 @@ use tuinix::{Terminal, TerminalEvent, TerminalFrame, TerminalInput};
 use crate::{
     editor::Editor,
     tuinix_ext::{TerminalFrameExt, TerminalSizeExt},
-    widget_notification::NotificationBar,
-    widget_status::StatusBar,
+    widget_message::MessageLine,
+    widget_status::StatusLine,
 };
 
 #[derive(Debug)]
 pub struct App {
     terminal: Terminal,
     editor: Editor,
-
-    // Are there better naming for the following fields and structs?
-    status: StatusBar,
-    notification: NotificationBar,
+    status_line: StatusLine,
+    message_line: MessageLine,
 }
 
 impl App {
@@ -26,8 +24,8 @@ impl App {
         Ok(Self {
             terminal,
             editor: Editor::new(path),
-            status: StatusBar,
-            notification: NotificationBar,
+            status_line: StatusLine,
+            message_line: MessageLine,
         })
     }
 
@@ -55,26 +53,24 @@ impl App {
         // Reserve space for status bar (bottom row) and notification bar (above status bar)
         let _main_region = full_region.without_bottom_rows(2);
         let status_region = full_region.without_bottom_rows(1).bottom_rows(1);
-        let notification_region = full_region.bottom_rows(1);
+        let message_region = full_region.bottom_rows(1);
 
         // Render main editor content (if you have editor rendering logic)
         // frame.draw_in_region(main_region, |frame| {
         //     // Editor content would go here
         //     Ok(())\n        // })?;
 
-        // Render status bar above the notification bar
         frame.draw_in_region(status_region, |frame| {
-            self.status.render(&self.editor, frame)
+            self.status_line.render(&self.editor, frame)
         })?;
 
-        // Render notification bar at the bottom
-        frame.draw_in_region(notification_region, |frame| {
-            self.notification.render(&self.editor, frame)
+        frame.draw_in_region(message_region, |frame| {
+            self.message_line.render(&self.editor, frame)
         })?;
 
         self.terminal.draw(frame).or_fail()?;
 
-        self.editor.notification = None;
+        self.editor.message = None;
         self.editor.dirty.render = false;
 
         Ok(())

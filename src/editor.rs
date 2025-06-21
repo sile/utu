@@ -9,7 +9,7 @@ pub struct Editor {
     pub dirty: Dirty,
     pub cursor: TextPosition,
     pub buffer: TextBuffer,
-    pub notification: Option<String>,
+    pub message: Option<String>,
 }
 
 impl Editor {
@@ -23,7 +23,7 @@ impl Editor {
             },
             cursor: TextPosition::default(),
             buffer: TextBuffer::new(),
-            notification: None,
+            message: None,
         }
     }
 }
