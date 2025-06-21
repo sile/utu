@@ -1,5 +1,8 @@
 use std::path::PathBuf;
 
+use orfail::OrFail;
+use pixed::editor::Editor;
+
 fn main() -> noargs::Result<()> {
     let mut args = noargs::raw_args();
     args.metadata_mut().app_name = env!("CARGO_PKG_NAME");
@@ -12,16 +15,12 @@ fn main() -> noargs::Result<()> {
     noargs::HELP_FLAG.take_help(&mut args);
 
     let file_path: PathBuf = noargs::arg("FILE_PATH")
-        .doc("File path to edit (error if absent)")
+        .doc("File path to edit")
         .example("/path/to/file")
         .take(&mut args)
         .then(|a| {
             let path = PathBuf::from(a.value());
-            if matches!(a, noargs::Arg::Example { .. }) {
-                Ok(path)
-            } else if !path.exists() {
-                Err("no such file")
-            } else if !path.is_file() {
+            if !matches!(a, noargs::Arg::Example { .. }) && !path.is_file() {
                 Err("not a file")
             } else {
                 Ok(path)
@@ -31,6 +30,9 @@ fn main() -> noargs::Result<()> {
         print!("{help}");
         return Ok(());
     }
+
+    let editor = Editor::new(file_path);
+    editor.run().or_fail()?;
 
     Ok(())
 }
