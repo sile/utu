@@ -31,6 +31,7 @@ impl App {
 
     pub fn run(mut self) -> orfail::Result<()> {
         while !self.editor.exit {
+            self.editor.try_reload();
             self.render().or_fail()?;
 
             if let Some(event) = self.terminal.poll_event(None).or_fail()? {

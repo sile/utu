@@ -14,6 +14,11 @@ pub struct Editor {
 
 impl Editor {
     pub fn new(path: PathBuf) -> Self {
+        let message = match path.try_exists() {
+            Err(e) => Some(e.to_string()),
+            Ok(false) => Some("New file".to_owned()),
+            Ok(true) => None,
+        };
         Self {
             path,
             exit: false,
@@ -23,8 +28,18 @@ impl Editor {
             },
             cursor: TextPosition::default(),
             buffer: TextBuffer::new(),
-            message: None,
+            message,
         }
+    }
+
+    pub fn try_reload(&mut self) {
+        // if !self.path.exists() {
+        //     // TODO: clear buffer if need
+        //     return;
+        // }
+
+        // self.dirty.content = false;
+        // self.dirty.render = true;
     }
 }
 
