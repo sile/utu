@@ -47,7 +47,7 @@ impl Editor {
         let mtime = metadata.modified().or_fail()?;
         if self.mtime.is_none() {
             self.mtime = Some(mtime);
-            self.set_message("File opened");
+            self.set_message(format!("Opened {}", self.path.display()));
         }
         Ok(())
     }
