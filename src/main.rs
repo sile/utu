@@ -20,7 +20,11 @@ fn main() -> noargs::Result<()> {
         .take(&mut args)
         .then(|a| {
             let path = PathBuf::from(a.value());
-            if !matches!(a, noargs::Arg::Example { .. }) && !path.is_file() {
+            if matches!(a, noargs::Arg::Example { .. }) {
+                Ok(path)
+            } else if !path.exists() {
+                Err("no such file")
+            } else if !path.is_file() {
                 Err("not a file")
             } else {
                 Ok(path)

@@ -14,11 +14,6 @@ pub struct Editor {
 
 impl Editor {
     pub fn new(path: PathBuf) -> Self {
-        let message = match path.try_exists() {
-            Err(e) => Some(e.to_string()),
-            Ok(false) => Some("New file".to_owned()),
-            Ok(true) => None,
-        };
         Self {
             path,
             exit: false,
@@ -28,7 +23,7 @@ impl Editor {
             },
             cursor: TextPosition::default(),
             buffer: TextBuffer::new(),
-            message,
+            message: None,
         }
     }
 
