@@ -6,11 +6,11 @@ use tuinix::TerminalFrame;
 use crate::{buffer::TextPosition, editor::Editor};
 
 #[derive(Debug)]
-pub struct TextWidget {
+pub struct TextView {
     scroll_offset: TextPosition,
 }
 
-impl TextWidget {
+impl TextView {
     pub fn new() -> Self {
         Self {
             scroll_offset: TextPosition::default(),
