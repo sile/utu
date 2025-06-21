@@ -8,6 +8,7 @@ pub struct Editor {
     pub exit: bool,
     pub dirty: Dirty,
     pub buffer: TextBuffer,
+    pub notification: Option<String>,
 }
 
 impl Editor {
@@ -20,6 +21,7 @@ impl Editor {
                 render: true,
             },
             buffer: TextBuffer::new(),
+            notification: None,
         }
     }
 }
