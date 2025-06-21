@@ -1,10 +1,13 @@
 use std::path::PathBuf;
 
+use crate::buffer::TextBuffer;
+
 #[derive(Debug)]
 pub struct Editor {
     pub path: PathBuf,
     pub exit: bool,
     pub dirty: Dirty,
+    pub buffer: TextBuffer,
 }
 
 impl Editor {
@@ -16,6 +19,7 @@ impl Editor {
                 content: false,
                 render: true,
             },
+            buffer: TextBuffer::new(),
         }
     }
 }
