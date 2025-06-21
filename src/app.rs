@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use orfail::OrFail;
-use tuinix::{Terminal, TerminalInput};
+use tuinix::{Terminal, TerminalEvent, TerminalFrame, TerminalInput};
 
 use crate::editor::Editor;
 
@@ -36,7 +36,7 @@ impl App {
             return Ok(());
         }
 
-        let mut frame = tuinix::TerminalFrame::new(self.terminal.size());
+        let mut frame = TerminalFrame::new(self.terminal.size());
 
         // Basic content - show the file path
         use std::fmt::Write;
@@ -49,15 +49,15 @@ impl App {
         Ok(())
     }
 
-    fn handle_event(&mut self, event: tuinix::TerminalEvent) -> orfail::Result<()> {
+    fn handle_event(&mut self, event: TerminalEvent) -> orfail::Result<()> {
         match event {
-            tuinix::TerminalEvent::Input(input) => {
+            TerminalEvent::Input(input) => {
                 let TerminalInput::Key(key) = input;
                 if key.ctrl && matches!(key.code, tuinix::KeyCode::Char('c')) {
                     self.editor.exit = true;
                 }
             }
-            tuinix::TerminalEvent::Resize(_) => {
+            TerminalEvent::Resize(_) => {
                 self.editor.dirty.render = true;
             }
         }
