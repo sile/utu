@@ -6,9 +6,9 @@ use tuinix::{TerminalFrame, TerminalStyle};
 use crate::editor::Editor;
 
 #[derive(Debug)]
-pub struct StatusBarWidget;
+pub struct StatusBar;
 
-impl StatusBarWidget {
+impl StatusBar {
     pub fn render(&self, editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
         // Create a styled status bar with reverse colors (dark background, light text)
         let style = TerminalStyle::new().reverse().bold();

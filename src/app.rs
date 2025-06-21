@@ -6,16 +6,18 @@ use tuinix::{Terminal, TerminalEvent, TerminalFrame, TerminalInput};
 use crate::{
     editor::Editor,
     tuinix_ext::{TerminalFrameExt, TerminalSizeExt},
-    widget_notification::NotificationBarWidget,
-    widget_status::StatusBarWidget,
+    widget_notification::NotificationBar,
+    widget_status::StatusBar,
 };
 
 #[derive(Debug)]
 pub struct App {
     terminal: Terminal,
     editor: Editor,
-    status_bar: StatusBarWidget,
-    notification_bar: NotificationBarWidget,
+
+    // Are there better naming for the following fields and structs?
+    status: StatusBar,
+    notification: NotificationBar,
 }
 
 impl App {
@@ -24,8 +26,8 @@ impl App {
         Ok(Self {
             terminal,
             editor: Editor::new(path),
-            status_bar: StatusBarWidget,
-            notification_bar: NotificationBarWidget,
+            status: StatusBar,
+            notification: NotificationBar,
         })
     }
 
@@ -62,12 +64,12 @@ impl App {
 
         // Render status bar above the notification bar
         frame.draw_in_region(status_region, |frame| {
-            self.status_bar.render(&self.editor, frame)
+            self.status.render(&self.editor, frame)
         })?;
 
         // Render notification bar at the bottom
         frame.draw_in_region(notification_region, |frame| {
-            self.notification_bar.render(&self.editor, frame)
+            self.notification.render(&self.editor, frame)
         })?;
 
         self.terminal.draw(frame).or_fail()?;
