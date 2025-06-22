@@ -33,13 +33,12 @@ impl Legend {
 
         // Basic keybindings for the editor
         let keybindings = [
-            "│ (^c)   quit       ",
-            "│ (^g)   cancel     ",
-            "│ (^s)   search     ",
-            "│ (^p,↑) prev-line  ",
-            "│ (^n,↓) next-line  ",
-            "│ (^b,←) prev-char  ",
-            "│ (^f,→) next-char  ",
+            "│ (^c) quit         ",
+            "│ (^g) cancel       ",
+            "│ (↑)  prev-line    ",
+            "│ (↓)  next-line    ",
+            "│ (←)  prev-char    ",
+            "│ (→)  next-char    ",
             "│-------------------",
             "│                   ",
             "└──────(^h)ide──────",
