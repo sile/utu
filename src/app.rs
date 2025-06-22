@@ -135,18 +135,16 @@ impl App {
             }
             EditorCommand::NextLine => {
                 let max_row = self.editor.buffer.lines().count().saturating_sub(1);
-                if self.editor.cursor.row < max_row {
-                    self.editor.cursor.row += 1;
-                    self.editor.dirty.render = true;
-                }
+                self.editor.cursor.row = max_row.min(self.editor.cursor.row + 1);
+                self.editor.dirty.render = true;
             }
             EditorCommand::PrevChar => {
                 self.editor.cursor.col = self.editor.cursor.col.saturating_sub(1);
                 self.editor.dirty.render = true;
             }
             EditorCommand::NextChar => {
-                let cols = self.editor.buffer.cols(self.editor.cursor.row); // TODO: -1
-                self.editor.cursor.col = cols.min(self.editor.cursor.col + 1);
+                let max_col = self.editor.buffer.cols(self.editor.cursor.row);
+                self.editor.cursor.col = max_col.min(self.editor.cursor.col + 1);
                 self.editor.dirty.render = true;
             }
             EditorCommand::Dot(_c) => {
