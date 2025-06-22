@@ -70,3 +70,11 @@ impl<'text> nojson::FromRawJsonValue<'text> for KeyBindings {
         Ok(bindings)
     }
 }
+
+impl Default for KeyBindings {
+    fn default() -> Self {
+        let json = include_str!("../default.keys.json");
+        let nojson::Json(bindings) = json.parse().expect("bug");
+        bindings
+    }
+}

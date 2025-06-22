@@ -5,6 +5,7 @@ use tuinix::{KeyCode, Terminal, TerminalEvent, TerminalFrame, TerminalInput};
 
 use crate::{
     editor::Editor,
+    key_binding::KeyBindings,
     tuinix_ext::{TerminalFrameExt, TerminalSizeExt},
     widget_legend::Legend,
     widget_message::MessageLine,
@@ -16,6 +17,7 @@ use crate::{
 pub struct App {
     terminal: Terminal,
     editor: Editor,
+    bindings: KeyBindings,
     text_view: TextView,
     status_line: StatusLine,
     message_line: MessageLine,
@@ -28,6 +30,7 @@ impl App {
         Ok(Self {
             terminal,
             editor: Editor::new(path),
+            bindings: KeyBindings::default(),
             text_view: TextView::new(),
             status_line: StatusLine,
             message_line: MessageLine,

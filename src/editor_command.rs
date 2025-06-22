@@ -7,6 +7,10 @@ pub enum EditorCommand {
     PrevChar,
     NextChar,
     Dot(char),
+    MarkStroke,
+    MarkLine,
+    MarkRect,
+    MarkFill,
 }
 
 impl std::fmt::Display for EditorCommand {
@@ -19,6 +23,10 @@ impl std::fmt::Display for EditorCommand {
             EditorCommand::PrevChar => write!(f, "prev-char"),
             EditorCommand::NextChar => write!(f, "next-char"),
             EditorCommand::Dot(c) => write!(f, "dot-{}", c),
+            EditorCommand::MarkStroke => write!(f, "mark-stroke"),
+            EditorCommand::MarkLine => write!(f, "mark-line"),
+            EditorCommand::MarkRect => write!(f, "mark-rect"),
+            EditorCommand::MarkFill => write!(f, "mark-fill"),
         }
     }
 }
@@ -34,6 +42,10 @@ impl std::str::FromStr for EditorCommand {
             "next-line" => Ok(EditorCommand::NextLine),
             "prev-char" => Ok(EditorCommand::PrevChar),
             "next-char" => Ok(EditorCommand::NextChar),
+            "mark-stroke" => Ok(EditorCommand::MarkStroke),
+            "mark-line" => Ok(EditorCommand::MarkLine),
+            "mark-rect" => Ok(EditorCommand::MarkRect),
+            "mark-fill" => Ok(EditorCommand::MarkFill),
             s if s.starts_with("dot-") => {
                 let mut chars = s[4..].chars();
                 match (chars.next(), chars.next()) {
