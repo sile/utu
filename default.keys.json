@@ -3,10 +3,12 @@
   "k": "next-line",
   "j": "prev-char",
   "l": "next-char",
-  "o": {
-    "dot": "o"
-  },
-  " ": {
-    "dot": " "
+  "o": "dot-o",
+  " ": "dot- ",
+  "m": {
+    "s": "mark-stroke",
+    "l": "mark-line",
+    "r": "mark-rect",
+    "f": "mark-fill"
   }
 }
