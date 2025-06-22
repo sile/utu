@@ -1,5 +1,3 @@
-use tuinix::KeyCode;
-
 #[derive(Debug)]
 pub enum EditorCommand {
     Quit,
@@ -46,13 +44,4 @@ impl std::str::FromStr for EditorCommand {
             _ => Err(format!("unknown command: {}", s)),
         }
     }
-}
-
-#[derive(Debug)]
-pub struct KeyBindings {}
-
-#[derive(Debug)]
-pub struct KeyBinding {
-    pub path: Vec<KeyCode>, // KeyPath
-    pub command: EditorCommand,
 }
