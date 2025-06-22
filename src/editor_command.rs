@@ -25,12 +25,11 @@ impl std::fmt::Display for EditorCommand {
     }
 }
 
-impl<'text> nojson::FromRawJsonValue<'text> for EditorCommand {
-    fn from_raw_json_value(
-        value: nojson::RawJsonValue<'text, '_>,
-    ) -> Result<Self, nojson::JsonParseError> {
-        let s = value.to_unquoted_string_str()?;
-        match s.as_ref() {
+impl std::str::FromStr for EditorCommand {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
             "quit" => Ok(EditorCommand::Quit),
             "cancel" => Ok(EditorCommand::Cancel),
             "prev-line" => Ok(EditorCommand::PrevLine),
@@ -41,10 +40,10 @@ impl<'text> nojson::FromRawJsonValue<'text> for EditorCommand {
                 let mut chars = s[4..].chars();
                 match (chars.next(), chars.next()) {
                     (Some(c), None) if !c.is_control() => Ok(EditorCommand::Dot(c)),
-                    _ => Err(value.invalid(format!("invalid dot command: {}", s))),
+                    _ => Err(format!("invalid dot command: {}", s)),
                 }
             }
-            _ => Err(value.invalid(format!("unknown command: {}", s))),
+            _ => Err(format!("unknown command: {}", s)),
         }
     }
 }
