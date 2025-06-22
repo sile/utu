@@ -1,4 +1,5 @@
 {
+  "q": "quit",
   "i": "prev-line",
   "k": "next-line",
   "j": "prev-char",
