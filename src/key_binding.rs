@@ -54,6 +54,49 @@ impl KeyBindings {
         if error { Err(()) } else { Ok(None) }
     }
 
+    pub fn possibe_commands(
+        &self,
+        prefix: &KeySequence,
+    ) -> impl '_ + Iterator<Item = (KeyInput, Option<EditorCommand>)> {
+        self.0
+            .iter()
+            .filter_map(move |binding| {
+                // Check if this binding starts with the given prefix
+                if binding.sequence.0.len() > prefix.0.len()
+                    && binding.sequence.0.starts_with(&prefix.0)
+                {
+                    let next_key = binding.sequence.0[prefix.0.len()];
+
+                    // Check if this is a complete binding (prefix + 1 key = full sequence)
+                    let command = if binding.sequence.0.len() == prefix.0.len() + 1 {
+                        Some(binding.command)
+                    } else {
+                        None // Has children (more keys needed)
+                    };
+
+                    Some((next_key, command))
+                } else {
+                    None
+                }
+            })
+            // Remove duplicates by collecting unique (KeyInput, Option<EditorCommand>) pairs
+            .fold(std::collections::BTreeMap::new(), |mut acc, (key, cmd)| {
+                // If we already have this key, prefer the complete command over None
+                match (acc.get(&key), &cmd) {
+                    (Some(Some(_)), _) => {} // Keep existing complete command
+                    (Some(None), Some(_)) => {
+                        acc.insert(key, cmd);
+                    } // Replace None with complete command
+                    (None, _) => {
+                        acc.insert(key, cmd);
+                    } // Insert new entry
+                    _ => {}                  // Keep existing entry
+                }
+                acc
+            })
+            .into_iter()
+    }
+
     fn parse(&mut self, value: nojson::RawJsonValue<'_, '_>) -> Result<(), nojson::JsonParseError> {
         for (keys, command_or_children) in value.to_object()? {
             if let Ok(command) = command_or_children.to_unquoted_string_str() {

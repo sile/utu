@@ -53,7 +53,11 @@ impl Legend {
         if self.hide {
             TerminalSize::rows_cols(1, Self::HIDE_COLS)
         } else {
-            TerminalSize::rows_cols(10, Self::SHOW_COLS)
+            let rows = 1 + editor
+                .key_bindings
+                .possibe_commands(&editor.pending_keys)
+                .count();
+            TerminalSize::rows_cols(rows, Self::SHOW_COLS)
         }
     }
 
