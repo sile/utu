@@ -1,11 +1,11 @@
 use std::path::PathBuf;
 
 use orfail::OrFail;
-use tuinix::{KeyCode, Terminal, TerminalEvent, TerminalFrame, TerminalInput};
+use tuinix::{KeyCode, KeyInput, Terminal, TerminalEvent, TerminalFrame, TerminalInput};
 
 use crate::{
     editor::Editor,
-    key_binding::KeyBindings,
+    key_binding::{KeyBindings, KeySequence},
     tuinix_ext::{TerminalFrameExt, TerminalSizeExt},
     widget_legend::Legend,
     widget_message::MessageLine,
@@ -17,7 +17,8 @@ use crate::{
 pub struct App {
     terminal: Terminal,
     editor: Editor,
-    bindings: KeyBindings,
+    key_bindings: KeyBindings,
+    pending_keys: KeySequence,
     text_view: TextView,
     status_line: StatusLine,
     message_line: MessageLine,
@@ -30,7 +31,8 @@ impl App {
         Ok(Self {
             terminal,
             editor: Editor::new(path),
-            bindings: KeyBindings::default(),
+            key_bindings: KeyBindings::default(),
+            pending_keys: KeySequence::default(),
             text_view: TextView::new(),
             status_line: StatusLine,
             message_line: MessageLine,
@@ -94,41 +96,56 @@ impl App {
         match event {
             TerminalEvent::Input(input) => {
                 let TerminalInput::Key(key) = input;
-                if key.ctrl && matches!(key.code, KeyCode::Char('c')) {
-                    self.editor.exit = true;
-                } else if key.ctrl && matches!(key.code, KeyCode::Char('h')) {
-                    self.legend.toggle_hide(&mut self.editor);
-                } else {
-                    // Handle basic cursor movement for now
-                    match key.code {
-                        KeyCode::Up => {
-                            if self.editor.cursor.row > 0 {
-                                self.editor.cursor.row -= 1;
-                                self.editor.dirty.render = true;
-                            }
-                        }
-                        KeyCode::Down => {
-                            // Limit to buffer length - 1
-                            let max_row = self.editor.buffer.lines().count().saturating_sub(1);
-                            if self.editor.cursor.row < max_row {
-                                self.editor.cursor.row += 1;
-                                self.editor.dirty.render = true;
-                            }
-                        }
-                        KeyCode::Left => {
-                            if self.editor.cursor.col > 0 {
-                                self.editor.cursor.col -= 1;
-                                self.editor.dirty.render = true;
-                            }
-                        }
-                        KeyCode::Right => {
-                            // Allow cursor to move one position past end of line for editing
-                            self.editor.cursor.col += 1;
-                            self.editor.dirty.render = true;
-                        }
-                        _ => {}
+                self.pending_keys.push(key);
+                match self.key_bindings.find(&self.pending_keys) {
+                    Err(()) => {
+                        todo!()
+                    }
+                    Ok(None) => {
+                        todo!()
+                    }
+                    Ok(Some(command)) => {
+                        self.pending_keys.clear();
+                        self.hanlde_command(command);
                     }
                 }
+
+                todo!();
+                // if key.ctrl && matches!(key.code, KeyCode::Char('c')) {
+                //     self.editor.exit = true;
+                // } else if key.ctrl && matches!(key.code, KeyCode::Char('h')) {
+                //     self.legend.toggle_hide(&mut self.editor);
+                // } else {
+                //     // Handle basic cursor movement for now
+                //     match key.code {
+                //         KeyCode::Up => {
+                //             if self.editor.cursor.row > 0 {
+                //                 self.editor.cursor.row -= 1;
+                //                 self.editor.dirty.render = true;
+                //             }
+                //         }
+                //         KeyCode::Down => {
+                //             // Limit to buffer length - 1
+                //             let max_row = self.editor.buffer.lines().count().saturating_sub(1);
+                //             if self.editor.cursor.row < max_row {
+                //                 self.editor.cursor.row += 1;
+                //                 self.editor.dirty.render = true;
+                //             }
+                //         }
+                //         KeyCode::Left => {
+                //             if self.editor.cursor.col > 0 {
+                //                 self.editor.cursor.col -= 1;
+                //                 self.editor.dirty.render = true;
+                //             }
+                //         }
+                //         KeyCode::Right => {
+                //             // Allow cursor to move one position past end of line for editing
+                //             self.editor.cursor.col += 1;
+                //             self.editor.dirty.render = true;
+                //         }
+                //         _ => {}
+                //     }
+                // }
             }
             TerminalEvent::Resize(_) => {
                 self.editor.dirty.render = true;

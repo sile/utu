@@ -8,12 +8,20 @@ pub struct KeyBinding {
     pub command: EditorCommand,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct KeySequence(pub Vec<KeyInput>);
 
 impl KeySequence {
     fn new(key: KeyInput) -> Self {
         Self(vec![key])
+    }
+
+    pub fn push(&mut self, key: KeyInput) {
+        self.0.push(key);
+    }
+
+    pub fn clear(&mut self) {
+        self.0.clear();
     }
 }
 
@@ -21,6 +29,19 @@ impl KeySequence {
 pub struct KeyBindings(pub Vec<KeyBinding>);
 
 impl KeyBindings {
+    pub fn find(&self, keys: &KeySequence) -> Result<Option<EditorCommand>, ()> {
+        let mut error = true;
+        for binding in &self.0 {
+            if binding.sequence.0 == keys.0 {
+                return Ok(Some(binding.command));
+            }
+            if !error && binding.sequence.0.starts_with(&keys.0) {
+                error = false;
+            }
+        }
+        if error { Err(()) } else { Ok(None) }
+    }
+
     fn parse(&mut self, value: nojson::RawJsonValue<'_, '_>) -> Result<(), nojson::JsonParseError> {
         for (keys, command_or_children) in value.to_object()? {
             if let Ok(command) = command_or_children.to_unquoted_string_str() {
