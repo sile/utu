@@ -1,10 +1,11 @@
 use std::path::PathBuf;
 
 use orfail::OrFail;
-use tuinix::{KeyCode, KeyInput, Terminal, TerminalEvent, TerminalFrame, TerminalInput};
+use tuinix::{Terminal, TerminalEvent, TerminalFrame, TerminalInput};
 
 use crate::{
     editor::Editor,
+    editor_command::EditorCommand,
     key_binding::{KeyBindings, KeySequence},
     tuinix_ext::{TerminalFrameExt, TerminalSizeExt},
     widget_legend::Legend,
@@ -106,49 +107,79 @@ impl App {
                     }
                     Ok(Some(command)) => {
                         self.pending_keys.clear();
-                        self.hanlde_command(command);
+                        self.handle_command(command).or_fail()?;
                     }
                 }
-
-                todo!();
-                // if key.ctrl && matches!(key.code, KeyCode::Char('c')) {
-                //     self.editor.exit = true;
-                // } else if key.ctrl && matches!(key.code, KeyCode::Char('h')) {
-                //     self.legend.toggle_hide(&mut self.editor);
-                // } else {
-                //     // Handle basic cursor movement for now
-                //     match key.code {
-                //         KeyCode::Up => {
-                //             if self.editor.cursor.row > 0 {
-                //                 self.editor.cursor.row -= 1;
-                //                 self.editor.dirty.render = true;
-                //             }
-                //         }
-                //         KeyCode::Down => {
-                //             // Limit to buffer length - 1
-                //             let max_row = self.editor.buffer.lines().count().saturating_sub(1);
-                //             if self.editor.cursor.row < max_row {
-                //                 self.editor.cursor.row += 1;
-                //                 self.editor.dirty.render = true;
-                //             }
-                //         }
-                //         KeyCode::Left => {
-                //             if self.editor.cursor.col > 0 {
-                //                 self.editor.cursor.col -= 1;
-                //                 self.editor.dirty.render = true;
-                //             }
-                //         }
-                //         KeyCode::Right => {
-                //             // Allow cursor to move one position past end of line for editing
-                //             self.editor.cursor.col += 1;
-                //             self.editor.dirty.render = true;
-                //         }
-                //         _ => {}
-                //     }
-                // }
             }
             TerminalEvent::Resize(_) => {
                 self.editor.dirty.render = true;
+            }
+        }
+        Ok(())
+    }
+
+    fn handle_command(&mut self, command: EditorCommand) -> orfail::Result<()> {
+        match command {
+            EditorCommand::Quit => {
+                self.editor.exit = true;
+            }
+            EditorCommand::ToggleLegend => {
+                self.legend.toggle_hide(&mut self.editor);
+            }
+            EditorCommand::Cancel => {
+                // Clear any pending operations or selections
+                self.pending_keys.clear();
+                self.editor.dirty.render = true;
+            }
+            EditorCommand::PrevLine => {
+                if self.editor.cursor.row > 0 {
+                    self.editor.cursor.row -= 1;
+                    self.editor.dirty.render = true;
+                }
+            }
+            EditorCommand::NextLine => {
+                let max_row = self.editor.buffer.lines().count().saturating_sub(1);
+                if self.editor.cursor.row < max_row {
+                    self.editor.cursor.row += 1;
+                    self.editor.dirty.render = true;
+                }
+            }
+            EditorCommand::PrevChar => {
+                if self.editor.cursor.col > 0 {
+                    self.editor.cursor.col -= 1;
+                    self.editor.dirty.render = true;
+                }
+            }
+            EditorCommand::NextChar => {
+                self.editor.cursor.col += 1;
+                self.editor.dirty.render = true;
+            }
+            EditorCommand::Dot(_c) => {
+                // Insert character at cursor position
+                // This would need to be implemented based on the editor's text manipulation capabilities
+                // For now, just mark as dirty to trigger a render
+                self.editor.dirty.render = true;
+                // TODO: Implement actual character insertion
+            }
+            EditorCommand::MarkStroke => {
+                // Set marking mode to stroke
+                self.editor.dirty.render = true;
+                // TODO: Implement stroke marking mode
+            }
+            EditorCommand::MarkLine => {
+                // Set marking mode to line
+                self.editor.dirty.render = true;
+                // TODO: Implement line marking mode
+            }
+            EditorCommand::MarkRect => {
+                // Set marking mode to rectangle
+                self.editor.dirty.render = true;
+                // TODO: Implement rectangle marking mode
+            }
+            EditorCommand::MarkFill => {
+                // Set marking mode to fill
+                self.editor.dirty.render = true;
+                // TODO: Implement fill marking mode
             }
         }
         Ok(())
