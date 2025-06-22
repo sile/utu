@@ -16,13 +16,14 @@ pub struct Legend {
 impl Legend {
     const HIDE_COLS: usize = 12;
     const SHOW_COLS: usize = 20;
+    const SHOW_MAX_ROWS: usize = 256; // Any reasonably large value will do
 
     pub fn new() -> Self {
         Self { hide: false }
     }
 
     pub fn render(&self, _editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
-        if frame.size() != self.size() {
+        if frame.size().cols != self.size().cols {
             return Ok(());
         }
 
@@ -30,8 +31,6 @@ impl Legend {
             writeln!(frame, "└──s(^h)ow──").or_fail()?;
             return Ok(());
         }
-
-        // Calculate position for legend (right side of screen)
 
         // Basic keybindings for the editor
         let keybindings = [
@@ -55,10 +54,10 @@ impl Legend {
 
     fn size(&self) -> TerminalSize {
         if self.hide {
-            return TerminalSize::rows_cols(1, Self::HIDE_COLS);
+            TerminalSize::rows_cols(1, Self::HIDE_COLS)
+        } else {
+            TerminalSize::rows_cols(Self::SHOW_MAX_ROWS, Self::SHOW_COLS)
         }
-
-        TerminalSize::rows_cols(20, Self::SHOW_COLS) // TODO: calc rows
     }
 
     pub fn region(&self, size: TerminalSize) -> TerminalRegion {
