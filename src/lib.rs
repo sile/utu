@@ -1,6 +1,7 @@
 pub mod app;
 pub mod buffer;
 pub mod editor;
+pub mod editor_command;
 pub mod tuinix_ext;
 pub mod widget_legend;
 pub mod widget_message;
