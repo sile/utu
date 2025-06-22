@@ -72,6 +72,7 @@ impl TerminalRegion {
 
 pub trait KeyInputExt {
     fn from_str(s: &str) -> Option<tuinix::KeyInput>;
+    fn display(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result;
 }
 
 impl KeyInputExt for tuinix::KeyInput {
@@ -117,6 +118,36 @@ impl KeyInputExt for tuinix::KeyInput {
         match (chars.next(), chars.next()) {
             (Some(c), None) if !c.is_control() => Some(key(KeyCode::Char(c))),
             _ => None,
+        }
+    }
+
+    fn display(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // Write modifiers
+        if self.ctrl {
+            write!(f, "C-")?;
+        }
+        if self.alt {
+            write!(f, "M-")?;
+        }
+
+        // Write the key code
+        match self.code {
+            KeyCode::Up => write!(f, "↑"),
+            KeyCode::Down => write!(f, "↓"),
+            KeyCode::Left => write!(f, "←"),
+            KeyCode::Right => write!(f, "→"),
+            KeyCode::Enter => write!(f, "↵"),
+            KeyCode::Escape => write!(f, "⎋"),
+            KeyCode::Backspace => write!(f, "⌫"),
+            KeyCode::Tab => write!(f, "⇥"),
+            KeyCode::BackTab => write!(f, "⇤"),
+            KeyCode::Delete => write!(f, "⌦"),
+            KeyCode::Insert => write!(f, "⎀"),
+            KeyCode::Home => write!(f, "⇱"),
+            KeyCode::End => write!(f, "⇲"),
+            KeyCode::PageUp => write!(f, "⇞"),
+            KeyCode::PageDown => write!(f, "⇟"),
+            KeyCode::Char(c) => write!(f, "{}", c),
         }
     }
 }
