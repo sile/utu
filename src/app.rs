@@ -100,10 +100,12 @@ impl App {
                 self.pending_keys.push(key);
                 match self.key_bindings.find(&self.pending_keys) {
                     Err(()) => {
-                        todo!()
+                        self.editor
+                            .set_message(format!("Undefined: {}", self.pending_keys));
+                        self.pending_keys.clear();
                     }
                     Ok(None) => {
-                        todo!()
+                        self.editor.set_message(self.pending_keys.to_string());
                     }
                     Ok(Some(command)) => {
                         self.pending_keys.clear();
