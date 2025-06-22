@@ -1,7 +1,7 @@
 use std::fmt::Write;
 
 use orfail::OrFail;
-use tuinix::{TerminalFrame, TerminalSize};
+use tuinix::{TerminalFrame, TerminalPosition, TerminalSize};
 
 use crate::{editor::Editor, tuinix_ext::TerminalRegion};
 
@@ -47,7 +47,45 @@ impl Legend {
     }
 
     pub fn region(&self, size: TerminalSize) -> TerminalRegion {
-        todo!()
+        if self.hide {
+            // Return an empty region if hidden
+            return TerminalRegion {
+                position: TerminalPosition::ZERO,
+                size: TerminalSize { rows: 0, cols: 0 },
+            };
+        }
+
+        // Legend dimensions
+        let legend_width = 17; // Width of the legend box
+        let legend_height = 6; // Number of lines in the keybindings array
+
+        // Check if we have enough space
+        if size.cols < 20 || size.rows < 3 {
+            // Not enough space, return empty region
+            return TerminalRegion {
+                position: TerminalPosition::ZERO,
+                size: TerminalSize { rows: 0, cols: 0 },
+            };
+        }
+
+        // Position legend on the right side of the screen
+        let legend_col = size.cols.saturating_sub(legend_width);
+        let legend_row = 0; // Start at the top
+
+        // Ensure legend fits within available space
+        let actual_width = legend_width.min(size.cols);
+        let actual_height = legend_height.min(size.rows);
+
+        TerminalRegion {
+            position: TerminalPosition {
+                row: legend_row,
+                col: legend_col,
+            },
+            size: TerminalSize {
+                rows: actual_height,
+                cols: actual_width,
+            },
+        }
     }
 
     pub fn toggle_hide(&mut self, editor: &mut Editor) {

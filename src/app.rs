@@ -62,13 +62,16 @@ impl App {
 
         // Render widgets
         frame.draw_in_region(main_region, |frame| {
-            self.text_view.render(&self.editor, frame)
+            self.text_view.render(&self.editor, frame).or_fail()
         })?;
         frame.draw_in_region(status_region, |frame| {
-            self.status_line.render(&self.editor, frame)
+            self.status_line.render(&self.editor, frame).or_fail()
         })?;
         frame.draw_in_region(message_region, |frame| {
-            self.message_line.render(&self.editor, frame)
+            self.message_line.render(&self.editor, frame).or_fail()
+        })?;
+        frame.draw_in_region(self.legend.region(frame.size()), |frame| {
+            self.legend.render(&self.editor, frame).or_fail()
         })?;
 
         // Set cursor position for text editing
