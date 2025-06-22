@@ -130,10 +130,8 @@ impl App {
                 self.editor.set_message("Canceled");
             }
             EditorCommand::PrevLine => {
-                if self.editor.cursor.row > 0 {
-                    self.editor.cursor.row -= 1;
-                    self.editor.dirty.render = true;
-                }
+                self.editor.cursor.row = self.editor.cursor.row.saturating_sub(1);
+                self.editor.dirty.render = true;
             }
             EditorCommand::NextLine => {
                 let max_row = self.editor.buffer.lines().count().saturating_sub(1);
@@ -143,10 +141,8 @@ impl App {
                 }
             }
             EditorCommand::PrevChar => {
-                if self.editor.cursor.col > 0 {
-                    self.editor.cursor.col -= 1;
-                    self.editor.dirty.render = true;
-                }
+                self.editor.cursor.col = self.editor.cursor.col.saturating_sub(1);
+                self.editor.dirty.render = true;
             }
             EditorCommand::NextChar => {
                 self.editor.cursor.col += 1;

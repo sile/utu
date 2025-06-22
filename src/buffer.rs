@@ -15,6 +15,8 @@ impl TextBuffer {
     pub fn set_text(&mut self, text: String) {
         self.lines = text.lines().map(|s| s.to_owned()).collect();
     }
+
+    // save() (seek & write uodated pixels)
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
