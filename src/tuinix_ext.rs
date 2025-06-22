@@ -73,9 +73,22 @@ impl TerminalRegion {
 pub trait KeyInputExt {
     fn from_str(s: &str) -> Option<tuinix::KeyInput>;
     fn display(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result;
+    fn to_string(&self) -> String;
 }
 
 impl KeyInputExt for tuinix::KeyInput {
+    fn to_string(&self) -> String {
+        struct DisplayWrapper<'a>(&'a tuinix::KeyInput);
+
+        impl<'a> std::fmt::Display for DisplayWrapper<'a> {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                self.0.display(f)
+            }
+        }
+
+        format!("{}", DisplayWrapper(self))
+    }
+
     fn from_str(s: &str) -> Option<tuinix::KeyInput> {
         // Control
         let (ctrl, s) = if let Some(s) = s.strip_prefix("C-") {

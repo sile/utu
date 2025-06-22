@@ -5,7 +5,7 @@ use tuinix::{TerminalFrame, TerminalSize};
 
 use crate::{
     editor::Editor,
-    tuinix_ext::{TerminalRegion, TerminalSizeExt},
+    tuinix_ext::{KeyInputExt, TerminalRegion, TerminalSizeExt},
 };
 
 #[derive(Debug)]
@@ -14,7 +14,7 @@ pub struct Legend {
 }
 
 impl Legend {
-    const HIDE_COLS: usize = 12;
+    const HIDE_COLS: usize = 4;
     const SHOW_COLS: usize = 20;
 
     pub fn new() -> Self {
@@ -27,24 +27,30 @@ impl Legend {
         }
 
         if self.hide {
-            writeln!(frame, "└──s(^h)ow──").or_fail()?;
+            writeln!(frame, "└───").or_fail()?;
             return Ok(());
         }
 
-        let keybindings = [
-            "│ (^c) quit         ",
-            "│ (^g) cancel       ",
-            "│ (↑)  prev-line    ",
-            "│ (↓)  next-line    ",
-            "│ (←)  prev-char    ",
-            "│ (→)  next-char    ",
-            "└──────(^h)ide──────",
-        ];
+        // Get actual possible commands based on current pending keys
+        let possible_commands: Vec<_> = editor
+            .key_bindings
+            .possibe_commands(&editor.pending_keys)
+            .collect();
 
         // Draw the legend box
-        for line in keybindings.iter() {
-            writeln!(frame, "{}", line).or_fail()?;
+        for (key, command) in possible_commands.iter() {
+            match command {
+                Some(cmd) => {
+                    writeln!(frame, "│ ({}) {}", key.to_string(), cmd).or_fail()?;
+                }
+                None => {
+                    writeln!(frame, "│ ({}) ...", key.to_string()).or_fail()?;
+                }
+            }
         }
+
+        // Add the hide option at the bottom
+        writeln!(frame, "└───────────────────").or_fail()?;
 
         Ok(())
     }
