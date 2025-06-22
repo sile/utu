@@ -19,10 +19,15 @@ impl TerminalFrameExt for TerminalFrame {
 }
 
 pub trait TerminalSizeExt {
+    fn rows_cols(rows: usize, cols: usize) -> TerminalSize;
     fn to_region(self) -> TerminalRegion;
 }
 
 impl TerminalSizeExt for TerminalSize {
+    fn rows_cols(rows: usize, cols: usize) -> TerminalSize {
+        Self { rows, cols }
+    }
+
     fn to_region(self) -> TerminalRegion {
         TerminalRegion {
             position: TerminalPosition::ZERO,
@@ -47,6 +52,14 @@ impl TerminalRegion {
         if let Some(offset) = self.size.rows.checked_sub(rows) {
             self.position.row += offset;
             self.size.rows = rows;
+        }
+        self
+    }
+
+    pub fn right_cols(mut self, cols: usize) -> Self {
+        if let Some(offset) = self.size.cols.checked_sub(cols) {
+            self.position.col += offset;
+            self.size.cols = cols;
         }
         self
     }

@@ -3,7 +3,10 @@ use std::fmt::Write;
 use orfail::OrFail;
 use tuinix::{TerminalFrame, TerminalPosition, TerminalSize};
 
-use crate::{editor::Editor, tuinix_ext::TerminalRegion};
+use crate::{
+    editor::Editor,
+    tuinix_ext::{TerminalRegion, TerminalSizeExt},
+};
 
 #[derive(Debug)]
 pub struct Legend {
@@ -11,12 +14,17 @@ pub struct Legend {
 }
 
 impl Legend {
+    const HIDE_COLS: usize = 12;
+
     pub fn new() -> Self {
         Self { hide: false }
     }
 
     pub fn render(&self, _editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
         if self.hide {
+            if Self::HIDE_COLS <= frame.size().cols {
+                writeln!(frame, "└──s(^h)ow──").or_fail()?;
+            }
             return Ok(());
         }
 
@@ -48,11 +56,7 @@ impl Legend {
 
     pub fn region(&self, size: TerminalSize) -> TerminalRegion {
         if self.hide {
-            // Return an empty region if hidden
-            return TerminalRegion {
-                position: TerminalPosition::ZERO,
-                size: TerminalSize { rows: 0, cols: 0 },
-            };
+            return size.to_region().top_rows(1).right_cols(Self::HIDE_COLS);
         }
 
         // Legend dimensions
