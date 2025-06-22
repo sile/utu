@@ -145,7 +145,8 @@ impl App {
                 self.editor.dirty.render = true;
             }
             EditorCommand::NextChar => {
-                self.editor.cursor.col += 1;
+                let cols = self.editor.buffer.cols(self.editor.cursor.row); // TODO: -1
+                self.editor.cursor.col = cols.min(self.editor.cursor.col + 1);
                 self.editor.dirty.render = true;
             }
             EditorCommand::Dot(_c) => {

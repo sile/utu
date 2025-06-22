@@ -12,6 +12,11 @@ impl TextBuffer {
         self.lines.iter().map(|s| s.as_ref())
     }
 
+    pub fn cols(&self, row: usize) -> usize {
+        // TODO: unicode width
+        self.lines.get(row).map_or(0, |line| line.chars().count())
+    }
+
     pub fn set_text(&mut self, text: String) {
         self.lines = text.lines().map(|s| s.to_owned()).collect();
     }
