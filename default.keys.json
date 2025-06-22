@@ -1,6 +1,6 @@
 {
-  "^c": "quit",
-  "^g": "cancel",
+  "C-c": "quit",
+  "C-g": "cancel",
   "↑,k": "prev-line",
   "↓,j": "next-line",
   "←,h": "prev-char",

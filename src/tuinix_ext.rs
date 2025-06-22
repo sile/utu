@@ -76,18 +76,21 @@ pub trait KeyInputExt {
 
 impl KeyInputExt for tuinix::KeyInput {
     fn from_str(s: &str) -> Option<tuinix::KeyInput> {
-        // Control characters (^x format)
-        let (ctrl, s) = if let Some(s) = s.strip_prefix('^') {
+        // Control
+        let (ctrl, s) = if let Some(s) = s.strip_prefix("C-") {
             (true, s)
         } else {
             (false, s)
         };
 
-        let key = |code| tuinix::KeyInput {
-            ctrl,
-            alt: false,
-            code,
+        // Alt
+        let (alt, s) = if let Some(s) = s.strip_prefix("M-") {
+            (true, s)
+        } else {
+            (false, s)
         };
+
+        let key = |code| tuinix::KeyInput { ctrl, alt, code };
 
         // Special keys
         match s {
