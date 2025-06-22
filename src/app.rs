@@ -71,7 +71,7 @@ impl App {
         frame.draw_in_region(message_region, |frame| {
             self.message_line.render(&self.editor, frame).or_fail()
         })?;
-        frame.draw_in_region(self.legend.region(frame.size()), |frame| {
+        frame.draw_in_region(self.legend.region(&self.editor, frame.size()), |frame| {
             self.legend.render(&self.editor, frame).or_fail()
         })?;
 

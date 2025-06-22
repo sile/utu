@@ -21,8 +21,8 @@ impl Legend {
         Self { hide: false }
     }
 
-    pub fn render(&self, _editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
-        if frame.size().cols != self.size().cols {
+    pub fn render(&self, editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
+        if frame.size().cols != self.size(editor).cols {
             return Ok(());
         }
 
@@ -31,28 +31,13 @@ impl Legend {
             return Ok(());
         }
 
-        // Basic keybindings for the editor
-        // let keybindings = [
-        //     "│ (^c) quit         ",
-        //     "│ (^g) cancel       ",
-        //     "│ (↑)  prev-line    ",
-        //     "│ (↓)  next-line    ",
-        //     "│ (←)  prev-char    ",
-        //     "│ (→)  next-char    ",
-        //     "│-------------------",
-        //     "│                   ",
-        //     "└──────(^h)ide──────",
-        // ];
-
         let keybindings = [
-            "│ quit          (^c)",
-            "│ cancel        (^g)",
-            "│ prev-line     (↑) ",
-            "│ next-line     (↓) ",
-            "│ prev-char     (←) ",
-            "│ next-char     (→) ",
-            "│-------------------",
-            "│                   ",
+            "│ (^c) quit         ",
+            "│ (^g) cancel       ",
+            "│ (↑)  prev-line    ",
+            "│ (↓)  next-line    ",
+            "│ (←)  prev-char    ",
+            "│ (→)  next-char    ",
             "└──────(^h)ide──────",
         ];
 
@@ -64,7 +49,7 @@ impl Legend {
         Ok(())
     }
 
-    fn size(&self) -> TerminalSize {
+    fn size(&self, editor: &Editor) -> TerminalSize {
         if self.hide {
             TerminalSize::rows_cols(1, Self::HIDE_COLS)
         } else {
@@ -72,8 +57,8 @@ impl Legend {
         }
     }
 
-    pub fn region(&self, size: TerminalSize) -> TerminalRegion {
-        let legend_size = self.size();
+    pub fn region(&self, editor: &Editor, size: TerminalSize) -> TerminalRegion {
+        let legend_size = self.size(editor);
         size.to_region()
             .top_rows(legend_size.rows)
             .right_cols(legend_size.cols)
