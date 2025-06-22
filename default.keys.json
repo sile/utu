@@ -1,0 +1,12 @@
+{
+  "i": "prev-line",
+  "k": "next-line",
+  "j": "prev-char",
+  "l": "next-char",
+  "o": {
+    "dot": "o"
+  },
+  " ": {
+    "dot": " "
+  }
+}

@@ -4,4 +4,5 @@ pub enum EditorCommand {
     NextLine,
     PrevChar,
     NextChar,
+    Dot(char),
 }

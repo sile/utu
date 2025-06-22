@@ -33,13 +33,15 @@ impl Legend {
 
         // Basic keybindings for the editor
         let keybindings = [
-            "│ quit          [^c]",
-            "│ cancel        [^g]",
-            "│ search        [^s]",
-            "│ (↑)           [^p]",
-            "│ (↓)           [^n]",
-            "│ (←)           [^b]",
-            "│ (→)           [^f]",
+            "│ (^c)   quit       ",
+            "│ (^g)   cancel     ",
+            "│ (^s)   search     ",
+            "│ (^p,↑) prev-line  ",
+            "│ (^n,↓) next-line  ",
+            "│ (^b,←) prev-char  ",
+            "│ (^f,→) next-char  ",
+            "│-------------------",
+            "│                   ",
             "└──────(^h)ide──────",
         ];
 
@@ -55,7 +57,7 @@ impl Legend {
         if self.hide {
             TerminalSize::rows_cols(1, Self::HIDE_COLS)
         } else {
-            TerminalSize::rows_cols(8, Self::SHOW_COLS)
+            TerminalSize::rows_cols(10, Self::SHOW_COLS)
         }
     }
 
