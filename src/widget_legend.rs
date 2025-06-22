@@ -16,7 +16,6 @@ pub struct Legend {
 impl Legend {
     const HIDE_COLS: usize = 12;
     const SHOW_COLS: usize = 20;
-    const SHOW_MAX_ROWS: usize = 256; // Any reasonably large value will do
 
     pub fn new() -> Self {
         Self { hide: false }
@@ -56,7 +55,7 @@ impl Legend {
         if self.hide {
             TerminalSize::rows_cols(1, Self::HIDE_COLS)
         } else {
-            TerminalSize::rows_cols(Self::SHOW_MAX_ROWS, Self::SHOW_COLS)
+            TerminalSize::rows_cols(8, Self::SHOW_COLS)
         }
     }
 
