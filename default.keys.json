@@ -1,9 +1,10 @@
 {
-  "q": "quit",
-  "i": "prev-line",
-  "k": "next-line",
-  "j": "prev-char",
-  "l": "next-char",
+  "^c": "quit",
+  "^g": "cancel",
+  "↑,k": "prev-line",
+  "↓,j": "next-line",
+  "←,h": "prev-char",
+  "→,l": "next-char",
   "o": "dot-o",
   " ": "dot- ",
   "m": {
