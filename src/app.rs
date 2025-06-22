@@ -6,7 +6,6 @@ use tuinix::{Terminal, TerminalEvent, TerminalFrame, TerminalInput};
 use crate::{
     editor::Editor,
     editor_command::EditorCommand,
-    key_binding::{KeyBindings, KeySequence},
     tuinix_ext::{TerminalFrameExt, TerminalSizeExt},
     widget_legend::Legend,
     widget_message::MessageLine,
@@ -18,8 +17,6 @@ use crate::{
 pub struct App {
     terminal: Terminal,
     editor: Editor,
-    key_bindings: KeyBindings,
-    pending_keys: KeySequence,
     text_view: TextView,
     status_line: StatusLine,
     message_line: MessageLine,
@@ -32,8 +29,6 @@ impl App {
         Ok(Self {
             terminal,
             editor: Editor::new(path),
-            key_bindings: KeyBindings::default(),
-            pending_keys: KeySequence::default(),
             text_view: TextView::new(),
             status_line: StatusLine,
             message_line: MessageLine,
@@ -97,19 +92,19 @@ impl App {
         match event {
             TerminalEvent::Input(input) => {
                 let TerminalInput::Key(key) = input;
-                self.pending_keys.push(key);
-                match self.key_bindings.find(&self.pending_keys) {
+                self.editor.pending_keys.push(key);
+                match self.editor.key_bindings.find(&self.editor.pending_keys) {
                     Err(()) => {
                         self.editor
-                            .set_message(format!("Undefined: {}", self.pending_keys));
-                        self.pending_keys.clear();
+                            .set_message(format!("Undefined: {}", self.editor.pending_keys));
+                        self.editor.pending_keys.clear();
                     }
                     Ok(None) => {
                         self.editor
-                            .set_message(format!("[INPUT] {} ->", self.pending_keys));
+                            .set_message(format!("[INPUT] {} ->", self.editor.pending_keys));
                     }
                     Ok(Some(command)) => {
-                        self.pending_keys.clear();
+                        self.editor.pending_keys.clear();
                         self.handle_command(command).or_fail()?;
                     }
                 }
@@ -131,7 +126,7 @@ impl App {
             }
             EditorCommand::Cancel => {
                 // Clear any pending operations or selections
-                self.pending_keys.clear();
+                self.editor.pending_keys.clear();
                 self.editor.set_message("Canceled");
             }
             EditorCommand::PrevLine => {

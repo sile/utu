@@ -2,7 +2,10 @@ use std::{path::PathBuf, time::SystemTime};
 
 use orfail::OrFail;
 
-use crate::buffer::{TextBuffer, TextPosition};
+use crate::{
+    buffer::{TextBuffer, TextPosition},
+    key_binding::{KeyBindings, KeySequence},
+};
 
 #[derive(Debug)]
 pub struct Editor {
@@ -13,6 +16,8 @@ pub struct Editor {
     pub cursor: TextPosition,
     pub buffer: TextBuffer,
     pub message: Option<String>,
+    pub key_bindings: KeyBindings,
+    pub pending_keys: KeySequence,
 }
 
 impl Editor {
@@ -28,6 +33,8 @@ impl Editor {
             cursor: TextPosition::default(),
             buffer: TextBuffer::new(),
             message: None,
+            key_bindings: KeyBindings::default(),
+            pending_keys: KeySequence::default(),
         }
     }
 

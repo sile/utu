@@ -1,3 +1,4 @@
+// AppCommand?
 #[derive(Debug, Clone, Copy)]
 pub enum EditorCommand {
     Quit,
