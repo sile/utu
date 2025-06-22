@@ -1,3 +1,5 @@
+use tuinix::KeyCode;
+
 #[derive(Debug)]
 pub enum EditorCommand {
     Quit,
@@ -45,6 +47,15 @@ impl<'text> nojson::FromRawJsonValue<'text> for EditorCommand {
             _ => Err(value.invalid(format!("unknown command: {}", s))),
         }
     }
+}
+
+#[derive(Debug)]
+pub struct KeyBindings {}
+
+#[derive(Debug)]
+pub struct KeyBinding {
+    pub path: Vec<KeyCode>, // KeyPath
+    pub command: EditorCommand,
 }
 
 pub trait RawJsonValueExt {

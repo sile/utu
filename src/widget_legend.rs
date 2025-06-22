@@ -32,13 +32,25 @@ impl Legend {
         }
 
         // Basic keybindings for the editor
+        // let keybindings = [
+        //     "│ (^c) quit         ",
+        //     "│ (^g) cancel       ",
+        //     "│ (↑)  prev-line    ",
+        //     "│ (↓)  next-line    ",
+        //     "│ (←)  prev-char    ",
+        //     "│ (→)  next-char    ",
+        //     "│-------------------",
+        //     "│                   ",
+        //     "└──────(^h)ide──────",
+        // ];
+
         let keybindings = [
-            "│ (^c) quit         ",
-            "│ (^g) cancel       ",
-            "│ (↑)  prev-line    ",
-            "│ (↓)  next-line    ",
-            "│ (←)  prev-char    ",
-            "│ (→)  next-char    ",
+            "│ quit          (^c)",
+            "│ cancel        (^g)",
+            "│ prev-line     (↑) ",
+            "│ next-line     (↓) ",
+            "│ prev-char     (←) ",
+            "│ next-char     (→) ",
             "│-------------------",
             "│                   ",
             "└──────(^h)ide──────",
