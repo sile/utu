@@ -105,7 +105,8 @@ impl App {
                         self.pending_keys.clear();
                     }
                     Ok(None) => {
-                        self.editor.set_message(self.pending_keys.to_string());
+                        self.editor
+                            .set_message(format!("[INPUT] {} ->", self.pending_keys));
                     }
                     Ok(Some(command)) => {
                         self.pending_keys.clear();
@@ -131,7 +132,7 @@ impl App {
             EditorCommand::Cancel => {
                 // Clear any pending operations or selections
                 self.pending_keys.clear();
-                self.editor.dirty.render = true;
+                self.editor.set_message("Canceled");
             }
             EditorCommand::PrevLine => {
                 if self.editor.cursor.row > 0 {

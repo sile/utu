@@ -47,7 +47,7 @@ impl KeyBindings {
             if binding.sequence.0 == keys.0 {
                 return Ok(Some(binding.command));
             }
-            if !error && binding.sequence.0.starts_with(&keys.0) {
+            if error && binding.sequence.0.starts_with(&keys.0) {
                 error = false;
             }
         }
