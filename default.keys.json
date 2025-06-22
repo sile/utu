@@ -1,5 +1,6 @@
 {
   "C-c": "quit",
+  "C-h": "toggle-legend",
   "C-g": "cancel",
   "↑,k": "prev-line",
   "↓,j": "next-line",
