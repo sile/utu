@@ -39,16 +39,25 @@ impl<'text> nojson::FromRawJsonValue<'text> for EditorCommand {
                 let mut chars = s[4..].chars();
                 match (chars.next(), chars.next()) {
                     (Some(c), None) if !c.is_control() => Ok(EditorCommand::Dot(c)),
-                    _ => Err(nojson::JsonParseError::invalid_value(
-                        value,
-                        format!("invalid dot command: {}", s),
-                    )),
+                    _ => Err(value.invalid(format!("invalid dot command: {}", s))),
                 }
             }
-            _ => Err(nojson::JsonParseError::invalid_value(
-                value,
-                format!("unknown command: {}", s),
-            )),
+            _ => Err(value.invalid(format!("unknown command: {}", s))),
         }
+    }
+}
+
+pub trait RawJsonValueExt {
+    fn invalid<E>(self, error: E) -> nojson::JsonParseError
+    where
+        E: Into<Box<dyn Send + Sync + std::error::Error>>;
+}
+
+impl<'text, 'json> RawJsonValueExt for nojson::RawJsonValue<'text, 'json> {
+    fn invalid<E>(self, error: E) -> nojson::JsonParseError
+    where
+        E: Into<Box<dyn Send + Sync + std::error::Error>>,
+    {
+        nojson::JsonParseError::invalid_value(self, error)
     }
 }
