@@ -1,7 +1,7 @@
 use std::fmt::Write;
 
 use orfail::OrFail;
-use tuinix::{TerminalFrame, TerminalPosition, TerminalSize};
+use tuinix::{TerminalFrame, TerminalSize};
 
 use crate::{
     editor::Editor,
@@ -15,35 +15,34 @@ pub struct Legend {
 
 impl Legend {
     const HIDE_COLS: usize = 12;
+    const SHOW_COLS: usize = 20;
 
     pub fn new() -> Self {
         Self { hide: false }
     }
 
     pub fn render(&self, _editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
-        if self.hide {
-            if Self::HIDE_COLS <= frame.size().cols {
-                writeln!(frame, "└──s(^h)ow──").or_fail()?;
-            }
+        if frame.size() != self.size() {
             return Ok(());
         }
 
-        // Get available space for legend
-        // let frame_size = frame.size();
-        // if frame_size.cols < 20 || frame_size.rows < 3 {
-        //     return Ok(()); // Not enough space to show legend
-        // }
+        if self.hide {
+            writeln!(frame, "└──s(^h)ow──").or_fail()?;
+            return Ok(());
+        }
 
         // Calculate position for legend (right side of screen)
 
         // Basic keybindings for the editor
         let keybindings = [
-            "│ quit     [^c] │",
-            "│ (↑)      [^p] │",
-            "│ (↓)      [^n] │",
-            "│ (←)      [^b] │",
-            "│ (→)      [^f] │",
-            "└────(^h)ide────┘",
+            "│ quit          [^c]",
+            "│ cancel        [^g]",
+            "│ search        [^s]",
+            "│ (↑)           [^p]",
+            "│ (↓)           [^n]",
+            "│ (←)           [^b]",
+            "│ (→)           [^f]",
+            "└──────(^h)ide──────",
         ];
 
         // Draw the legend box
@@ -54,42 +53,19 @@ impl Legend {
         Ok(())
     }
 
-    pub fn region(&self, size: TerminalSize) -> TerminalRegion {
+    fn size(&self) -> TerminalSize {
         if self.hide {
-            return size.to_region().top_rows(1).right_cols(Self::HIDE_COLS);
+            return TerminalSize::rows_cols(1, Self::HIDE_COLS);
         }
 
-        // Legend dimensions
-        let legend_width = 17; // Width of the legend box
-        let legend_height = 6; // Number of lines in the keybindings array
+        TerminalSize::rows_cols(20, Self::SHOW_COLS) // TODO: calc rows
+    }
 
-        // Check if we have enough space
-        if size.cols < 20 || size.rows < 3 {
-            // Not enough space, return empty region
-            return TerminalRegion {
-                position: TerminalPosition::ZERO,
-                size: TerminalSize { rows: 0, cols: 0 },
-            };
-        }
-
-        // Position legend on the right side of the screen
-        let legend_col = size.cols.saturating_sub(legend_width);
-        let legend_row = 0; // Start at the top
-
-        // Ensure legend fits within available space
-        let actual_width = legend_width.min(size.cols);
-        let actual_height = legend_height.min(size.rows);
-
-        TerminalRegion {
-            position: TerminalPosition {
-                row: legend_row,
-                col: legend_col,
-            },
-            size: TerminalSize {
-                rows: actual_height,
-                cols: actual_width,
-            },
-        }
+    pub fn region(&self, size: TerminalSize) -> TerminalRegion {
+        let legend_size = self.size();
+        size.to_region()
+            .top_rows(legend_size.rows)
+            .right_cols(legend_size.cols)
     }
 
     pub fn toggle_hide(&mut self, editor: &mut Editor) {
