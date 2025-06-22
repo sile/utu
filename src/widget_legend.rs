@@ -21,10 +21,10 @@ impl Legend {
         }
 
         // Get available space for legend
-        let frame_size = frame.size();
-        if frame_size.cols < 20 || frame_size.rows < 3 {
-            return Ok(()); // Not enough space to show legend
-        }
+        // let frame_size = frame.size();
+        // if frame_size.cols < 20 || frame_size.rows < 3 {
+        //     return Ok(()); // Not enough space to show legend
+        // }
 
         // Calculate position for legend (right side of screen)
 
