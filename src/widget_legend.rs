@@ -50,7 +50,7 @@ impl Legend {
         }
 
         // Add the hide option at the bottom
-        writeln!(frame, "└───────────────────").or_fail()?;
+        writeln!(frame, "└─────────────────────").or_fail()?;
 
         Ok(())
     }

@@ -121,7 +121,7 @@ impl App {
             EditorCommand::Quit => {
                 self.editor.exit = true;
             }
-            EditorCommand::ToggleLegend => {
+            EditorCommand::Legend => {
                 self.legend.toggle_hide(&mut self.editor);
             }
             EditorCommand::Cancel => {
