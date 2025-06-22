@@ -1,4 +1,4 @@
-use tuinix::{TerminalFrame, TerminalPosition, TerminalSize};
+use tuinix::{KeyCode, TerminalFrame, TerminalPosition, TerminalSize};
 
 pub trait TerminalFrameExt {
     fn draw_in_region<F, E>(&mut self, region: TerminalRegion, f: F) -> Result<(), E>
@@ -67,5 +67,53 @@ impl TerminalRegion {
     pub fn without_bottom_rows(mut self, rows: usize) -> Self {
         self.size.rows = self.size.rows.saturating_sub(rows);
         self
+    }
+}
+
+pub trait KeyInputExt {
+    fn from_str(s: &str) -> Option<tuinix::KeyInput>;
+}
+
+impl KeyInputExt for tuinix::KeyInput {
+    fn from_str(s: &str) -> Option<tuinix::KeyInput> {
+        // Control characters (^x format)
+        let (ctrl, s) = if let Some(s) = s.strip_prefix('^') {
+            (true, s)
+        } else {
+            (false, s)
+        };
+
+        let key = |code| tuinix::KeyInput {
+            ctrl,
+            alt: false,
+            code,
+        };
+
+        // Special keys
+        match s {
+            "↑" => return Some(key(KeyCode::Up)),
+            "↓" => return Some(key(KeyCode::Down)),
+            "←" => return Some(key(KeyCode::Left)),
+            "→" => return Some(key(KeyCode::Right)),
+            "↵" | "⏎" | "⮐" => return Some(key(KeyCode::Enter)),
+            "⎋" => return Some(key(KeyCode::Escape)),
+            "⌫" => return Some(key(KeyCode::Backspace)),
+            "⇥" | "↹" => return Some(key(KeyCode::Tab)),
+            "⇤" => return Some(key(KeyCode::BackTab)),
+            "⌦" => return Some(key(KeyCode::Delete)),
+            "⎀" => return Some(key(KeyCode::Insert)),
+            "⇱" | "↖" => return Some(key(KeyCode::Home)),
+            "⇲" | "↘" => return Some(key(KeyCode::End)),
+            "⇞" => return Some(key(KeyCode::PageUp)),
+            "⇟" => return Some(key(KeyCode::PageDown)),
+            _ => {}
+        }
+
+        // Normal keys
+        let mut chars = s.chars();
+        match (chars.next(), chars.next()) {
+            (Some(c), None) if !c.is_control() => Some(key(KeyCode::Char(c))),
+            _ => None,
+        }
     }
 }
