@@ -1,9 +1,9 @@
 use std::fmt::Write;
 
 use orfail::OrFail;
-use tuinix::TerminalFrame;
+use tuinix::{TerminalFrame, TerminalSize};
 
-use crate::editor::Editor;
+use crate::{editor::Editor, tuinix_ext::TerminalRegion};
 
 #[derive(Debug)]
 pub struct Legend {
@@ -46,7 +46,17 @@ impl Legend {
         Ok(())
     }
 
-    pub fn toggle_hide(&mut self) {
+    pub fn region(&self, size: TerminalSize) -> TerminalRegion {
+        todo!()
+    }
+
+    pub fn toggle_hide(&mut self, editor: &mut Editor) {
         self.hide = !self.hide;
+        if self.hide {
+            editor.set_message("Hide Legend");
+        } else {
+            editor.set_message("Show Legend");
+        }
+        editor.dirty.render = true;
     }
 }

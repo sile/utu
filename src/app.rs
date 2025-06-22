@@ -6,6 +6,7 @@ use tuinix::{KeyCode, Terminal, TerminalEvent, TerminalFrame, TerminalInput};
 use crate::{
     editor::Editor,
     tuinix_ext::{TerminalFrameExt, TerminalSizeExt},
+    widget_legend::Legend,
     widget_message::MessageLine,
     widget_status::StatusLine,
     widget_text::TextView,
@@ -18,6 +19,7 @@ pub struct App {
     text_view: TextView,
     status_line: StatusLine,
     message_line: MessageLine,
+    legend: Legend,
 }
 
 impl App {
@@ -29,6 +31,7 @@ impl App {
             text_view: TextView::new(),
             status_line: StatusLine,
             message_line: MessageLine,
+            legend: Legend::new(),
         })
     }
 
@@ -85,8 +88,10 @@ impl App {
         match event {
             TerminalEvent::Input(input) => {
                 let TerminalInput::Key(key) = input;
-                if key.ctrl && matches!(key.code, tuinix::KeyCode::Char('c')) {
+                if key.ctrl && matches!(key.code, KeyCode::Char('c')) {
                     self.editor.exit = true;
+                } else if key.ctrl && matches!(key.code, KeyCode::Char('h')) {
+                    self.legend.toggle_hide(&mut self.editor);
                 } else {
                     // Handle basic cursor movement for now
                     match key.code {
