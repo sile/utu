@@ -96,3 +96,14 @@ Character reference:
 - `🟦` (U+1F7E6) - Blue square
 - `🟪` (U+1F7EA) - Purple square
 
+4 colors:
+- `⬜` (U+2B1C) - White large square
+- `🟨` (U+1F7E8) - Yellow square
+- `🟧` (U+1F7E7) - Orange square
+- `🟥` (U+1F7E5) - Red square
+
+Another pattern:
+- `⬜` (U+2B1C) - White large square
+- `🟨` (U+1F7E8) - Yellow square
+- `🟫` (U+1F7EB) - Brown square
+- `⬛` (U+2B1B) - Black large square
