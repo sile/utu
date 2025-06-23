@@ -1,6 +1,8 @@
+// todo: rename
 #[derive(Debug)]
 pub struct TextBuffer {
     lines: Vec<String>,
+    // todo: undo handling
 }
 
 impl TextBuffer {
@@ -19,6 +21,10 @@ impl TextBuffer {
 
     pub fn set_text(&mut self, text: String) {
         self.lines = text.lines().map(|s| s.to_owned()).collect();
+    }
+
+    pub fn update(&mut self, position: TextPosition, c: char) -> orfail::Result<bool> {
+        todo!()
     }
 
     // save() (seek & write uodated pixels)

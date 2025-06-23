@@ -49,6 +49,16 @@ impl Editor {
         }
     }
 
+    pub fn dot(&mut self, c: char) -> orfail::Result<()> {
+        // todo: consider marker
+
+        if self.buffer.update(self.cursor, c).or_fail()? {
+            self.dirty.content = true;
+            self.dirty.render = true;
+        }
+        Ok(())
+    }
+
     pub fn try_reload(&mut self) -> orfail::Result<()> {
         let metadata = self.path.metadata().or_fail()?;
         let mtime = metadata.modified().or_fail()?;

@@ -147,13 +147,7 @@ impl App {
                 self.editor.cursor.col = max_col.min(self.editor.cursor.col + 1);
                 self.editor.dirty.render = true;
             }
-            EditorCommand::Dot(_c) => {
-                // Insert character at cursor position
-                // This would need to be implemented based on the editor's text manipulation capabilities
-                // For now, just mark as dirty to trigger a render
-                self.editor.dirty.render = true;
-                // TODO: Implement actual character insertion
-            }
+            EditorCommand::Dot(c) => self.editor.dot(c).or_fail()?,
             EditorCommand::MarkStroke => {
                 // Set marking mode to stroke
                 self.editor.dirty.render = true;
