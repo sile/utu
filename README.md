@@ -102,6 +102,18 @@ Character reference:
 - `🟧` (U+1F7E7) - Orange square
 - `🟥` (U+1F7E5) - Red square
 
+```
+⬜⬜🟥🟥🟥🟥⬜⬜
+⬜🟥🟥🟧🟧🟥🟥⬜
+🟥🟥🟧🟨🟨🟧🟥🟥
+🟥🟧🟧🟨🟨🟧🟧🟥
+🟥🟧🟨🟨🟨🟨🟧🟥
+🟧🟧🟨🟨🟨🟨🟧🟧
+🟧🟨🟨🟨🟨🟨🟨🟧
+🟨🟨🟨🟨🟨🟨🟨🟨
+```
+
+
 Another pattern:
 - `⬜` (U+2B1C) - White large square
 - `🟨` (U+1F7E8) - Yellow square
