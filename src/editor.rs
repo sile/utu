@@ -54,6 +54,8 @@ impl Editor {
         if self.buffer.update(self.cursor, c) {
             self.dirty.content = true;
             self.dirty.render = true;
+        } else {
+            self.set_message("No effect");
         }
         Ok(())
     }

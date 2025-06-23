@@ -18,12 +18,21 @@ impl TextBuffer {
         self.lines.get(row).map_or(0, |line| line.chars().count())
     }
 
+    pub fn rows(&self) -> usize {
+        self.lines.len()
+    }
+
     pub fn set_text(&mut self, text: String) {
         self.lines = text.lines().map(|s| s.to_owned()).collect();
     }
 
-    pub fn update(&mut self, position: TextPosition, c: char) -> bool {
-        todo!()
+    pub fn update(&mut self, pos: TextPosition, c: char) -> bool {
+        if !(pos.row < self.rows() && pos.col < self.cols(pos.row)) {
+            return false;
+        }
+
+        self.lines[pos.row].insert(pos.col, c);
+        c != self.lines[pos.row].remove(pos.col + 1) // todo: width
     }
 
     // save() (seek & write uodated pixels)

@@ -6,7 +6,7 @@
   "↓,k": "next-line",
   "←,j": "prev-char",
   "→,l": "next-char",
-  "o": "dot-o",
+  "d": "dot-o",
   " ": "dot- ",
   "m": {
     "C-g": "cancel",
