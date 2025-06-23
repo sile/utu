@@ -28,7 +28,7 @@ impl App {
         let terminal = Terminal::new().or_fail()?;
         Ok(Self {
             terminal,
-            editor: Editor::new(path),
+            editor: Editor::new(path).or_fail()?,
             text_view: TextView::new(),
             status_line: StatusLine,
             message_line: MessageLine,
@@ -37,8 +37,9 @@ impl App {
     }
 
     pub fn run(mut self) -> orfail::Result<()> {
+        self.editor.reload().or_fail()?;
+
         while !self.editor.exit {
-            self.editor.try_reload().or_fail()?;
             self.render().or_fail()?;
 
             if let Some(event) = self.terminal.poll_event(None).or_fail()? {

@@ -4,7 +4,7 @@ pub enum EditorCommand {
     Quit,
     Legend,
     Cancel,
-    // reload
+    // save, reload
     PrevLine,
     NextLine,
     PrevChar,

@@ -1,4 +1,3 @@
-// todo: rename
 #[derive(Debug)]
 pub struct TextBuffer {
     lines: Vec<String>,
@@ -23,7 +22,7 @@ impl TextBuffer {
         self.lines = text.lines().map(|s| s.to_owned()).collect();
     }
 
-    pub fn update(&mut self, position: TextPosition, c: char) -> orfail::Result<bool> {
+    pub fn update(&mut self, position: TextPosition, c: char) -> bool {
         todo!()
     }
 

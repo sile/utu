@@ -1,4 +1,4 @@
-use std::{path::PathBuf, time::SystemTime};
+use std::path::PathBuf;
 
 use orfail::OrFail;
 
@@ -10,7 +10,6 @@ use crate::{
 #[derive(Debug)]
 pub struct Editor {
     pub path: PathBuf,
-    pub mtime: Option<SystemTime>,
     pub exit: bool,
     pub dirty: Dirty,
     pub cursor: TextPosition,
@@ -21,10 +20,10 @@ pub struct Editor {
 }
 
 impl Editor {
-    pub fn new(path: PathBuf) -> Self {
-        Self {
+    pub fn new(path: PathBuf) -> orfail::Result<Self> {
+        Ok(Self {
             path,
-            mtime: None,
+
             exit: false,
             dirty: Dirty {
                 content: false,
@@ -35,7 +34,7 @@ impl Editor {
             message: None,
             key_bindings: KeyBindings::default(),
             pending_keys: KeySequence::default(),
-        }
+        })
     }
 
     pub fn set_message(&mut self, message: impl Into<String>) {
@@ -52,31 +51,18 @@ impl Editor {
     pub fn dot(&mut self, c: char) -> orfail::Result<()> {
         // todo: consider marker
 
-        if self.buffer.update(self.cursor, c).or_fail()? {
+        if self.buffer.update(self.cursor, c) {
             self.dirty.content = true;
             self.dirty.render = true;
         }
         Ok(())
     }
 
-    pub fn try_reload(&mut self) -> orfail::Result<()> {
-        let metadata = self.path.metadata().or_fail()?;
-        let mtime = metadata.modified().or_fail()?;
-
-        if self.mtime == Some(mtime) {
-            return Ok(());
-        }
-
+    pub fn reload(&mut self) -> orfail::Result<()> {
         let text = std::fs::read_to_string(&self.path).or_fail()?;
         self.buffer.set_text(text);
+        self.set_message(format!("Loaded {}", self.path.display()));
 
-        if self.mtime.is_none() {
-            self.set_message(format!("Opened {}", self.path.display()));
-        } else {
-            self.set_message(format!("Reloaded {}", self.path.display()));
-        }
-
-        self.mtime = Some(mtime);
         self.dirty.content = false;
         self.dirty.render = true;
 
