@@ -2,6 +2,7 @@
   "C-c": "quit",
   "C-h": "legend",
   "C-g": "cancel",
+  "s": "save",
   "↑,i": "prev-line",
   "↓,k": "next-line",
   "←,j": "prev-char",

@@ -169,6 +169,7 @@ impl App {
                 self.editor.dirty.render = true;
                 // TODO: Implement fill marking mode
             }
+            EditorCommand::Save => self.editor.save().or_fail()?,
         }
         Ok(())
     }

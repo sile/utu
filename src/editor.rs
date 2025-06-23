@@ -60,6 +60,21 @@ impl Editor {
         Ok(())
     }
 
+    pub fn save(&mut self) -> orfail::Result<()> {
+        if !self.dirty.content {
+            self.set_message("No changes to save");
+            return Ok(());
+        }
+
+        let content = self.buffer.lines().collect::<Vec<&str>>().join("\n");
+        std::fs::write(&self.path, content).or_fail()?;
+
+        self.dirty.content = false;
+        self.set_message(format!("Saved {}", self.path.display()));
+
+        Ok(())
+    }
+
     pub fn reload(&mut self) -> orfail::Result<()> {
         let text = std::fs::read_to_string(&self.path).or_fail()?;
         self.buffer.set_text(text);
