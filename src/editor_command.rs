@@ -3,6 +3,7 @@
 pub enum EditorCommand {
     Quit,
     Legend,
+    Background(char),
     Cancel,
     Save,
     Undo,
@@ -23,6 +24,7 @@ impl std::fmt::Display for EditorCommand {
         match self {
             EditorCommand::Quit => write!(f, "quit"),
             EditorCommand::Legend => write!(f, "legend"),
+            EditorCommand::Background(c) => write!(f, "bg-{}", c),
             EditorCommand::Cancel => write!(f, "cancel"),
             EditorCommand::Save => write!(f, "save"),
             EditorCommand::Undo => write!(f, "undo"),
@@ -62,6 +64,13 @@ impl std::str::FromStr for EditorCommand {
                 match (chars.next(), chars.next()) {
                     (Some(c), None) if !c.is_control() => Ok(EditorCommand::Dot(c)),
                     _ => Err(format!("invalid dot command: {}", s)),
+                }
+            }
+            s if s.starts_with("bg-") => {
+                let mut chars = s[2..].chars();
+                match (chars.next(), chars.next()) {
+                    (Some(c), None) if !c.is_control() => Ok(EditorCommand::Background(c)),
+                    _ => Err(format!("invalid background command: {}", s)),
                 }
             }
             _ => Err(format!("unknown command: {}", s)),

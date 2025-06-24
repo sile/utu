@@ -1,6 +1,7 @@
 {
   "C-c": "quit",
   "C-h": "legend",
+  "C-b": "bg-_",
   "C-g": "cancel",
   "s": "save",
   "C-u": "undo",

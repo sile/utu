@@ -128,6 +128,7 @@ impl App {
             EditorCommand::Legend => {
                 self.legend.toggle_hide(&mut self.editor);
             }
+            EditorCommand::Background(c) => {}
             EditorCommand::Cancel => {
                 // Clear any pending operations or selections
                 self.editor.pending_keys.clear();
