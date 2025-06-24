@@ -128,7 +128,12 @@ impl App {
             EditorCommand::Legend => {
                 self.legend.toggle_hide(&mut self.editor);
             }
-            EditorCommand::Background(c) => {}
+            EditorCommand::Background(c) => {
+                if self.editor.buffer.filter.bg_char.take().is_none() {
+                    self.editor.buffer.filter.bg_char = Some(c);
+                }
+                self.editor.dirty.render = true;
+            }
             EditorCommand::Cancel => {
                 // Clear any pending operations or selections
                 self.editor.pending_keys.clear();

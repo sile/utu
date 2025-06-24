@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
+use unicode_width::UnicodeWidthChar;
 
 #[derive(Debug)]
 pub struct TextBuffer {
@@ -154,10 +154,11 @@ pub struct TextBufferFilter {
 }
 
 impl TextBufferFilter {
-    fn apply(&self, c: char) -> char {
+    pub fn apply(&self, c: char) -> char {
         if self.fg_chars.contains(&c) {
             c
         } else {
+            // TODO: consider c.width()
             self.bg_char.unwrap_or(c)
         }
     }

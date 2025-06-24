@@ -37,6 +37,7 @@ impl TextView {
             // Get the visible portion of the line
             let visible_chars: String = line
                 .chars()
+                .map(|c| editor.buffer.filter.apply(c))
                 .skip(self.scroll_offset.col)
                 .take(terminal_size.cols)
                 .collect();
