@@ -5,15 +5,7 @@ pub struct TextBuffer {
     lines: Vec<String>,
     undo_stack: Vec<UndoOperation>,
     undo_index: usize,
-}
-
-#[derive(Debug, Clone)]
-enum UndoOperation {
-    Update {
-        pos: TextPosition,
-        old_char: char,
-        new_char: char,
-    },
+    undoing: bool,
 }
 
 impl TextBuffer {
@@ -22,6 +14,7 @@ impl TextBuffer {
             lines: Vec::new(),
             undo_stack: Vec::new(),
             undo_index: 0,
+            undoing: false,
         }
     }
 
@@ -102,16 +95,11 @@ impl TextBuffer {
                 }
 
                 // Record the operation for undo
-                let undo_op = UndoOperation::Update {
-                    pos,
-                    old_char: c,
-                    new_char: new,
-                };
-
-                // Truncate undo stack if we're not at the end
-                self.undo_stack.truncate(self.undo_index);
+                let undo_op = UndoOperation::Update { pos, old_char: c };
                 self.undo_stack.push(undo_op);
-                self.undo_index = self.undo_stack.len();
+                if !self.undoing {
+                    self.undo_index = self.undo_stack.len();
+                }
 
                 // Perform the actual update
                 self.lines[pos.row].remove(i);
@@ -124,32 +112,15 @@ impl TextBuffer {
     }
 
     pub fn undo(&mut self) -> Option<usize> {
-        if self.undo_index == 0 {
-            return None;
-        }
-
-        self.undo_index -= 1;
-        let undo_op = &self.undo_stack[self.undo_index].clone();
-
+        self.undo_index = self.undo_index.checked_sub(1)?;
+        self.undoing = true;
+        let undo_op = self.undo_stack[self.undo_index].clone();
         match undo_op {
-            UndoOperation::Update { pos, old_char, .. } => {
-                // Find the character at the position and replace it
-                let mut current_cols = 0;
-                for (i, _) in self.lines[pos.row].char_indices() {
-                    if current_cols >= pos.col {
-                        self.lines[pos.row].remove(i);
-                        self.lines[pos.row].insert(i, *old_char);
-                        break;
-                    }
-                    current_cols += self.lines[pos.row]
-                        .chars()
-                        .nth(i)
-                        .unwrap()
-                        .width()
-                        .unwrap_or(0);
-                }
+            UndoOperation::Update { pos, old_char } => {
+                self.update(pos, old_char);
             }
         }
+        self.undoing = false;
 
         Some(self.undo_index)
     }
@@ -159,4 +130,9 @@ impl TextBuffer {
 pub struct TextPosition {
     pub row: usize,
     pub col: usize,
+}
+
+#[derive(Debug, Clone)]
+enum UndoOperation {
+    Update { pos: TextPosition, old_char: char },
 }
