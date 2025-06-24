@@ -1,4 +1,5 @@
 use tuinix::{KeyCode, TerminalFrame, TerminalPosition, TerminalSize};
+use unicode_width::UnicodeWidthChar;
 
 pub trait TerminalFrameExt {
     fn draw_in_region<F, E>(&mut self, region: TerminalRegion, f: F) -> Result<(), E>
@@ -6,7 +7,7 @@ pub trait TerminalFrameExt {
         F: FnOnce(&mut TerminalFrame) -> Result<(), E>;
 }
 
-impl TerminalFrameExt for TerminalFrame {
+impl<W: tuinix::EstimateCharWidth> TerminalFrameExt for TerminalFrame<W> {
     fn draw_in_region<F, E>(&mut self, region: TerminalRegion, f: F) -> Result<(), E>
     where
         F: FnOnce(&mut TerminalFrame) -> Result<(), E>,
@@ -162,5 +163,14 @@ impl KeyInputExt for tuinix::KeyInput {
             KeyCode::PageDown => write!(f, "⇟"),
             KeyCode::Char(c) => write!(f, "{}", c),
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct UnicodeCharWidthEstimator;
+
+impl tuinix::EstimateCharWidth for UnicodeCharWidthEstimator {
+    fn estimate_char_width(&self, c: char) -> usize {
+        c.width().unwrap_or(0)
     }
 }

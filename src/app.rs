@@ -6,7 +6,7 @@ use tuinix::{Terminal, TerminalEvent, TerminalFrame, TerminalInput};
 use crate::{
     editor::Editor,
     editor_command::EditorCommand,
-    tuinix_ext::{TerminalFrameExt, TerminalSizeExt},
+    tuinix_ext::{TerminalFrameExt, TerminalSizeExt, UnicodeCharWidthEstimator},
     widget_legend::Legend,
     widget_message::MessageLine,
     widget_status::StatusLine,
@@ -54,7 +54,10 @@ impl App {
             return Ok(());
         }
 
-        let mut frame = TerminalFrame::new(self.terminal.size());
+        let mut frame = TerminalFrame::with_char_width_estimator(
+            self.terminal.size(),
+            UnicodeCharWidthEstimator,
+        );
 
         // Create regions for different UI components
         let full_region = frame.size().to_region();
