@@ -5,7 +5,7 @@ use tuinix::{TerminalFrame, TerminalSize};
 
 use crate::{
     editor::Editor,
-    tuinix_ext::{KeyInputExt, TerminalRegion, TerminalSizeExt},
+    tuinix_ext::{KeyInputExt, TerminalRegion, TerminalSizeExt, UnicodeCharWidthEstimator},
 };
 
 #[derive(Debug)]
@@ -21,7 +21,11 @@ impl Legend {
         Self { hide: false }
     }
 
-    pub fn render(&self, editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
+    pub fn render(
+        &self,
+        editor: &Editor,
+        frame: &mut TerminalFrame<UnicodeCharWidthEstimator>,
+    ) -> orfail::Result<()> {
         if frame.size().cols != self.size(editor).cols {
             return Ok(());
         }

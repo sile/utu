@@ -3,7 +3,7 @@ use std::fmt::Write;
 use orfail::OrFail;
 use tuinix::TerminalFrame;
 
-use crate::{buffer::TextPosition, editor::Editor};
+use crate::{buffer::TextPosition, editor::Editor, tuinix_ext::UnicodeCharWidthEstimator};
 
 #[derive(Debug)]
 pub struct TextView {
@@ -17,7 +17,11 @@ impl TextView {
         }
     }
 
-    pub fn render(&mut self, editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
+    pub fn render(
+        &mut self,
+        editor: &Editor,
+        frame: &mut TerminalFrame<UnicodeCharWidthEstimator>,
+    ) -> orfail::Result<()> {
         let terminal_size = frame.size();
 
         // Adjust scroll offset to keep cursor visible

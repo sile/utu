@@ -4,15 +4,16 @@ use unicode_width::UnicodeWidthChar;
 pub trait TerminalFrameExt {
     fn draw_in_region<F, E>(&mut self, region: TerminalRegion, f: F) -> Result<(), E>
     where
-        F: FnOnce(&mut TerminalFrame) -> Result<(), E>;
+        F: FnOnce(&mut TerminalFrame<UnicodeCharWidthEstimator>) -> Result<(), E>;
 }
 
 impl<W: tuinix::EstimateCharWidth> TerminalFrameExt for TerminalFrame<W> {
     fn draw_in_region<F, E>(&mut self, region: TerminalRegion, f: F) -> Result<(), E>
     where
-        F: FnOnce(&mut TerminalFrame) -> Result<(), E>,
+        F: FnOnce(&mut TerminalFrame<UnicodeCharWidthEstimator>) -> Result<(), E>,
     {
-        let mut subframe = TerminalFrame::new(region.size);
+        let mut subframe =
+            TerminalFrame::with_char_width_estimator(region.size, UnicodeCharWidthEstimator);
         f(&mut subframe)?;
         self.draw(region.position, &subframe);
         Ok(())
