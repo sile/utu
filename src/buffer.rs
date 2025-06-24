@@ -8,7 +8,7 @@ pub struct TextBuffer {
     undo_stack: Vec<UndoOperation>,
     undo_index: usize,
     undoing: bool,
-    filter: TextBufferFilter,
+    pub filter: TextBufferFilter,
 }
 
 impl TextBuffer {
@@ -27,7 +27,11 @@ impl TextBuffer {
     }
 
     pub fn cols(&self, row: usize) -> usize {
-        self.lines.get(row).map_or(0, |line| line.width())
+        self.lines.get(row).map_or(0, |line| {
+            line.chars()
+                .map(|c| self.filter.apply(c).width().unwrap_or(0))
+                .sum::<usize>()
+        })
     }
 
     pub fn prev_col(&self, TextPosition { row, col }: TextPosition) -> usize {
@@ -40,6 +44,7 @@ impl TextBuffer {
         let mut prev_col = 0;
 
         for c in line.chars() {
+            let c = self.filter.apply(c);
             let char_width = c.width().unwrap_or(0);
             if current_col >= col {
                 return prev_col;
@@ -60,6 +65,7 @@ impl TextBuffer {
         let mut current_col = 0;
 
         for c in line.chars() {
+            let c = self.filter.apply(c);
             let char_width = c.width().unwrap_or(0);
             if current_col > col {
                 return current_col;
@@ -94,7 +100,7 @@ impl TextBuffer {
         for (i, c) in self.lines[pos.row].char_indices() {
             if current_cols >= pos.col {
                 assert_eq!(current_cols, pos.col);
-                if new == c {
+                if new == c || !self.filter.fg_chars.contains(&c) {
                     return false;
                 }
 
