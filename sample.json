@@ -1,0 +1,90 @@
+{
+  "palettes": {
+    "mono": {
+      "colors": {
+        " ": "#ffffff",
+        "o": "#000000"
+      }
+    }
+  },
+  "images": {
+    "main": {
+      "palette": "mono",
+      "width": 32,
+      "height": 32,
+      "pixels": [
+        "                                ",
+        "   oo     ooo      oo           ",
+        "  o  o    o o   oo oo           ",
+        " o    o   ooo   o o             ",
+        " o    o  o  o  o   oo           ",
+        "  o  o     o                    ",
+        "   oo            ooooo          ",
+        "       o             o  ooooo   ",
+        "       o          o o       o   ",
+        "       o           o      oo    ",
+        "        o    o      o   oo  o   ",
+        "        o    oo  oo             ",
+        "            oooooo o            ",
+        "            o o oooo            ",
+        "            o o ooo             ",
+        "            ooooooo             ",
+        "            ooooooo             ",
+        "             ooooo              ",
+        "              oo                ",
+        "         ooo  ooo               ",
+        "        oo oo oooo              ",
+        "        o   ooooooo             ",
+        "             oooooo             ",
+        "             ooooooo            ",
+        "             ooooooo            ",
+        "             ooooooo            ",
+        "             oooooooo           ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                "
+      ]
+    },
+    "main": {
+      "palette": "mono",
+      "width": 32,
+      "height": 32,
+      "pixels": [
+        "                                ",
+        "   ██     ███      ██           ",
+        "  █  █    █ █   ██ ██           ",
+        " █    █   ███   █ █             ",
+        " █    █  █  █  █   ██           ",
+        "  █  █     █                    ",
+        "   ██            █████          ",
+        "       █             █  █████   ",
+        "       █          █ █       █   ",
+        "       █           █      ██    ",
+        "        █    █      █   ██  █   ",
+        "        █    ██  ██             ",
+        "            ██████ █            ",
+        "            █ █ ████            ",
+        "            █ █ ███             ",
+        "            ███████             ",
+        "            ███████             ",
+        "             █████              ",
+        "              ██                ",
+        "         ███  ███               ",
+        "        ██ ██ ████              ",
+        "        █   ███████             ",
+        "             ██████             ",
+        "             ███████            ",
+        "             ███████            ",
+        "             ███████            ",
+        "             ████████           ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                ",
+        "                                "
+      ]
+    }
+  }
+}
