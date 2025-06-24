@@ -67,10 +67,10 @@ impl std::str::FromStr for EditorCommand {
                 }
             }
             s if s.starts_with("bg-") => {
-                let mut chars = s[2..].chars();
+                let mut chars = s[3..].chars();
                 match (chars.next(), chars.next()) {
                     (Some(c), None) if !c.is_control() => Ok(EditorCommand::Background(c)),
-                    _ => Err(format!("invalid background command: {}", s)),
+                    _ => Err(format!("invalid bg command: {}", s)),
                 }
             }
             _ => Err(format!("unknown command: {}", s)),

@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
 #[derive(Debug)]
@@ -6,6 +8,7 @@ pub struct TextBuffer {
     undo_stack: Vec<UndoOperation>,
     undo_index: usize,
     undoing: bool,
+    filter: TextBufferFilter,
 }
 
 impl TextBuffer {
@@ -15,6 +18,7 @@ impl TextBuffer {
             undo_stack: Vec::new(),
             undo_index: 0,
             undoing: false,
+            filter: TextBufferFilter::default(),
         }
     }
 
@@ -135,4 +139,20 @@ pub struct TextPosition {
 #[derive(Debug, Clone)]
 enum UndoOperation {
     Update { pos: TextPosition, old_char: char },
+}
+
+#[derive(Debug, Default)]
+pub struct TextBufferFilter {
+    pub bg_char: Option<char>,
+    pub fg_chars: HashSet<char>,
+}
+
+impl TextBufferFilter {
+    fn apply(&self, c: char) -> char {
+        if self.fg_chars.contains(&c) {
+            c
+        } else {
+            self.bg_char.unwrap_or(c)
+        }
+    }
 }
