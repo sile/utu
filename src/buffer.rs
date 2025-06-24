@@ -3,12 +3,26 @@ use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 #[derive(Debug)]
 pub struct TextBuffer {
     lines: Vec<String>,
-    // todo: undo handling
+    undo_stack: Vec<UndoOperation>,
+    undo_index: usize,
+}
+
+#[derive(Debug, Clone)]
+enum UndoOperation {
+    Update {
+        pos: TextPosition,
+        old_char: char,
+        new_char: char,
+    },
 }
 
 impl TextBuffer {
     pub fn new() -> Self {
-        Self { lines: Vec::new() }
+        Self {
+            lines: Vec::new(),
+            undo_stack: Vec::new(),
+            undo_index: 0,
+        }
     }
 
     pub fn lines(&self) -> impl '_ + Iterator<Item = &str> {
@@ -68,6 +82,10 @@ impl TextBuffer {
 
     pub fn set_text(&mut self, text: String) {
         self.lines = text.lines().map(|s| s.to_owned()).collect();
+        // Clear undo history when setting new text
+        // TODO: keep history
+        self.undo_stack.clear();
+        self.undo_index = 0;
     }
 
     pub fn update(&mut self, pos: TextPosition, new: char) -> bool {
@@ -82,13 +100,58 @@ impl TextBuffer {
                 if new == c {
                     return false;
                 }
+
+                // Record the operation for undo
+                let undo_op = UndoOperation::Update {
+                    pos,
+                    old_char: c,
+                    new_char: new,
+                };
+
+                // Truncate undo stack if we're not at the end
+                self.undo_stack.truncate(self.undo_index);
+                self.undo_stack.push(undo_op);
+                self.undo_index = self.undo_stack.len();
+
+                // Perform the actual update
                 self.lines[pos.row].remove(i);
-                self.lines[pos.row].insert(i, c);
+                self.lines[pos.row].insert(i, new);
                 return true;
             }
             current_cols += c.width().unwrap_or(0);
         }
         panic!("bug")
+    }
+
+    pub fn undo(&mut self) -> Option<usize> {
+        if self.undo_index == 0 {
+            return None;
+        }
+
+        self.undo_index -= 1;
+        let undo_op = &self.undo_stack[self.undo_index].clone();
+
+        match undo_op {
+            UndoOperation::Update { pos, old_char, .. } => {
+                // Find the character at the position and replace it
+                let mut current_cols = 0;
+                for (i, _) in self.lines[pos.row].char_indices() {
+                    if current_cols >= pos.col {
+                        self.lines[pos.row].remove(i);
+                        self.lines[pos.row].insert(i, *old_char);
+                        break;
+                    }
+                    current_cols += self.lines[pos.row]
+                        .chars()
+                        .nth(i)
+                        .unwrap()
+                        .width()
+                        .unwrap_or(0);
+                }
+            }
+        }
+
+        Some(self.undo_index)
     }
 }
 

@@ -133,6 +133,11 @@ impl App {
                 self.editor.pending_keys.clear();
                 self.editor.set_message("Canceled");
             }
+            EditorCommand::Undo => {
+                if let Some(i) = self.editor.buffer.undo() {
+                    self.editor.set_message(format!("Undo: {i} remainings"));
+                }
+            }
             EditorCommand::PrevLine => {
                 self.editor.cursor.row = self.editor.cursor.row.saturating_sub(1);
                 self.editor.dirty.render = true;

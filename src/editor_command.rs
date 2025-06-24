@@ -5,6 +5,7 @@ pub enum EditorCommand {
     Legend,
     Cancel,
     Save,
+    Undo,
     // reload
     PrevLine,
     NextLine,
@@ -24,6 +25,7 @@ impl std::fmt::Display for EditorCommand {
             EditorCommand::Legend => write!(f, "legend"),
             EditorCommand::Cancel => write!(f, "cancel"),
             EditorCommand::Save => write!(f, "save"),
+            EditorCommand::Undo => write!(f, "undo"),
             EditorCommand::PrevLine => write!(f, "prev-line"),
             EditorCommand::NextLine => write!(f, "next-line"),
             EditorCommand::PrevChar => write!(f, "prev-char"),
@@ -46,6 +48,7 @@ impl std::str::FromStr for EditorCommand {
             "legend" => Ok(EditorCommand::Legend),
             "cancel" => Ok(EditorCommand::Cancel),
             "save" => Ok(EditorCommand::Save),
+            "undo" => Ok(EditorCommand::Undo),
             "prev-line" => Ok(EditorCommand::PrevLine),
             "next-line" => Ok(EditorCommand::NextLine),
             "prev-char" => Ok(EditorCommand::PrevChar),

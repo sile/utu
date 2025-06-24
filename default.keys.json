@@ -3,6 +3,7 @@
   "C-h": "legend",
   "C-g": "cancel",
   "s": "save",
+  "C-u": "undo",
   "↑,i": "prev-line",
   "↓,k": "next-line",
   "←,j": "prev-char",
