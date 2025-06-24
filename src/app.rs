@@ -143,12 +143,11 @@ impl App {
                 self.editor.dirty.render = true;
             }
             EditorCommand::PrevChar => {
-                self.editor.cursor.col = self.editor.cursor.col.saturating_sub(1);
+                self.editor.cursor.col = self.editor.buffer.prev_col(self.editor.cursor);
                 self.editor.dirty.render = true;
             }
             EditorCommand::NextChar => {
-                let max_col = self.editor.buffer.cols(self.editor.cursor.row);
-                self.editor.cursor.col = max_col.min(self.editor.cursor.col + 1);
+                self.editor.cursor.col = self.editor.buffer.next_col(self.editor.cursor);
                 self.editor.dirty.render = true;
             }
             EditorCommand::Dot(c) => self.editor.dot(c).or_fail()?,
