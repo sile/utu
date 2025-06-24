@@ -41,6 +41,16 @@ impl std::fmt::Display for KeySequence {
 pub struct KeyBindings(pub Vec<KeyBinding>);
 
 impl KeyBindings {
+    pub fn fg_chars(&self) -> impl '_ + Iterator<Item = char> {
+        self.0.iter().filter_map(|b| {
+            if let EditorCommand::Dot(c) = b.command {
+                Some(c)
+            } else {
+                None
+            }
+        })
+    }
+
     pub fn find(&self, keys: &KeySequence) -> Result<Option<EditorCommand>, ()> {
         let mut error = true;
         for binding in &self.0 {

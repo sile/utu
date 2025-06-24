@@ -21,6 +21,10 @@ pub struct Editor {
 
 impl Editor {
     pub fn new(path: PathBuf) -> orfail::Result<Self> {
+        let mut buffer = TextBuffer::new();
+        let key_bindings = KeyBindings::default();
+        buffer.filter.fg_chars = key_bindings.fg_chars().collect();
+
         Ok(Self {
             path,
 
@@ -30,9 +34,9 @@ impl Editor {
                 render: true,
             },
             cursor: TextPosition::default(),
-            buffer: TextBuffer::new(),
+            buffer,
             message: None,
-            key_bindings: KeyBindings::default(),
+            key_bindings,
             pending_keys: KeySequence::default(),
         })
     }
