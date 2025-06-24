@@ -1,3 +1,5 @@
+use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
+
 #[derive(Debug)]
 pub struct TextBuffer {
     lines: Vec<String>,
@@ -14,8 +16,7 @@ impl TextBuffer {
     }
 
     pub fn cols(&self, row: usize) -> usize {
-        // TODO: unicode width
-        self.lines.get(row).map_or(0, |line| line.chars().count())
+        self.lines.get(row).map_or(0, |line| line.width())
     }
 
     pub fn rows(&self) -> usize {
@@ -26,16 +27,26 @@ impl TextBuffer {
         self.lines = text.lines().map(|s| s.to_owned()).collect();
     }
 
-    pub fn update(&mut self, pos: TextPosition, c: char) -> bool {
+    pub fn update(&mut self, pos: TextPosition, new: char) -> bool {
         if !(pos.row < self.rows() && pos.col < self.cols(pos.row)) {
             return false;
         }
 
-        self.lines[pos.row].insert(pos.col, c);
-        c != self.lines[pos.row].remove(pos.col + 1) // todo: width
+        let mut current_cols = 0;
+        for (i, c) in self.lines[pos.row].char_indices() {
+            if current_cols >= pos.col {
+                assert_eq!(current_cols, pos.col);
+                if new == c {
+                    return false;
+                }
+                self.lines[pos.row].remove(i);
+                self.lines[pos.row].insert(i, c);
+                return true;
+            }
+            current_cols += c.width().unwrap_or(0);
+        }
+        panic!("bug")
     }
-
-    // save() (seek & write uodated pixels)
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
