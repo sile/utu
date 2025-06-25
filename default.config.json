@@ -3,9 +3,9 @@
     "__main__": {
       "__include(global)__": {},
       "__include(move)__": {},
-      "C-b": "bg(_)",
-      "s": "save",
+      "C-s": "save",
       "C-u": "undo",
+      "C-b": "bg(_)",
       "d": "dot(o)",
       " ": "dot( )",
       "m": "scope(marker)"
