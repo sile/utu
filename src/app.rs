@@ -97,7 +97,12 @@ impl App {
             TerminalEvent::Input(input) => {
                 let TerminalInput::Key(key) = input;
                 self.editor.pending_keys.push(key);
-                match self.editor.keybindings.find(&self.editor.pending_keys) {
+                match self
+                    .editor
+                    .config
+                    .keybindings
+                    .find(&self.editor.pending_keys)
+                {
                     Err(()) => {
                         self.editor
                             .set_message(format!("Undefined: {}", self.editor.pending_keys));

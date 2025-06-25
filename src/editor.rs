@@ -4,7 +4,8 @@ use orfail::OrFail;
 
 use crate::{
     buffer::{TextBuffer, TextPosition},
-    keybinding::{KeyBindings, KeySequence},
+    config::Config,
+    keybinding::KeySequence,
 };
 
 #[derive(Debug)]
@@ -15,15 +16,15 @@ pub struct Editor {
     pub cursor: TextPosition,
     pub buffer: TextBuffer,
     pub message: Option<String>,
-    pub keybindings: KeyBindings,
+    pub config: Config,
     pub pending_keys: KeySequence,
 }
 
 impl Editor {
     pub fn new(path: PathBuf) -> orfail::Result<Self> {
         let mut buffer = TextBuffer::new();
-        let key_bindings = KeyBindings::default();
-        buffer.filter.fg_chars = key_bindings.fg_chars().collect();
+        let config = Config::default();
+        buffer.filter.fg_chars = config.keybindings.fg_chars().collect();
 
         Ok(Self {
             path,
@@ -36,7 +37,7 @@ impl Editor {
             cursor: TextPosition::default(),
             buffer,
             message: None,
-            keybindings: key_bindings,
+            config,
             pending_keys: KeySequence::default(),
         })
     }

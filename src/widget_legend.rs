@@ -37,6 +37,7 @@ impl Legend {
 
         // Get actual possible commands based on current pending keys
         let possible_commands: Vec<_> = editor
+            .config
             .keybindings
             .possibe_commands(&editor.pending_keys)
             .collect();
@@ -64,6 +65,7 @@ impl Legend {
             TerminalSize::rows_cols(1, Self::HIDE_COLS)
         } else {
             let rows = 1 + editor
+                .config
                 .keybindings
                 .possibe_commands(&editor.pending_keys)
                 .count();
