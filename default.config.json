@@ -1,0 +1,28 @@
+{
+  "keybindings": {
+    "global": {
+      "C-c": "quit",
+      "C-h": "legend",
+      "C-g": "cancel",
+      "↑,i": "prev-line",
+      "↓,k": "next-line",
+      "←,j": "prev-char",
+      "→,l": "next-char"
+    },
+    "main": {
+      "C-b": "bg-_",
+      "s": "save",
+      "C-u": "undo",
+      "d": "dot-o",
+      " ": "dot- ",
+      "m": "scope:marker"
+    },
+    "marker": {
+      "C-g": "cancel",
+      "s": "mark-stroke",
+      "l": "mark-line",
+      "r": "mark-rect",
+      "f": "mark-fill"
+    }
+  }
+}
