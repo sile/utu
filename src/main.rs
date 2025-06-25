@@ -16,6 +16,7 @@ fn main() -> noargs::Result<()> {
 
     let config = noargs::opt("config-file")
         .short('c')
+        .ty("PATH")
         .doc("Configuration file path")
         .env("PIXED_CONFIG_FILE")
         .take(&mut args)
