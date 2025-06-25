@@ -21,9 +21,8 @@ pub struct Editor {
 }
 
 impl Editor {
-    pub fn new(path: PathBuf) -> orfail::Result<Self> {
+    pub fn new(path: PathBuf, config: Config) -> orfail::Result<Self> {
         let mut buffer = TextBuffer::new();
-        let config = Config::default();
         buffer.filter.fg_chars = config.keybindings.fg_chars().collect();
 
         Ok(Self {

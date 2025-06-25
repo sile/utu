@@ -14,6 +14,17 @@ fn main() -> noargs::Result<()> {
     }
     noargs::HELP_FLAG.take_help(&mut args);
 
+    let config = noargs::opt("config-file")
+        .short('c')
+        .doc("Configuration file path")
+        .env("PIXED_CONFIG_FILE")
+        .take(&mut args)
+        .present_and_then(|a| -> Result<_, Box<dyn std::error::Error>> {
+            let content = std::fs::read_to_string(a.value())?;
+            let config = content.parse().map(|nojson::Json(v)| v)?;
+            Ok(config)
+        })?
+        .unwrap_or_default();
     let file_path: PathBuf = noargs::arg("FILE_PATH")
         .doc("File path to edit")
         .example("/path/to/file")
@@ -35,7 +46,7 @@ fn main() -> noargs::Result<()> {
         return Ok(());
     }
 
-    let app = App::new(file_path).or_fail()?;
+    let app = App::new(file_path, config).or_fail()?;
     app.run().or_fail()?;
 
     Ok(())

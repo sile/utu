@@ -4,6 +4,7 @@ use orfail::OrFail;
 use tuinix::{Terminal, TerminalEvent, TerminalFrame, TerminalInput};
 
 use crate::{
+    config::Config,
     editor::Editor,
     editor_command::EditorCommand,
     tuinix_ext::{TerminalFrameExt, TerminalSizeExt, UnicodeCharWidthEstimator},
@@ -24,11 +25,11 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(path: PathBuf) -> orfail::Result<Self> {
+    pub fn new(path: PathBuf, config: Config) -> orfail::Result<Self> {
         let terminal = Terminal::new().or_fail()?;
         Ok(Self {
             terminal,
-            editor: Editor::new(path).or_fail()?,
+            editor: Editor::new(path, config).or_fail()?,
             text_view: TextView::new(),
             status_line: StatusLine,
             message_line: MessageLine,
