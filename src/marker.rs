@@ -35,6 +35,15 @@ impl Marker {
             Marker::Fill(_) => "MARK(FILL)",
         }
     }
+
+    pub fn marked_positions(&self) -> Box<dyn '_ + Iterator<Item = TextPosition>> {
+        match self {
+            Marker::Stroke(m) => Box::new(m.positions.iter().copied()),
+            Marker::Line(m) => todo!(),
+            Marker::Rect(m) => todo!(),
+            Marker::Fill(m) => Box::new(m.filled_positions.iter().copied()),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
