@@ -1,5 +1,6 @@
 pub mod app;
 pub mod buffer;
+pub mod config;
 pub mod editor;
 pub mod editor_command;
 pub mod key_binding;
