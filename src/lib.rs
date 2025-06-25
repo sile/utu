@@ -3,7 +3,7 @@ pub mod buffer;
 pub mod config;
 pub mod editor;
 pub mod editor_command;
-pub mod key_binding;
+pub mod keybinding;
 pub mod nojson_ext;
 pub mod tuinix_ext;
 pub mod widget_legend;

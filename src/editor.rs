@@ -4,7 +4,7 @@ use orfail::OrFail;
 
 use crate::{
     buffer::{TextBuffer, TextPosition},
-    key_binding::{KeyBindings, KeySequence},
+    keybinding::{KeyBindings, KeySequence},
 };
 
 #[derive(Debug)]
@@ -15,7 +15,7 @@ pub struct Editor {
     pub cursor: TextPosition,
     pub buffer: TextBuffer,
     pub message: Option<String>,
-    pub key_bindings: KeyBindings,
+    pub keybindings: KeyBindings,
     pub pending_keys: KeySequence,
 }
 
@@ -36,7 +36,7 @@ impl Editor {
             cursor: TextPosition::default(),
             buffer,
             message: None,
-            key_bindings,
+            keybindings: key_bindings,
             pending_keys: KeySequence::default(),
         })
     }

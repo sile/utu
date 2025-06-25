@@ -1,4 +1,4 @@
-use crate::key_binding::KeyBindings;
+use crate::keybinding::KeyBindings;
 
 #[derive(Debug, Default)]
 pub struct Config {
