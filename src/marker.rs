@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use crate::buffer::TextPosition;
+use crate::{buffer::TextPosition, editor::Editor};
 
 #[derive(Debug, Clone)]
 pub enum Marker {
@@ -11,20 +11,20 @@ pub enum Marker {
 }
 
 impl Marker {
-    pub fn new_stroke() -> Self {
-        Self::Stroke(StrokeMarker::new())
+    pub fn new_stroke(editor: &Editor) -> Self {
+        Self::Stroke(StrokeMarker::new(editor))
     }
 
-    pub fn new_line() -> Self {
-        Self::Line(LineMarker::new())
+    pub fn new_line(editor: &Editor) -> Self {
+        Self::Line(LineMarker::new(editor))
     }
 
-    pub fn new_rect() -> Self {
-        Self::Rect(RectMarker::new())
+    pub fn new_rect(editor: &Editor) -> Self {
+        Self::Rect(RectMarker::new(editor))
     }
 
-    pub fn new_fill() -> Self {
-        Self::Fill(FillMarker::new())
+    pub fn new_fill(editor: &Editor) -> Self {
+        Self::Fill(FillMarker::new(editor))
     }
 
     pub fn name(&self) -> &'static str {
@@ -52,7 +52,7 @@ pub struct StrokeMarker {
 }
 
 impl StrokeMarker {
-    fn new() -> Self {
+    fn new(editor: &Editor) -> Self {
         Self {
             positions: BTreeSet::new(),
         }
@@ -61,30 +61,30 @@ impl StrokeMarker {
 
 #[derive(Debug, Clone)]
 pub struct LineMarker {
-    start: Option<TextPosition>,
-    end: Option<TextPosition>,
+    start: TextPosition,
+    end: TextPosition,
 }
 
 impl LineMarker {
-    fn new() -> Self {
+    fn new(editor: &Editor) -> Self {
         Self {
-            start: None,
-            end: None,
+            start: editor.cursor,
+            end: editor.cursor,
         }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct RectMarker {
-    start: Option<TextPosition>,
-    end: Option<TextPosition>,
+    start: TextPosition,
+    end: TextPosition,
 }
 
 impl RectMarker {
-    fn new() -> Self {
+    fn new(editor: &Editor) -> Self {
         Self {
-            start: None,
-            end: None,
+            start: editor.cursor,
+            end: editor.cursor,
         }
     }
 }
@@ -97,10 +97,10 @@ pub struct FillMarker {
 }
 
 impl FillMarker {
-    fn new() -> Self {
+    fn new(editor: &Editor) -> Self {
         Self {
-            position: None,
-            target_char: None,
+            position: Some(editor.cursor),
+            target_char: None, // Could be initialized from buffer at cursor position
             filled_positions: BTreeSet::new(),
         }
     }
