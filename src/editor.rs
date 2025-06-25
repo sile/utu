@@ -70,7 +70,8 @@ impl Editor {
             return Ok(());
         }
 
-        let content = self.buffer.lines().collect::<Vec<&str>>().join("\n");
+        let mut content = self.buffer.lines().collect::<Vec<&str>>().join("\n");
+        content.push('\n');
         std::fs::write(&self.path, content).or_fail()?;
 
         self.dirty.content = false;
