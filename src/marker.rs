@@ -39,8 +39,8 @@ impl Marker {
     pub fn marked_positions(&self) -> Box<dyn '_ + Iterator<Item = TextPosition>> {
         match self {
             Marker::Stroke(m) => Box::new(m.positions.iter().copied()),
-            Marker::Line(m) => todo!(),
-            Marker::Rect(m) => todo!(),
+            Marker::Line(_m) => todo!(),
+            Marker::Rect(_m) => todo!(),
             Marker::Fill(m) => Box::new(m.filled_positions.iter().copied()),
         }
     }
@@ -52,7 +52,7 @@ pub struct StrokeMarker {
 }
 
 impl StrokeMarker {
-    fn new(editor: &Editor) -> Self {
+    fn new(_editor: &Editor) -> Self {
         Self {
             positions: BTreeSet::new(),
         }
@@ -60,6 +60,7 @@ impl StrokeMarker {
 }
 
 #[derive(Debug, Clone)]
+#[expect(dead_code)]
 pub struct LineMarker {
     start: TextPosition,
     end: TextPosition,
@@ -75,6 +76,7 @@ impl LineMarker {
 }
 
 #[derive(Debug, Clone)]
+#[expect(dead_code)]
 pub struct RectMarker {
     start: TextPosition,
     end: TextPosition,
@@ -90,6 +92,7 @@ impl RectMarker {
 }
 
 #[derive(Debug, Clone)]
+#[expect(dead_code)]
 pub struct FillMarker {
     position: Option<TextPosition>,
     target_char: Option<char>,
