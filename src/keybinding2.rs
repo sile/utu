@@ -2,13 +2,71 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use tuinix::KeyInput;
 
-use crate::{editor_command::EditorCommand, nojson_ext::RawJsonValueExt, tuinix_ext::KeyInputExt};
+use crate::{
+    editor_command::EditorCommand, keybinding::KeySequence, nojson_ext::RawJsonValueExt,
+    tuinix_ext::KeyInputExt,
+};
 
 #[derive(Debug)]
 pub struct KeyBindings {
     pub main: KeyBindingsGroup,
     pub global: Option<KeyBindingsGroup>,
     pub groups: BTreeMap<String, KeyBindingsGroup>,
+}
+
+impl KeyBindings {
+    // TODO: return a reference
+    pub fn find(&self, keys: &KeySequence) -> Result<Option<EditorCommand>, ()> {
+        self.find_in_group(&self.main, &keys.0)
+    }
+
+    fn find_in_scope(
+        &self,
+        scope: Option<&str>,
+        keys: &[KeyInput],
+    ) -> Result<Option<EditorCommand>, ()> {
+        let group = match scope {
+            Some(scope_name) => self.groups.get(scope_name).ok_or(())?,
+            None => &self.main,
+        };
+
+        self.find_in_group(group, keys)
+    }
+
+    fn find_in_group(
+        &self,
+        group: &KeyBindingsGroup,
+        keys: &[KeyInput],
+    ) -> Result<Option<EditorCommand>, ()> {
+        let mut has_prefix = false;
+
+        for entry in &group.entries {
+            if entry.keys.0 == keys {
+                return Ok(Some(entry.command.clone()));
+            }
+            if entry.keys.0.starts_with(keys) {
+                has_prefix = true;
+            }
+        }
+
+        // Check global bindings if no match found in current group
+        if let Some(global) = &self.global {
+            for entry in &global.entries {
+                if entry.keys.0 == keys {
+                    return Ok(Some(entry.command.clone()));
+                }
+                if entry.keys.0.starts_with(keys) {
+                    has_prefix = true;
+                }
+            }
+        }
+
+        if has_prefix {
+            Ok(None) // Partial match, need more keys
+        } else {
+            Err(()) // No match at all
+        }
+    }
 }
 
 impl<'text> nojson::FromRawJsonValue<'text> for KeyBindings {
