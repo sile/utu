@@ -20,6 +20,63 @@ impl KeyBindings {
         self.find_in_group(&self.main, keys.0.iter().copied())
     }
 
+    pub fn possible_commands(
+        &self,
+        prefix: &KeySequence,
+    ) -> impl Iterator<Item = (KeyInput, Option<EditorCommand>)> + '_ {
+        let mut results = std::collections::BTreeMap::new();
+
+        // Check main group
+        self.collect_possible_commands(&self.main, prefix, &mut results);
+
+        // Check global group if it exists
+        if let Some(global) = &self.global {
+            self.collect_possible_commands(global, prefix, &mut results);
+        }
+
+        results.into_iter()
+    }
+
+    fn collect_possible_commands(
+        &self,
+        group: &KeyBindingsGroup,
+        prefix: &KeySequence,
+        results: &mut std::collections::BTreeMap<KeyInput, Option<EditorCommand>>,
+    ) {
+        for entry in &group.entries {
+            for &key in &entry.keys.0 {
+                if prefix.0.is_empty() {
+                    // No prefix, so this key is a possible first key
+                    let command = if let EditorCommand::Scope(_) = &entry.command {
+                        None // Has children
+                    } else {
+                        Some(entry.command.clone()) // Complete command
+                    };
+
+                    // Prefer complete commands over incomplete ones
+                    match (results.get(&key), &command) {
+                        (Some(Some(_)), _) => {} // Keep existing complete command
+                        (Some(None), Some(_)) => {
+                            results.insert(key, command);
+                        }
+                        (None, _) => {
+                            results.insert(key, command);
+                        }
+                        _ => {}
+                    }
+                } else if prefix.0.len() == 1 && prefix.0[0] == key {
+                    // This key matches our prefix, check what comes next
+                    if let EditorCommand::Scope(scope_name) = &entry.command {
+                        if let Some(scoped_group) = self.groups.get(scope_name) {
+                            let empty_prefix = KeySequence(vec![]);
+                            self.collect_possible_commands(scoped_group, &empty_prefix, results);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     pub fn fg_chars(&self) -> impl Iterator<Item = char> {
         self.all_commands().filter_map(|c| {
             if let EditorCommand::Dot(c) = c {
