@@ -20,6 +20,35 @@ impl KeyBindings {
         self.find_in_group(&self.main, keys.0.iter().copied())
     }
 
+    pub fn fg_chars(&self) -> impl Iterator<Item = char> {
+        self.all_commands().filter_map(|c| {
+            if let EditorCommand::Dot(c) = c {
+                Some(*c)
+            } else {
+                None
+            }
+        })
+    }
+
+    fn all_commands(&self) -> impl Iterator<Item = &EditorCommand> {
+        self.main
+            .entries
+            .iter()
+            .map(|entry| &entry.command)
+            .chain(
+                self.global
+                    .iter()
+                    .flat_map(|group| group.entries.iter())
+                    .map(|entry| &entry.command),
+            )
+            .chain(
+                self.groups
+                    .values()
+                    .flat_map(|group| group.entries.iter())
+                    .map(|entry| &entry.command),
+            )
+    }
+
     fn find_in_group(
         &self,
         group: &KeyBindingsGroup,
