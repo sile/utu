@@ -115,7 +115,7 @@ impl App {
                     }
                     Ok(Some(command)) => {
                         self.editor.pending_keys.clear();
-                        self.handle_command(command).or_fail()?;
+                        self.handle_command(&command.clone()).or_fail()?;
                     }
                 }
             }
@@ -126,7 +126,7 @@ impl App {
         Ok(())
     }
 
-    fn handle_command(&mut self, command: EditorCommand) -> orfail::Result<()> {
+    fn handle_command(&mut self, command: &EditorCommand) -> orfail::Result<()> {
         match command {
             EditorCommand::Quit => {
                 self.editor.exit = true;
@@ -136,7 +136,7 @@ impl App {
             }
             EditorCommand::Background(c) => {
                 if self.editor.buffer.filter.bg_char.take().is_none() {
-                    self.editor.buffer.filter.bg_char = Some(c);
+                    self.editor.buffer.filter.bg_char = Some(*c);
                 }
                 self.editor.dirty.render = true;
             }
@@ -167,7 +167,7 @@ impl App {
                 self.editor.cursor.col = self.editor.buffer.next_col(self.editor.cursor);
                 self.editor.dirty.render = true;
             }
-            EditorCommand::Dot(c) => self.editor.dot(c).or_fail()?,
+            EditorCommand::Dot(c) => self.editor.dot(*c).or_fail()?,
             EditorCommand::MarkStroke => {
                 // Set marking mode to stroke
                 self.editor.dirty.render = true;

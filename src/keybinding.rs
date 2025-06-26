@@ -37,8 +37,7 @@ pub struct KeyBindings {
 }
 
 impl KeyBindings {
-    // TODO: return a reference
-    pub fn find(&self, keys: &KeySequence) -> Result<Option<EditorCommand>, ()> {
+    pub fn find(&self, keys: &KeySequence) -> Result<Option<&EditorCommand>, ()> {
         self.find_in_group(&self.main, keys.0.iter().copied())
     }
 
@@ -128,11 +127,11 @@ impl KeyBindings {
             )
     }
 
-    fn find_in_group(
-        &self,
-        group: &KeyBindingsGroup,
+    fn find_in_group<'a>(
+        &'a self,
+        group: &'a KeyBindingsGroup,
         mut keys: impl Iterator<Item = KeyInput>,
-    ) -> Result<Option<EditorCommand>, ()> {
+    ) -> Result<Option<&'a EditorCommand>, ()> {
         let Some(key) = keys.next() else {
             return Ok(None);
         };
@@ -149,7 +148,7 @@ impl KeyBindings {
                 let group = self.groups.get(name).expect("bug");
                 return self.find_in_group(group, keys);
             } else {
-                return Ok(Some(entry.command.clone()));
+                return Ok(Some(&entry.command));
             }
         }
 
