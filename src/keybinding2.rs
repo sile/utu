@@ -52,7 +52,7 @@ impl<'text, 'a> RawKeyBindings<'text, 'a> {
                 let name = k.to_unquoted_string_str()?;
                 if name.starts_with("__")
                     && name.ends_with("__")
-                    && !matches!(name.as_ref(), "__main__")
+                    && !matches!(name.as_ref(), "__main__" | "__global__")
                 {
                     return Err(k.invalid("no such built-in group"));
                 }
@@ -66,7 +66,8 @@ impl<'text, 'a> RawKeyBindings<'text, 'a> {
     fn process(&self) -> Result<BTreeMap<String, KeyBindingsGroup>, JsonParseError> {
         let mut groups = BTreeMap::new();
         for (name, raw_group) in &self.groups {
-            raw_group.process(self, &name, &mut Vec::new(), &mut groups)?;
+            let group = raw_group.process(self)?;
+            groups.insert(name.clone(), group);
         }
         Ok(groups)
     }
@@ -86,16 +87,7 @@ impl<'text, 'a> RawKeyBindingsGroup<'text, 'a> {
         Ok(Self { entries })
     }
 
-    fn process(
-        &self,
-        raw: &RawKeyBindings<'text, 'a>,
-        name: &str,
-        path: &mut Vec<String>,
-        groups: &mut BTreeMap<String, KeyBindingsGroup>,
-    ) -> Result<(), JsonParseError> {
-        if groups.contains_key(name) {
-            return Ok(());
-        }
+    fn process(&self, raw: &RawKeyBindings<'text, 'a>) -> Result<KeyBindingsGroup, JsonParseError> {
         todo!()
     }
 }
