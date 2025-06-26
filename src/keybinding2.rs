@@ -15,8 +15,13 @@ impl<'text> nojson::FromRawJsonValue<'text> for KeyBindings {
     fn from_raw_json_value(
         value: nojson::RawJsonValue<'text, '_>,
     ) -> Result<Self, nojson::JsonParseError> {
-        let raw = RawKeyBindings::parse(value)?;
-        todo!()
+        let mut groups = RawKeyBindings::parse(value)?.to_groups()?;
+
+        let main = groups
+            .remove("__main__")
+            .ok_or_else(|| value.invalid("missing __main__ group"))?;
+
+        Ok(KeyBindings { main, groups })
     }
 }
 
@@ -36,7 +41,6 @@ pub struct KeySet(pub Vec<KeyInput>);
 
 #[derive(Debug)]
 pub struct RawKeyBindings<'text, 'a> {
-    pub root: RawJsonValue<'text, 'a>,
     pub groups: BTreeMap<String, RawKeyBindingsGroup<'text, 'a>>,
 }
 
@@ -56,7 +60,11 @@ impl<'text, 'a> RawKeyBindings<'text, 'a> {
                 Ok((name.into_owned(), RawKeyBindingsGroup::parse(v)?))
             })
             .collect::<Result<_, _>>()?;
-        Ok(Self { root, groups })
+        Ok(Self { groups })
+    }
+
+    fn to_groups(&self) -> Result<BTreeMap<String, KeyBindingsGroup>, JsonParseError> {
+        todo!()
     }
 }
 
