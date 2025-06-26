@@ -55,7 +55,7 @@ impl KeyBindings {
         let mut error = true;
         for binding in &self.0 {
             if binding.sequence.0 == keys.0 {
-                return Ok(Some(binding.command));
+                return Ok(Some(binding.command.clone()));
             }
             if error && binding.sequence.0.starts_with(&keys.0) {
                 error = false;
@@ -79,7 +79,7 @@ impl KeyBindings {
 
                     // Check if this is a complete binding (prefix + 1 key = full sequence)
                     let command = if binding.sequence.0.len() == prefix.0.len() + 1 {
-                        Some(binding.command)
+                        Some(binding.command.clone())
                     } else {
                         None // Has children (more keys needed)
                     };
@@ -117,7 +117,7 @@ impl KeyBindings {
                     let key = KeyInput::from_str(key).ok_or_else(|| keys.invalid("invalid key"))?;
                     let binding = KeyBinding {
                         sequence: KeySequence::new(key),
-                        command,
+                        command: command.clone(),
                     };
                     self.0.push(binding);
                 }
@@ -134,7 +134,7 @@ impl KeyBindings {
                                     .chain(child.sequence.0.iter().copied())
                                     .collect(),
                             ),
-                            command: child.command,
+                            command: child.command.clone(),
                         };
                         self.0.push(binding);
                     }

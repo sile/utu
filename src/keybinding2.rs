@@ -1,8 +1,9 @@
 use std::collections::BTreeMap;
 
 use nojson::{JsonParseError, RawJsonValue};
+use tuinix::KeyInput;
 
-use crate::nojson_ext::RawJsonValueExt;
+use crate::{editor_command::EditorCommand, nojson_ext::RawJsonValueExt};
 
 #[derive(Debug)]
 pub struct KeyBindings {
@@ -20,7 +21,18 @@ impl<'text> nojson::FromRawJsonValue<'text> for KeyBindings {
 }
 
 #[derive(Debug)]
-pub struct KeyBindingsGroup {}
+pub struct KeyBindingsGroup {
+    pub entries: Vec<KeyBindingEntry>,
+}
+
+#[derive(Debug)]
+pub struct KeyBindingEntry {
+    pub input: KeySet,
+    pub command: EditorCommand,
+}
+
+#[derive(Debug)]
+pub struct KeySet(pub Vec<KeyInput>);
 
 #[derive(Debug)]
 pub struct RawKeyBindings<'text, 'a> {
