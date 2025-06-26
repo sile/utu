@@ -15,7 +15,7 @@ impl<'text> nojson::FromRawJsonValue<'text> for KeyBindings {
     fn from_raw_json_value(
         value: nojson::RawJsonValue<'text, '_>,
     ) -> Result<Self, nojson::JsonParseError> {
-        let mut groups = RawKeyBindings::parse(value)?.to_groups()?;
+        let mut groups = RawKeyBindings::parse(value)?.process()?;
 
         let main = groups
             .remove("__main__")
@@ -63,8 +63,12 @@ impl<'text, 'a> RawKeyBindings<'text, 'a> {
         Ok(Self { groups })
     }
 
-    fn to_groups(&self) -> Result<BTreeMap<String, KeyBindingsGroup>, JsonParseError> {
-        todo!()
+    fn process(&self) -> Result<BTreeMap<String, KeyBindingsGroup>, JsonParseError> {
+        let mut groups = BTreeMap::new();
+        for (name, raw_group) in &self.groups {
+            raw_group.process(self, &name, &mut Vec::new(), &mut groups)?;
+        }
+        Ok(groups)
     }
 }
 
@@ -80,6 +84,19 @@ impl<'text, 'a> RawKeyBindingsGroup<'text, 'a> {
             .map(|(key, value)| RawKeyBindingEntry { key, value })
             .collect();
         Ok(Self { entries })
+    }
+
+    fn process(
+        &self,
+        raw: &RawKeyBindings<'text, 'a>,
+        name: &str,
+        path: &mut Vec<String>,
+        groups: &mut BTreeMap<String, KeyBindingsGroup>,
+    ) -> Result<(), JsonParseError> {
+        if groups.contains_key(name) {
+            return Ok(());
+        }
+        todo!()
     }
 }
 
