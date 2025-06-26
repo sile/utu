@@ -17,55 +17,35 @@ pub struct KeyBindings {
 impl KeyBindings {
     // TODO: return a reference
     pub fn find(&self, keys: &KeySequence) -> Result<Option<EditorCommand>, ()> {
-        self.find_in_group(&self.main, &keys.0)
-    }
-
-    fn find_in_scope(
-        &self,
-        scope: Option<&str>,
-        keys: &[KeyInput],
-    ) -> Result<Option<EditorCommand>, ()> {
-        let group = match scope {
-            Some(scope_name) => self.groups.get(scope_name).ok_or(())?,
-            None => &self.main,
-        };
-
-        self.find_in_group(group, keys)
+        self.find_in_group(&self.main, keys.0.iter().copied())
     }
 
     fn find_in_group(
         &self,
         group: &KeyBindingsGroup,
-        keys: &[KeyInput],
+        mut keys: impl Iterator<Item = KeyInput>,
     ) -> Result<Option<EditorCommand>, ()> {
-        let mut has_prefix = false;
+        let Some(key) = keys.next() else {
+            return Ok(None);
+        };
 
-        for entry in &group.entries {
-            if entry.keys.0 == keys {
+        for entry in group
+            .entries
+            .iter()
+            .chain(self.global.iter().flat_map(|x| x.entries.iter()))
+        {
+            if !entry.keys.0.contains(&key) {
+                continue;
+            }
+            if let EditorCommand::Scope(name) = &entry.command {
+                let group = self.groups.get(name).expect("bug");
+                return self.find_in_group(group, keys);
+            } else {
                 return Ok(Some(entry.command.clone()));
             }
-            if entry.keys.0.starts_with(keys) {
-                has_prefix = true;
-            }
         }
 
-        // Check global bindings if no match found in current group
-        if let Some(global) = &self.global {
-            for entry in &global.entries {
-                if entry.keys.0 == keys {
-                    return Ok(Some(entry.command.clone()));
-                }
-                if entry.keys.0.starts_with(keys) {
-                    has_prefix = true;
-                }
-            }
-        }
-
-        if has_prefix {
-            Ok(None) // Partial match, need more keys
-        } else {
-            Err(()) // No match at all
-        }
+        Err(())
     }
 }
 
@@ -73,10 +53,11 @@ impl<'text> nojson::FromRawJsonValue<'text> for KeyBindings {
     fn from_raw_json_value(
         value: nojson::RawJsonValue<'text, '_>,
     ) -> Result<Self, nojson::JsonParseError> {
-        let group_names = value
+        let mut group_names = value
             .to_object()?
             .map(|(k, _)| Ok(k.to_unquoted_string_str()?.into_owned()))
             .collect::<Result<BTreeSet<_>, _>>()?;
+        group_names.retain(|n| !matches!(n.as_str(), "__main__" | "__global__"));
 
         let mut groups = BTreeMap::new();
         for (raw_name, raw_group) in value.to_object()? {
