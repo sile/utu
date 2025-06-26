@@ -4,7 +4,6 @@ pub mod config;
 pub mod editor;
 pub mod editor_command;
 pub mod keybinding;
-pub mod keybinding2;
 pub mod marker;
 pub mod nojson_ext;
 pub mod tuinix_ext;
