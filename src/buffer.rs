@@ -33,7 +33,7 @@ impl TextBuffer {
         for c in line.chars() {
             let char_width = self.filter.apply(c).width().unwrap_or(0);
             if current_col == pos.col {
-                return Some(c);
+                return self.filter.fg_chars.contains(&c).then_some(c);
             }
             current_col += char_width;
             if current_col > pos.col {
