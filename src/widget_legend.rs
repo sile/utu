@@ -44,14 +44,7 @@ impl Legend {
 
         // Draw the legend box
         for (key, command) in possible_commands.iter() {
-            match command {
-                Some(cmd) => {
-                    writeln!(frame, "│ ({}) {}", key.to_string(), cmd).or_fail()?;
-                }
-                None => {
-                    writeln!(frame, "│ ({}) ...", key.to_string()).or_fail()?;
-                }
-            }
+            writeln!(frame, "│ ({}) {}", key.to_string(), command).or_fail()?;
         }
 
         // Add the hide option at the bottom

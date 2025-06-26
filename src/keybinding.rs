@@ -44,7 +44,7 @@ impl KeyBindings {
     pub fn possible_commands(
         &self,
         prefix: &KeySequence,
-    ) -> impl Iterator<Item = (KeyInput, Option<EditorCommand>)> + '_ {
+    ) -> impl Iterator<Item = (KeyInput, EditorCommand)> + '_ {
         let mut results = std::collections::BTreeMap::new();
 
         // Check main group
@@ -52,7 +52,9 @@ impl KeyBindings {
 
         // Check global group if it exists
         if let Some(global) = &self.global {
-            self.collect_possible_commands(global, prefix, &mut results);
+            // Global commands are always available regardless of prefix
+            let empty_prefix = KeySequence(vec![]);
+            self.collect_possible_commands(global, &empty_prefix, &mut results);
         }
 
         results.into_iter()
@@ -62,29 +64,14 @@ impl KeyBindings {
         &self,
         group: &KeyBindingsGroup,
         prefix: &KeySequence,
-        results: &mut std::collections::BTreeMap<KeyInput, Option<EditorCommand>>,
+        results: &mut std::collections::BTreeMap<KeyInput, EditorCommand>,
     ) {
         for entry in &group.entries {
             for &key in &entry.keys.0 {
                 if prefix.0.is_empty() {
                     // No prefix, so this key is a possible first key
-                    let command = if let EditorCommand::Scope(_) = &entry.command {
-                        None // Has children
-                    } else {
-                        Some(entry.command.clone()) // Complete command
-                    };
-
-                    // Prefer complete commands over incomplete ones
-                    match (results.get(&key), &command) {
-                        (Some(Some(_)), _) => {} // Keep existing complete command
-                        (Some(None), Some(_)) => {
-                            results.insert(key, command);
-                        }
-                        (None, _) => {
-                            results.insert(key, command);
-                        }
-                        _ => {}
-                    }
+                    // Always insert the command (whether it's complete or Scope)
+                    results.insert(key, entry.command.clone());
                 } else if prefix.0.len() == 1 && prefix.0[0] == key {
                     // This key matches our prefix, check what comes next
                     if let EditorCommand::Scope(scope_name) = &entry.command {
