@@ -1,32 +1,23 @@
 {
   "keybindings": {
-    "__main__": {
-      "__include(global)__": {},
-      "__include(move)__": {},
-      "C-s": "save",
-      "C-u": "undo",
-      "C-b": "bg(_)",
-      "d": "dot(o)",
-      " ": "dot( )",
-      "m": "scope(marker)"
-    },
-    "global": {
+    "__global__": {
       "C-c": "quit",
       "C-g": "cancel",
       "C-h": "legend"
     },
-    "move": {
+    "__main__": {
+      "C-s": "save",
+      "C-u": "undo",
+      "C-b": "bg(_)",
       "↑,i": "prev-line",
       "↓,k": "next-line",
       "←,j": "prev-char",
-      "→,l": "next-char"
+      "→,l": "next-char",
+      "d": "dot(o)",
+      " ": "dot( )",
+      "m": "scope(marker)"
     },
     "marker": {
-      "__include(global)__": {
-        "excludes": [
-          "C-c"
-        ]
-      },
       "s": "mark-stroke",
       "l": "mark-line",
       "r": "mark-rect",
