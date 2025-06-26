@@ -1,74 +1,71 @@
-use std::{
-    borrow::Cow,
-    collections::{BTreeMap, BTreeSet},
-};
+use std::collections::BTreeMap;
+
+use nojson::{JsonParseError, RawJsonValue};
 
 use crate::nojson_ext::RawJsonValueExt;
 
 #[derive(Debug)]
-pub struct KeyBindings {
-    pub groups: BTreeMap<String, GroupedKeyBindings>,
+pub struct RawKeyBindings<'text, 'a> {
+    pub root: RawJsonValue<'text, 'a>,
+    pub groups: BTreeMap<String, RawKeyBindingsGroup<'text, 'a>>,
 }
 
-impl<'text> nojson::FromRawJsonValue<'text> for KeyBindings {
-    fn from_raw_json_value(
-        value: nojson::RawJsonValue<'text, '_>,
-    ) -> Result<Self, nojson::JsonParseError> {
-        let group_names = value
+impl<'text, 'a> RawKeyBindings<'text, 'a> {
+    pub fn parse(root: RawJsonValue<'text, 'a>) -> Result<Self, JsonParseError> {
+        let groups = root
             .to_object()?
-            .map(|(k, _)| k.to_unquoted_string_str())
-            .collect::<Result<BTreeSet<_>, _>>()?;
-        if !group_names.contains("__main__") {
-            return Err(value.invalid("No '__main__' group"))?;
-        }
+            .map(|(k, v)| {
+                let name = k.to_unquoted_string_str()?;
+                if name.starts_with("__")
+                    && name.ends_with("__")
+                    && !matches!(name.as_ref(), "__main__")
+                {
+                    return Err(k.invalid("no such built-in group"));
+                }
 
-        let mut parser = KeyBindingsParser {
-            group_names,
-            include_path: Vec::new(),
-        };
-        parser.parse(value)?;
-        // let group = value.try_to()?;
-        // Ok(KeyBindings { groups: group })
-        todo!()
+                Ok((name.into_owned(), RawKeyBindingsGroup::parse(v)?))
+            })
+            .collect::<Result<_, _>>()?;
+        Ok(Self { root, groups })
     }
 }
 
 #[derive(Debug)]
-struct KeyBindingsParser<'text> {
-    group_names: BTreeSet<Cow<'text, str>>,
-    include_path: Vec<Cow<'text, str>>,
+pub struct RawKeyBindingsGroup<'text, 'a> {
+    entries: Vec<RawKeyBindingEntry<'text, 'a>>,
 }
 
-impl<'text> KeyBindingsParser<'text> {
-    fn parse(
-        &mut self,
-        value: nojson::RawJsonValue<'text, '_>,
-    ) -> Result<(), nojson::JsonParseError> {
-        todo!()
+impl<'text, 'a> RawKeyBindingsGroup<'text, 'a> {
+    pub fn parse(value: RawJsonValue<'text, 'a>) -> Result<Self, JsonParseError> {
+        let entries = value
+            .to_object()?
+            .map(|(key, value)| RawKeyBindingEntry { key, value })
+            .collect();
+        Ok(Self { entries })
     }
 }
 
 #[derive(Debug)]
-pub struct GroupedKeyBindings {
-    //
+pub struct RawKeyBindingEntry<'text, 'a> {
+    key: RawJsonValue<'text, 'a>,
+    value: RawJsonValue<'text, 'a>,
 }
 
 #[cfg(test)]
 mod tests {
-    use nojson::FromRawJsonValue;
     use orfail::OrFail;
 
     use super::*;
 
     #[test]
-    fn parse_key_bindings() -> orfail::Result<()> {
+    fn parse_raw_key_bindings() -> orfail::Result<()> {
         let json = include_str!("../default.config.json");
         let json = nojson::RawJson::parse(json).or_fail()?;
         let ([keybindings], []) = json
             .value()
             .to_fixed_object(["keybindings"], [])
             .or_fail()?;
-        KeyBindings::from_raw_json_value(keybindings).or_fail()?;
+        RawKeyBindings::parse(keybindings).or_fail()?;
         Ok(())
     }
 }
