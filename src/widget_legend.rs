@@ -5,7 +5,7 @@ use tuinix::{TerminalFrame, TerminalSize};
 
 use crate::{
     editor::Editor,
-    tuinix_ext::{KeyInputExt, TerminalRegion, TerminalSizeExt, UnicodeCharWidthEstimator},
+    tuinix_ext::{TerminalRegion, TerminalSizeExt, UnicodeCharWidthEstimator},
 };
 
 #[derive(Debug)]
@@ -44,7 +44,7 @@ impl Legend {
 
         // Draw the legend box
         for (key, command) in possible_commands.iter() {
-            writeln!(frame, "│ ({}) {}", key.to_string(), command).or_fail()?;
+            writeln!(frame, "│ [{}] {}", key, command).or_fail()?;
         }
 
         // Add the hide option at the bottom

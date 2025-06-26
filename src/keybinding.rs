@@ -44,7 +44,7 @@ impl KeyBindings {
     pub fn possible_commands(
         &self,
         prefix: &KeySequence,
-    ) -> impl Iterator<Item = (KeyInput, EditorCommand)> + '_ {
+    ) -> impl Iterator<Item = (KeySet, EditorCommand)> + '_ {
         let mut results = std::collections::BTreeMap::new();
 
         // Check main group
@@ -64,14 +64,14 @@ impl KeyBindings {
         &self,
         group: &KeyBindingsGroup,
         prefix: &KeySequence,
-        results: &mut std::collections::BTreeMap<KeyInput, EditorCommand>,
+        results: &mut std::collections::BTreeMap<KeySet, EditorCommand>,
     ) {
         for entry in &group.entries {
             for &key in &entry.keys.0 {
                 if prefix.0.is_empty() {
                     // No prefix, so this key is a possible first key
                     // Always insert the command (whether it's complete or Scope)
-                    results.insert(key, entry.command.clone());
+                    results.insert(entry.keys.clone(), entry.command.clone());
                 } else if prefix.0.len() == 1 && prefix.0[0] == key {
                     // This key matches our prefix, check what comes next
                     if let EditorCommand::Scope(scope_name) = &entry.command {
@@ -224,7 +224,7 @@ impl KeyBindingEntry {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct KeySet(pub Vec<KeyInput>);
 
 impl KeySet {
@@ -235,6 +235,18 @@ impl KeySet {
             keys.push(key);
         }
         Ok(Self(keys))
+    }
+}
+
+impl std::fmt::Display for KeySet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for (i, key) in self.0.iter().enumerate() {
+            if i > 0 {
+                write!(f, ",")?;
+            }
+            key.display(f)?;
+        }
+        Ok(())
     }
 }
 
