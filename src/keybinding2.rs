@@ -78,7 +78,16 @@ impl KeyBindingEntry {
         group_names: &BTreeSet<String>,
     ) -> Result<Self, nojson::JsonParseError> {
         let keys = KeySet::parse(raw_keys)?;
-        todo!()
+        let command = raw_command
+            .to_unquoted_string_str()?
+            .parse::<EditorCommand>()
+            .map_err(|e| raw_command.invalid(e))?;
+        if let EditorCommand::Scope(group_name) = &command {
+            if !group_names.contains(group_name) {
+                return Err(raw_command.invalid("no such group"));
+            }
+        }
+        Ok(Self { keys, command })
     }
 }
 
@@ -87,15 +96,11 @@ pub struct KeySet(pub Vec<KeyInput>);
 
 impl KeySet {
     fn parse(raw_keys: nojson::RawJsonValue<'_, '_>) -> Result<Self, nojson::JsonParseError> {
-        let keys_str = raw_keys.to_unquoted_string_str()?;
         let mut keys = Vec::new();
-
-        for key_str in keys_str.split(',') {
-            let key = KeyInput::from_str(key_str.trim())
-                .ok_or_else(|| raw_keys.invalid("invalid key"))?;
+        for key in raw_keys.to_unquoted_string_str()?.split(',') {
+            let key = KeyInput::from_str(key).ok_or_else(|| raw_keys.invalid("invalid key"))?;
             keys.push(key);
         }
-
         Ok(Self(keys))
     }
 }

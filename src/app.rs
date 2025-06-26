@@ -189,6 +189,7 @@ impl App {
                 // TODO: Implement fill marking mode
             }
             EditorCommand::Save => self.editor.save().or_fail()?,
+            EditorCommand::Scope(_) => todo!(),
         }
         Ok(())
     }

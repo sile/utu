@@ -8,6 +8,7 @@ pub enum EditorCommand {
     Save,
     Undo,
     // reload
+    Scope(String),
     PrevLine,
     NextLine,
     PrevChar,
@@ -24,15 +25,16 @@ impl std::fmt::Display for EditorCommand {
         match self {
             EditorCommand::Quit => write!(f, "quit"),
             EditorCommand::Legend => write!(f, "legend"),
-            EditorCommand::Background(c) => write!(f, "bg-{}", c),
+            EditorCommand::Background(c) => write!(f, "bg({})", c),
             EditorCommand::Cancel => write!(f, "cancel"),
             EditorCommand::Save => write!(f, "save"),
             EditorCommand::Undo => write!(f, "undo"),
+            EditorCommand::Scope(s) => write!(f, "scope({})", s),
             EditorCommand::PrevLine => write!(f, "prev-line"),
             EditorCommand::NextLine => write!(f, "next-line"),
             EditorCommand::PrevChar => write!(f, "prev-char"),
             EditorCommand::NextChar => write!(f, "next-char"),
-            EditorCommand::Dot(c) => write!(f, "dot-{}", c),
+            EditorCommand::Dot(c) => write!(f, "dot({})", c),
             EditorCommand::MarkStroke => write!(f, "mark-stroke"),
             EditorCommand::MarkLine => write!(f, "mark-line"),
             EditorCommand::MarkRect => write!(f, "mark-rect"),
@@ -59,18 +61,28 @@ impl std::str::FromStr for EditorCommand {
             "mark-line" => Ok(EditorCommand::MarkLine),
             "mark-rect" => Ok(EditorCommand::MarkRect),
             "mark-fill" => Ok(EditorCommand::MarkFill),
-            s if s.starts_with("dot-") => {
-                let mut chars = s[4..].chars();
+            s if s.starts_with("dot(") && s.ends_with(")") => {
+                let arg = &s[4..s.len() - 1];
+                let mut chars = arg.chars();
                 match (chars.next(), chars.next()) {
                     (Some(c), None) if !c.is_control() => Ok(EditorCommand::Dot(c)),
                     _ => Err(format!("invalid dot command: {}", s)),
                 }
             }
-            s if s.starts_with("bg-") => {
-                let mut chars = s[3..].chars();
+            s if s.starts_with("bg(") && s.ends_with(")") => {
+                let arg = &s[3..s.len() - 1];
+                let mut chars = arg.chars();
                 match (chars.next(), chars.next()) {
                     (Some(c), None) if !c.is_control() => Ok(EditorCommand::Background(c)),
                     _ => Err(format!("invalid bg command: {}", s)),
+                }
+            }
+            s if s.starts_with("scope(") && s.ends_with(")") => {
+                let group_name = &s[6..s.len() - 1];
+                if group_name.is_empty() {
+                    Err(format!("invalid scope command: {}", s))
+                } else {
+                    Ok(EditorCommand::Scope(group_name.to_owned()))
                 }
             }
             _ => Err(format!("unknown command: {}", s)),
