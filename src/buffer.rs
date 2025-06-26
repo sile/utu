@@ -22,6 +22,29 @@ impl TextBuffer {
         }
     }
 
+    pub fn get_char_at(&self, pos: TextPosition) -> Option<char> {
+        if pos.row >= self.rows() {
+            return None;
+        }
+
+        let line = &self.lines[pos.row];
+        let mut current_col = 0;
+
+        for c in line.chars() {
+            let char_width = self.filter.apply(c).width().unwrap_or(0);
+            if current_col == pos.col {
+                return Some(c);
+            }
+            current_col += char_width;
+            if current_col > pos.col {
+                // Position is in the middle of a wide character
+                return None;
+            }
+        }
+
+        None
+    }
+
     pub fn lines(&self) -> impl '_ + Iterator<Item = &str> {
         self.lines.iter().map(|s| s.as_ref())
     }

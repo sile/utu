@@ -6,6 +6,7 @@ use crate::{
     buffer::{TextBuffer, TextPosition},
     config::Config,
     keybinding::KeySequence,
+    marker::Marker,
 };
 
 #[derive(Debug)]
@@ -18,6 +19,7 @@ pub struct Editor {
     pub message: Option<String>,
     pub config: Config,
     pub pending_keys: KeySequence,
+    pub marker: Option<Marker>,
 }
 
 impl Editor {
@@ -27,7 +29,6 @@ impl Editor {
 
         Ok(Self {
             path,
-
             exit: false,
             dirty: Dirty {
                 content: false,
@@ -38,6 +39,7 @@ impl Editor {
             message: None,
             config,
             pending_keys: KeySequence::default(),
+            marker: None,
         })
     }
 

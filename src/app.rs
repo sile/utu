@@ -143,6 +143,7 @@ impl App {
             EditorCommand::Cancel => {
                 // Clear any pending operations or selections
                 self.editor.pending_keys.clear();
+                self.editor.marker = None;
                 self.editor.set_message("Canceled");
             }
             EditorCommand::Undo => {
@@ -153,40 +154,56 @@ impl App {
             EditorCommand::PrevLine => {
                 self.editor.cursor.row = self.editor.cursor.row.saturating_sub(1);
                 self.editor.dirty.render = true;
+                if let Some(mut marker) = self.editor.marker.take() {
+                    marker.handle_cursor_move(&self.editor);
+                    self.editor.marker = Some(marker);
+                }
             }
             EditorCommand::NextLine => {
                 let max_row = self.editor.buffer.lines().count().saturating_sub(1);
                 self.editor.cursor.row = max_row.min(self.editor.cursor.row + 1);
                 self.editor.dirty.render = true;
+                if let Some(mut marker) = self.editor.marker.take() {
+                    marker.handle_cursor_move(&self.editor);
+                    self.editor.marker = Some(marker);
+                }
             }
             EditorCommand::PrevChar => {
                 self.editor.cursor.col = self.editor.buffer.prev_col(self.editor.cursor);
                 self.editor.dirty.render = true;
+                if let Some(mut marker) = self.editor.marker.take() {
+                    marker.handle_cursor_move(&self.editor);
+                    self.editor.marker = Some(marker);
+                }
             }
             EditorCommand::NextChar => {
                 self.editor.cursor.col = self.editor.buffer.next_col(self.editor.cursor);
                 self.editor.dirty.render = true;
+                if let Some(mut marker) = self.editor.marker.take() {
+                    marker.handle_cursor_move(&self.editor);
+                    self.editor.marker = Some(marker);
+                }
             }
             EditorCommand::Dot(c) => self.editor.dot(*c).or_fail()?,
             EditorCommand::MarkStroke => {
-                // Set marking mode to stroke
+                self.editor.marker = Some(crate::marker::Marker::new_stroke(&self.editor));
+                self.editor.set_message("Stroke marking mode started");
                 self.editor.dirty.render = true;
-                // TODO: Implement stroke marking mode
             }
             EditorCommand::MarkLine => {
-                // Set marking mode to line
+                self.editor.marker = Some(crate::marker::Marker::new_line(&self.editor));
+                self.editor.set_message("Line marking mode started");
                 self.editor.dirty.render = true;
-                // TODO: Implement line marking mode
             }
             EditorCommand::MarkRect => {
-                // Set marking mode to rectangle
+                self.editor.marker = Some(crate::marker::Marker::new_rect(&self.editor));
+                self.editor.set_message("Rectangle marking mode started");
                 self.editor.dirty.render = true;
-                // TODO: Implement rectangle marking mode
             }
             EditorCommand::MarkFill => {
-                // Set marking mode to fill
+                self.editor.marker = Some(crate::marker::Marker::new_fill(&self.editor));
+                self.editor.set_message("Fill marking mode started");
                 self.editor.dirty.render = true;
-                // TODO: Implement fill marking mode
             }
             EditorCommand::Save => self.editor.save().or_fail()?,
             EditorCommand::Scope(_) => todo!(),
