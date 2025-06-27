@@ -151,11 +151,15 @@ impl<'text> nojson::FromRawJsonValue<'text> for KeyBindings {
             .to_object()?
             .map(|(k, _)| Ok(k.to_unquoted_string_str()?.into_owned()))
             .collect::<Result<BTreeSet<_>, _>>()?;
-        group_names.retain(|n| !matches!(n.as_str(), "__main__" | "__global__"));
+        group_names.retain(|n| !matches!(n.as_str(), "__main__" | "__global__" | "__comment__"));
 
         let mut groups = BTreeMap::new();
         for (raw_name, raw_group) in value.to_object()? {
             let name = raw_name.to_unquoted_string_str()?;
+            if name == "__comment__" {
+                continue;
+            }
+
             if name.starts_with("__")
                 && name.ends_with("__")
                 && !matches!(name.as_ref(), "__main__" | "__global__")
