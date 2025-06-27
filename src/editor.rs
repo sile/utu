@@ -4,6 +4,7 @@ use orfail::OrFail;
 
 use crate::{
     buffer::{TextBuffer, TextPosition},
+    clipboard::Clipboard,
     config::Config,
     keybinding::KeySequence,
     marker::Marker,
@@ -20,6 +21,7 @@ pub struct Editor {
     pub config: Config,
     pub pending_keys: KeySequence,
     pub marker: Option<Marker>,
+    pub clipboard: Option<Clipboard>,
 }
 
 impl Editor {
@@ -40,6 +42,7 @@ impl Editor {
             config,
             pending_keys: KeySequence::default(),
             marker: None,
+            clipboard: None,
         })
     }
 
