@@ -25,25 +25,20 @@
       "f": "mark-fill"
     },
     "__comment__": {
-      "__paste__": {
-        "v": "paste",
-        "r": "scope(__resize__)",
-        "t": "scope(__rotate__)",
-        "ESC": "scope(__main__)"
+      "__main__": {
+        "w": "cut",
+        "W": "copy"
       },
-      "__resize__": {
-        "↑": "resize-up",
-        "↓": "resize-down",
-        "←": "resize-left",
-        "→": "resize-right",
-        "ESC": "scope(__paste__)"
-      },
-      "__rotate__": {
+      "__clipboard__": {
+        "y": "paste",
+        "↑,i": "prev-line",
+        "↓,k": "next-line",
+        "←,j": "prev-char",
+        "→,l": "next-char",
         "r": "rotate-cw",
         "l": "rotate-ccw",
         "h": "flip-horizontal",
-        "v": "flip-vertical",
-        "ESC": "scope(__paste__)"
+        "v": "flip-vertical"
       }
     }
   }
