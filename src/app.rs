@@ -212,7 +212,9 @@ impl App {
                 self.editor.dirty.render = true;
             }
             EditorCommand::Save => self.editor.save().or_fail()?,
-            EditorCommand::Scope(_) => todo!(),
+            EditorCommand::Scope(_) => unreachable!(),
+            EditorCommand::Cut => todo!(),
+            EditorCommand::Copy => todo!(),
         }
         Ok(())
     }

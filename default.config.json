@@ -15,6 +15,8 @@
       "→,l": "next-char",
       "d": "dot(o)",
       " ": "dot( )",
+      "w": "cut",
+      "W": "copy",
       "m": "scope(marker)"
     },
     "marker": {
@@ -25,10 +27,6 @@
       "f": "mark-fill"
     },
     "__comment__": {
-      "__main__": {
-        "w": "cut",
-        "W": "copy"
-      },
       "__clipboard__": {
         "y": "paste",
         "↑,i": "prev-line",
