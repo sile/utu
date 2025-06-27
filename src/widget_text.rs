@@ -22,28 +22,61 @@ impl TextView {
         editor: &Editor,
         frame: &mut TerminalFrame<UnicodeCharWidthEstimator>,
     ) -> orfail::Result<()> {
+        use std::collections::BTreeSet;
+        use tuinix::{TerminalColor, TerminalStyle};
+
         let terminal_size = frame.size();
 
         // Adjust scroll offset to keep cursor visible
         self.adjust_scroll_offset_for_cursor(editor, terminal_size.rows, terminal_size.cols);
 
+        // Collect all marked positions for efficient lookup
+        let marked_positions: BTreeSet<TextPosition> = editor
+            .marker
+            .as_ref()
+            .map(|marker| marker.marked_positions().collect())
+            .unwrap_or_default();
+
         // Render visible lines
-        for line in editor
+        for (line_index, line) in editor
             .buffer
             .lines()
             .skip(self.scroll_offset.row)
             .take(terminal_size.rows)
+            .enumerate()
         {
-            // Get the visible portion of the line
-            let visible_chars: String = line
+            let current_row = self.scroll_offset.row + line_index;
+
+            // Process each character in the visible portion of the line
+            for (char_index, c) in line
                 .chars()
-                .map(|c| editor.buffer.filter.apply(c))
                 .skip(self.scroll_offset.col)
                 .take(terminal_size.cols)
-                .collect();
+                .enumerate()
+            {
+                let current_col = self.scroll_offset.col + char_index;
+                let position = TextPosition {
+                    row: current_row,
+                    col: current_col,
+                };
 
-            // Write the line to the frame
-            writeln!(frame, "{}", visible_chars).or_fail()?;
+                let filtered_char = editor.buffer.filter.apply(c);
+
+                // Check if this position is marked
+                if marked_positions.contains(&position) {
+                    // Render with highlight style
+                    let style = TerminalStyle::new().reverse();
+                    //let style = TerminalStyle::new().bg_color(TerminalColor::new(200, 200, 200));
+                    let reset = TerminalStyle::RESET;
+                    write!(frame, "{}{}{}", style, filtered_char, reset).or_fail()?;
+                } else {
+                    // Render normally
+                    write!(frame, "{}", filtered_char).or_fail()?;
+                }
+            }
+
+            // Move to next line
+            writeln!(frame).or_fail()?;
         }
 
         Ok(())
