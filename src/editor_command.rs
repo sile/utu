@@ -8,6 +8,7 @@ pub enum EditorCommand {
     Save,
     Undo,
     // reload
+    // call or execute or shell
     Scope(String),
     PrevLine,
     NextLine,
