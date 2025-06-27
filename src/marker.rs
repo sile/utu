@@ -61,9 +61,9 @@ pub struct StrokeMarker {
 }
 
 impl StrokeMarker {
-    fn new(_editor: &Editor) -> Self {
+    fn new(editor: &Editor) -> Self {
         Self {
-            positions: BTreeSet::new(),
+            positions: [editor.cursor].into_iter().collect(),
         }
     }
 
@@ -118,7 +118,6 @@ impl LineMarker {
 }
 
 #[derive(Debug, Clone)]
-
 pub struct RectMarker {
     start: TextPosition,
     end: TextPosition,
@@ -162,16 +161,16 @@ impl RectMarker {
 
 #[derive(Debug, Clone)]
 pub struct FillMarker {
-    position: TextPosition, // Removed Option wrapper
-    target_char: char,
+    position: TextPosition,
+    target_char: Option<char>,
     filled_positions: BTreeSet<TextPosition>,
 }
 
 impl FillMarker {
     fn new(editor: &Editor) -> Self {
         let mut marker = Self {
-            position: editor.cursor, // Direct assignment, no Some()
-            target_char: ' ',        // Default to space, will be updated on first cursor move
+            position: editor.cursor,
+            target_char: None, // Initialize as None, will be set on first update
             filled_positions: BTreeSet::new(),
         };
         marker.update_filled_positions(editor);
@@ -179,36 +178,38 @@ impl FillMarker {
     }
 
     fn handle_cursor_move(&mut self, editor: &Editor) {
-        self.position = editor.cursor; // Direct assignment, no Some()
+        self.position = editor.cursor;
         self.update_filled_positions(editor);
     }
 
     fn update_filled_positions(&mut self, editor: &Editor) {
         self.filled_positions.clear();
 
-        // No need to unwrap Option anymore
         let start_pos = self.position;
 
-        // Get the character at the current position
-        let target_char = editor.buffer.get_char_at(start_pos).unwrap_or(' ');
+        // Get the character at the current position (None for background/empty positions)
+        let target_char = editor.buffer.get_char_at(start_pos);
 
         // Only update if the character has changed
         if self.target_char != target_char {
             self.target_char = target_char;
         }
 
+        if self.target_char.is_none() {
+            self.filled_positions.clear();
+            return;
+        }
+
         // Perform flood fill
         self.flood_fill(editor, start_pos, self.target_char);
     }
 
-    fn flood_fill(&mut self, editor: &Editor, start_pos: TextPosition, target_char: char) {
+    fn flood_fill(&mut self, editor: &Editor, start_pos: TextPosition, target_char: Option<char>) {
         let mut stack = vec![start_pos];
 
         while let Some(current_pos) = stack.pop() {
-            // Get character at current position
-            let Some(current_char) = editor.buffer.get_char_at(current_pos) else {
-                continue;
-            };
+            // Get character at current position (None for background/empty positions)
+            let current_char = editor.buffer.get_char_at(current_pos);
 
             // If character doesn't match target or position already visited, skip
             if current_char != target_char || self.filled_positions.contains(&current_pos) {
@@ -235,13 +236,13 @@ impl FillMarker {
             if current_pos.col > 0 {
                 stack.push(TextPosition {
                     row: current_pos.row,
-                    col: current_pos.col - 1,
+                    col: current_pos.col - 1, // TODO: consider unicode width
                 });
             }
             // Right
             stack.push(TextPosition {
                 row: current_pos.row,
-                col: current_pos.col + 1,
+                col: current_pos.col + 1, // TODO: consider unicode width
             });
         }
     }

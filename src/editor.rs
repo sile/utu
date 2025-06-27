@@ -55,11 +55,25 @@ impl Editor {
     }
 
     pub fn dot(&mut self, c: char) -> orfail::Result<()> {
-        if self.buffer.update(self.cursor, c) {
-            self.dirty.content = true;
-            self.dirty.render = true;
+        if let Some(marker) = self.marker.take() {
+            // Handle marker: apply character to all marked positions
+            let positions: Vec<_> = marker.marked_positions().collect();
+            let updates = positions.into_iter().map(|pos| (pos, c));
+
+            if self.buffer.update_bulk(updates) {
+                self.dirty.content = true;
+                self.dirty.render = true;
+            } else {
+                self.set_message("No effect");
+            }
         } else {
-            self.set_message("No effect");
+            // Handle single character update at cursor
+            if self.buffer.update(self.cursor, c) {
+                self.dirty.content = true;
+                self.dirty.render = true;
+            } else {
+                self.set_message("No effect");
+            }
         }
         Ok(())
     }
