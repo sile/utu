@@ -22,11 +22,16 @@ impl StatusLine {
         // Show file status, cursor position, and mode information
         writeln!(
             frame,
-            "{style}{}[{}:{}:{}]{filler}{reset}",
+            "{style}{}[{}:{}:{}] {} {filler}{reset}",
             if editor.dirty.content { '*' } else { ' ' }, // Dirty indicator
             editor.path.file_name().and_then(|n| n.to_str()).or_fail()?,
             editor.cursor.row + 1,
             editor.cursor.col + 1,
+            if let Some(m) = &editor.marker {
+                m.name()
+            } else {
+                "DRAW"
+            }
         )
         .or_fail()?;
 
