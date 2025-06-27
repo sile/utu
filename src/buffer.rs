@@ -115,33 +115,51 @@ impl TextBuffer {
     }
 
     pub fn update(&mut self, pos: TextPosition, new: char) -> bool {
-        if !(pos.row < self.rows() && pos.col < self.cols(pos.row)) {
-            return false;
-        }
+        self.update_bulk(std::iter::once((pos, new)))
+    }
 
-        let mut current_cols = 0;
-        for (i, c) in self.lines[pos.row].char_indices() {
-            if current_cols >= pos.col {
-                assert_eq!(current_cols, pos.col);
-                if new == c || !self.filter.fg_chars.contains(&c) {
-                    return false;
-                }
+    pub fn update_bulk(&mut self, updates: impl Iterator<Item = (TextPosition, char)>) -> bool {
+        let mut any_updated = false;
+        let mut bulk_undo_updates = Vec::new();
 
-                // Record the operation for undo
-                let undo_op = UndoOperation::Update { pos, old_char: c };
-                self.undo_stack.push(undo_op);
-                if !self.undoing {
-                    self.undo_index = self.undo_stack.len();
-                }
-
-                // Perform the actual update
-                self.lines[pos.row].remove(i);
-                self.lines[pos.row].insert(i, new);
-                return true;
+        // Collect all valid updates first
+        for (pos, new) in updates {
+            if !(pos.row < self.rows() && pos.col < self.cols(pos.row)) {
+                continue;
             }
-            current_cols += c.width().unwrap_or(0);
+
+            let mut current_cols = 0;
+            for (i, c) in self.lines[pos.row].char_indices() {
+                if current_cols >= pos.col {
+                    assert_eq!(current_cols, pos.col);
+                    if new == c || !self.filter.fg_chars.contains(&c) {
+                        break;
+                    }
+
+                    // Record the operation for bulk undo
+                    bulk_undo_updates.push((pos, c)); // old char
+
+                    // Perform the actual update
+                    self.lines[pos.row].remove(i);
+                    self.lines[pos.row].insert(i, new);
+                    any_updated = true;
+                    break;
+                }
+                current_cols += c.width().unwrap_or(0);
+            }
         }
-        panic!("bug")
+
+        // Add bulk undo operation to stack if any updates occurred
+        if any_updated && !bulk_undo_updates.is_empty() {
+            self.undo_stack.push(UndoOperation::BulkUpdate {
+                updates: bulk_undo_updates,
+            });
+            if !self.undoing {
+                self.undo_index = self.undo_stack.len();
+            }
+        }
+
+        any_updated
     }
 
     pub fn undo(&mut self) -> Option<usize> {
@@ -149,8 +167,9 @@ impl TextBuffer {
         self.undoing = true;
         let undo_op = self.undo_stack[self.undo_index].clone();
         match undo_op {
-            UndoOperation::Update { pos, old_char } => {
-                self.update(pos, old_char);
+            UndoOperation::BulkUpdate { updates } => {
+                // Restore all characters in bulk
+                self.update_bulk(updates.into_iter());
             }
         }
         self.undoing = false;
@@ -167,7 +186,7 @@ pub struct TextPosition {
 
 #[derive(Debug, Clone)]
 enum UndoOperation {
-    Update { pos: TextPosition, old_char: char },
+    BulkUpdate { updates: Vec<(TextPosition, char)> },
 }
 
 #[derive(Debug, Default)]

@@ -55,8 +55,6 @@ impl Editor {
     }
 
     pub fn dot(&mut self, c: char) -> orfail::Result<()> {
-        // todo: consider marker
-
         if self.buffer.update(self.cursor, c) {
             self.dirty.content = true;
             self.dirty.render = true;
