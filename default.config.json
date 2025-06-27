@@ -21,6 +21,7 @@
       "s": "mark-stroke",
       "l": "mark-line",
       "r": "mark-rect",
+      "R": "mark-filled-rect",
       "f": "mark-fill"
     }
   }

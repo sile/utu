@@ -7,6 +7,7 @@ pub enum Marker {
     Stroke(StrokeMarker),
     Line(LineMarker),
     Rect(RectMarker),
+    FilledRect(FilledRectMarker),
     Fill(FillMarker),
 }
 
@@ -27,11 +28,16 @@ impl Marker {
         Self::Fill(FillMarker::new(editor))
     }
 
+    pub fn new_filled_rect(editor: &Editor) -> Self {
+        Self::FilledRect(FilledRectMarker::new(editor))
+    }
+
     pub fn name(&self) -> &'static str {
         match self {
             Marker::Stroke(_) => "MARK(STROKE)",
             Marker::Line(_) => "MARK(LINE)",
             Marker::Rect(_) => "MARK(RECT)",
+            Marker::FilledRect(_) => "MARK(FILLED_RECT)",
             Marker::Fill(_) => "MARK(FILL)",
         }
     }
@@ -41,6 +47,7 @@ impl Marker {
             Marker::Stroke(m) => Box::new(m.positions.iter().copied()),
             Marker::Line(m) => Box::new(m.marked_positions()),
             Marker::Rect(m) => Box::new(m.marked_positions()),
+            Marker::FilledRect(m) => Box::new(m.marked_positions()),
             Marker::Fill(m) => Box::new(m.filled_positions.iter().copied()),
         }
     }
@@ -50,6 +57,7 @@ impl Marker {
             Marker::Stroke(m) => m.handle_cursor_move(editor),
             Marker::Line(m) => m.handle_cursor_move(editor),
             Marker::Rect(m) => m.handle_cursor_move(editor),
+            Marker::FilledRect(m) => m.handle_cursor_move(editor),
             Marker::Fill(m) => m.handle_cursor_move(editor),
         }
     }
@@ -156,6 +164,40 @@ impl RectMarker {
                 }
             })
         })
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct FilledRectMarker {
+    start: TextPosition,
+    end: TextPosition,
+}
+
+impl FilledRectMarker {
+    fn new(editor: &Editor) -> Self {
+        Self {
+            start: editor.cursor,
+            end: editor.cursor,
+        }
+    }
+
+    fn handle_cursor_move(&mut self, editor: &Editor) {
+        self.end = editor.cursor;
+    }
+
+    fn marked_positions(&self) -> impl Iterator<Item = TextPosition> + '_ {
+        let start = self.start;
+        let end = self.end;
+
+        // Calculate rectangle bounds
+        let min_row = std::cmp::min(start.row, end.row);
+        let max_row = std::cmp::max(start.row, end.row);
+        let min_col = std::cmp::min(start.col, end.col);
+        let max_col = std::cmp::max(start.col, end.col);
+
+        // Generate all positions within the rectangle (filled)
+        (min_row..=max_row)
+            .flat_map(move |row| (min_col..=max_col).map(move |col| TextPosition { row, col }))
     }
 }
 

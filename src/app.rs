@@ -200,6 +200,12 @@ impl App {
                 self.editor.set_message("Rectangle marking mode started");
                 self.editor.dirty.render = true;
             }
+            EditorCommand::MarkFilledRect => {
+                self.editor.marker = Some(crate::marker::Marker::new_filled_rect(&self.editor));
+                self.editor
+                    .set_message("Filled rectangle marking mode started");
+                self.editor.dirty.render = true;
+            }
             EditorCommand::MarkFill => {
                 self.editor.marker = Some(crate::marker::Marker::new_fill(&self.editor));
                 self.editor.set_message("Fill marking mode started");

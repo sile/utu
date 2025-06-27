@@ -17,6 +17,7 @@ pub enum EditorCommand {
     MarkStroke,
     MarkLine,
     MarkRect,
+    MarkFilledRect,
     MarkFill,
 }
 
@@ -38,6 +39,7 @@ impl std::fmt::Display for EditorCommand {
             EditorCommand::MarkStroke => write!(f, "mark-stroke"),
             EditorCommand::MarkLine => write!(f, "mark-line"),
             EditorCommand::MarkRect => write!(f, "mark-rect"),
+            EditorCommand::MarkFilledRect => write!(f, "mark-filled-rect"),
             EditorCommand::MarkFill => write!(f, "mark-fill"),
         }
     }
@@ -60,6 +62,7 @@ impl std::str::FromStr for EditorCommand {
             "mark-stroke" => Ok(EditorCommand::MarkStroke),
             "mark-line" => Ok(EditorCommand::MarkLine),
             "mark-rect" => Ok(EditorCommand::MarkRect),
+            "mark-filled-rect" => Ok(EditorCommand::MarkFilledRect),
             "mark-fill" => Ok(EditorCommand::MarkFill),
             s if s.starts_with("dot(") && s.ends_with(")") => {
                 let arg = &s[4..s.len() - 1];
