@@ -13,16 +13,16 @@ default.keys.json
 |                                |
 |                                |
 |                                |
+|  oooooooooo                    |
+|  o        o                    |
+|  o        o                    |
+|  oooooooooo                    |
 |                                |
-|                                |
-|                                |
-|                                |
-|                                |
-|                                |
-|                                |
-|                                |
-|                                |
-|                                |
+|        ooooooooooooo           |
+|        o           o           |
+|        o           o           |
+|        o           o           |
+|        ooooooooooooo           |
 |                                |
 |                                |
 +--------------------------------+
