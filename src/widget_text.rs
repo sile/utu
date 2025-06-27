@@ -1,7 +1,7 @@
-use std::fmt::Write;
+use std::{collections::BTreeSet, fmt::Write};
 
 use orfail::OrFail;
-use tuinix::TerminalFrame;
+use tuinix::{TerminalFrame, TerminalStyle};
 use unicode_width::UnicodeWidthChar;
 
 use crate::{buffer::TextPosition, editor::Editor, tuinix_ext::UnicodeCharWidthEstimator};
@@ -23,9 +23,6 @@ impl TextView {
         editor: &Editor,
         frame: &mut TerminalFrame<UnicodeCharWidthEstimator>,
     ) -> orfail::Result<()> {
-        use std::collections::BTreeSet;
-        use tuinix::{TerminalColor, TerminalStyle};
-
         let terminal_size = frame.size();
 
         // Adjust scroll offset to keep cursor visible
