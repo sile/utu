@@ -2,6 +2,7 @@ use std::fmt::Write;
 
 use orfail::OrFail;
 use tuinix::TerminalFrame;
+use unicode_width::UnicodeWidthChar;
 
 use crate::{buffer::TextPosition, editor::Editor, tuinix_ext::UnicodeCharWidthEstimator};
 
@@ -46,21 +47,20 @@ impl TextView {
             .enumerate()
         {
             let current_row = self.scroll_offset.row + line_index;
+            let mut current_col = self.scroll_offset.col;
 
             // Process each character in the visible portion of the line
-            for (char_index, c) in line
+            for c in line
                 .chars()
                 .skip(self.scroll_offset.col)
                 .take(terminal_size.cols)
-                .enumerate()
             {
-                let current_col = self.scroll_offset.col + char_index;
+                let c = editor.buffer.filter.apply(c);
                 let position = TextPosition {
                     row: current_row,
                     col: current_col,
                 };
-
-                let filtered_char = editor.buffer.filter.apply(c);
+                current_col += c.width().unwrap_or_default();
 
                 // Check if this position is marked
                 if marked_positions.contains(&position) {
@@ -68,10 +68,10 @@ impl TextView {
                     let style = TerminalStyle::new().reverse();
                     //let style = TerminalStyle::new().bg_color(TerminalColor::new(200, 200, 200));
                     let reset = TerminalStyle::RESET;
-                    write!(frame, "{}{}{}", style, filtered_char, reset).or_fail()?;
+                    write!(frame, "{}{}{}", style, c, reset).or_fail()?;
                 } else {
                     // Render normally
-                    write!(frame, "{}", filtered_char).or_fail()?;
+                    write!(frame, "{}", c).or_fail()?;
                 }
             }
 
