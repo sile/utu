@@ -81,11 +81,9 @@ impl App {
             self.legend.render(&self.editor, frame).or_fail()
         })?;
 
-        if self.editor.clipboard.is_none() {
-            // Set cursor position for text editing
-            let cursor_pos = self.text_view.cursor_terminal_position(&self.editor);
-            self.terminal.set_cursor(Some(cursor_pos));
-        }
+        // Set cursor position for text editing
+        let cursor_pos = self.text_view.cursor_terminal_position(&self.editor);
+        self.terminal.set_cursor(Some(cursor_pos));
 
         self.terminal.draw(frame).or_fail()?;
 
@@ -167,6 +165,9 @@ impl App {
                     marker.handle_cursor_move(&self.editor);
                     self.editor.marker = Some(marker);
                 }
+                if let Some(cb) = &mut self.editor.clipboard {
+                    cb.cursor = self.editor.cursor;
+                }
             }
             EditorCommand::NextLine => {
                 let max_row = self.editor.buffer.lines().count().saturating_sub(1);
@@ -176,6 +177,9 @@ impl App {
                     marker.handle_cursor_move(&self.editor);
                     self.editor.marker = Some(marker);
                 }
+                if let Some(cb) = &mut self.editor.clipboard {
+                    cb.cursor = self.editor.cursor;
+                }
             }
             EditorCommand::PrevChar => {
                 self.editor.cursor.col = self.editor.buffer.prev_col(self.editor.cursor);
@@ -184,6 +188,9 @@ impl App {
                     marker.handle_cursor_move(&self.editor);
                     self.editor.marker = Some(marker);
                 }
+                if let Some(cb) = &mut self.editor.clipboard {
+                    cb.cursor = self.editor.cursor;
+                }
             }
             EditorCommand::NextChar => {
                 self.editor.cursor.col = self.editor.buffer.next_col(self.editor.cursor);
@@ -191,6 +198,9 @@ impl App {
                 if let Some(mut marker) = self.editor.marker.take() {
                     marker.handle_cursor_move(&self.editor);
                     self.editor.marker = Some(marker);
+                }
+                if let Some(cb) = &mut self.editor.clipboard {
+                    cb.cursor = self.editor.cursor;
                 }
             }
             EditorCommand::Dot(c) => self.editor.dot(*c).or_fail()?,

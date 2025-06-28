@@ -4,33 +4,30 @@ use crate::{buffer::TextPosition, editor::Editor};
 
 #[derive(Debug)]
 pub struct Clipboard {
-    pub position: TextPosition,               // left-top position
-    pub pixels: BTreeMap<TextPosition, char>, // positions are relative to `position`
+    pub original_cursor: TextPosition,
+    pub cursor: TextPosition,
+    pub pixels: BTreeMap<TextPosition, char>,
 }
 
 impl Clipboard {
     pub fn copy_marked_pixels(editor: &mut Editor) -> Option<Self> {
         let marker = editor.marker.take()?;
-        let position = marker.marked_positions().min()?;
         let pixels = marker
             .marked_positions()
-            .filter_map(|pos| {
-                editor.buffer.get_char_at(pos).map(|c| {
-                    let p = TextPosition {
-                        row: pos.row - position.row,
-                        col: pos.col - position.col,
-                    };
-                    (p, c)
-                })
-            })
+            .filter_map(|pos| editor.buffer.get_char_at(pos).map(|c| (pos, c)))
             .collect();
-        Some(Self { position, pixels })
+        let cursor = editor.cursor;
+        Some(Self {
+            original_cursor: cursor,
+            cursor,
+            pixels,
+        })
     }
 
     pub fn get(&self, pos: TextPosition) -> Option<char> {
         let (Some(row), Some(col)) = (
-            pos.row.checked_sub(self.position.row),
-            pos.col.checked_sub(self.position.col),
+            (pos.row + self.original_cursor.row).checked_sub(self.cursor.row),
+            (pos.col + self.original_cursor.col).checked_sub(self.cursor.col),
         ) else {
             return None;
         };
