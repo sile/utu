@@ -34,6 +34,20 @@ impl Clipboard {
         })
     }
 
+    pub fn pixels(&self) -> impl '_ + Iterator<Item = (TextPosition, char)> {
+        self.pixels.iter().filter_map(|(&pos, &ch)| {
+            let (Some(row), Some(col)) = (
+                (pos.row + self.cursor.row).checked_sub(self.original_cursor.row),
+                (pos.col + self.cursor.col).checked_sub(self.original_cursor.col),
+            ) else {
+                return None;
+            };
+
+            let pos = TextPosition { row, col };
+            Some((pos, ch))
+        })
+    }
+
     pub fn get(&self, pos: TextPosition) -> Option<char> {
         let (Some(row), Some(col)) = (
             (pos.row + self.original_cursor.row).checked_sub(self.cursor.row),

@@ -239,7 +239,14 @@ impl App {
                     self.editor.set_message("Enter clipboard mode");
                 }
             }
-            EditorCommand::Paste => todo!(),
+            EditorCommand::Paste => {
+                if let Some(clipboard) = &self.editor.clipboard {
+                    self.editor.buffer.update_bulk(clipboard.pixels());
+                    self.editor.set_message("Pasted");
+                } else {
+                    self.editor.set_message("No clipboard content");
+                }
+            }
         }
         Ok(())
     }

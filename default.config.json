@@ -31,7 +31,7 @@
       "↓,k": "next-line",
       "←,j": "prev-char",
       "→,l": "next-char",
-      "y": "paste"
+      "v": "paste"
     },
     "__comment__": {
       "__clipboard__": {
