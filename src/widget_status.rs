@@ -29,6 +29,8 @@ impl StatusLine {
             editor.cursor.col + 1,
             if let Some(m) = &editor.marker {
                 m.name()
+            } else if editor.clipboard.is_some() {
+                "CLIPBOARD"
             } else {
                 "DRAW"
             }

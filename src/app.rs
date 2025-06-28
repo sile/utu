@@ -4,6 +4,7 @@ use orfail::OrFail;
 use tuinix::{Terminal, TerminalEvent, TerminalFrame, TerminalInput};
 
 use crate::{
+    clipboard::Clipboard,
     config::Config,
     editor::Editor,
     editor_command::EditorCommand,
@@ -214,7 +215,12 @@ impl App {
             EditorCommand::Save => self.editor.save().or_fail()?,
             EditorCommand::Scope(_) => unreachable!(),
             EditorCommand::Cut => todo!(),
-            EditorCommand::Copy => todo!(),
+            EditorCommand::Copy => {
+                if let Some(clipboard) = Clipboard::copy_marked_pixels(&mut self.editor) {
+                    self.editor.clipboard = Some(clipboard);
+                    self.editor.set_message("Enter clipboard mode");
+                }
+            }
         }
         Ok(())
     }
