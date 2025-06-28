@@ -2,8 +2,8 @@
   "keybindings": {
     "__global__": {
       "C-c": "quit",
-      "C-g": "cancel",
-      "C-h": "legend"
+      "C-h": "legend",
+      "g": "cancel"
     },
     "__main__": {
       "C-s": "save",
@@ -30,15 +30,11 @@
       "↑,i": "prev-line",
       "↓,k": "next-line",
       "←,j": "prev-char",
-      "→,l": "next-char"
+      "→,l": "next-char",
+      "y": "paste"
     },
     "__comment__": {
       "__clipboard__": {
-        "y": "paste",
-        "↑,i": "prev-line",
-        "↓,k": "next-line",
-        "←,j": "prev-char",
-        "→,l": "next-char",
         "r": "rotate-cw",
         "l": "rotate-ccw",
         "h": "flip-horizontal",

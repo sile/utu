@@ -27,7 +27,7 @@ impl StatusLine {
             editor.path.file_name().and_then(|n| n.to_str()).or_fail()?,
             editor.cursor.row + 1,
             editor.cursor.col + 1,
-            editor.config.keybindings.canvas_char()
+            editor.config.keybindings.canvas_char(),
             if let Some(m) = &editor.marker {
                 m.name()
             } else if editor.clipboard.is_some() {

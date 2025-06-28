@@ -22,6 +22,7 @@ pub enum EditorCommand {
     MarkFill,
     Cut,
     Copy,
+    Paste,
 }
 
 impl std::fmt::Display for EditorCommand {
@@ -46,6 +47,7 @@ impl std::fmt::Display for EditorCommand {
             EditorCommand::MarkFill => write!(f, "mark-fill"),
             EditorCommand::Cut => write!(f, "cut"),
             EditorCommand::Copy => write!(f, "copy"),
+            EditorCommand::Paste => write!(f, "paste"),
         }
     }
 }
@@ -71,6 +73,7 @@ impl std::str::FromStr for EditorCommand {
             "mark-fill" => Ok(EditorCommand::MarkFill),
             "cut" => Ok(EditorCommand::Cut),
             "copy" => Ok(EditorCommand::Copy),
+            "paste" => Ok(EditorCommand::Paste),
             s if s.starts_with("dot(") && s.ends_with(")") => {
                 let arg = &s[4..s.len() - 1];
                 let mut chars = arg.chars();

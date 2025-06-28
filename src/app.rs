@@ -239,6 +239,7 @@ impl App {
                     self.editor.set_message("Enter clipboard mode");
                 }
             }
+            EditorCommand::Paste => todo!(),
         }
         Ok(())
     }
