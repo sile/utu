@@ -26,6 +26,12 @@
       "R": "mark-filled-rect",
       "f": "mark-fill"
     },
+    "__clipboard__": {
+      "↑,i": "prev-line",
+      "↓,k": "next-line",
+      "←,j": "prev-char",
+      "→,l": "next-char"
+    },
     "__comment__": {
       "__clipboard__": {
         "y": "paste",

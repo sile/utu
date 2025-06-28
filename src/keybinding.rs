@@ -32,23 +32,29 @@ impl std::fmt::Display for KeySequence {
 #[derive(Debug)]
 pub struct KeyBindings {
     pub main: KeyBindingsGroup,
+    pub clipboard: KeyBindingsGroup,
     pub global: Option<KeyBindingsGroup>,
     pub groups: BTreeMap<String, KeyBindingsGroup>,
 }
 
 impl KeyBindings {
-    pub fn find(&self, keys: &KeySequence) -> Result<Option<&EditorCommand>, ()> {
-        self.find_in_group(&self.main, keys.0.iter().copied())
+    pub fn find<'a>(
+        &'a self,
+        group: &'a KeyBindingsGroup,
+        keys: &KeySequence,
+    ) -> Result<Option<&'a EditorCommand>, ()> {
+        self.find_in_group(group, keys.0.iter().copied())
     }
 
     pub fn possible_commands(
         &self,
+        group: &KeyBindingsGroup,
         prefix: &KeySequence,
-    ) -> impl Iterator<Item = (KeySet, EditorCommand)> + '_ {
+    ) -> impl Iterator<Item = (KeySet, EditorCommand)> {
         let mut results = std::collections::BTreeMap::new();
 
         // Check main group
-        self.collect_possible_commands(&self.main, prefix, &mut results);
+        self.collect_possible_commands(group, prefix, &mut results);
 
         // Check global group if it exists
         if let Some(global) = &self.global {
@@ -71,7 +77,7 @@ impl KeyBindings {
                 if prefix.0.is_empty() {
                     // No prefix, so this key is a possible first key
                     // Always insert the command (whether it's complete or Scope)
-                    results.insert(entry.keys.clone(), entry.command.clone());
+                    results.insert(entry.keys.clone(), entry.command.clone()); // TODO} remove clone
                 } else if prefix.0.len() == 1 && prefix.0[0] == key {
                     // This key matches our prefix, check what comes next
                     if let EditorCommand::Scope(scope_name) = &entry.command {
@@ -151,7 +157,12 @@ impl<'text> nojson::FromRawJsonValue<'text> for KeyBindings {
             .to_object()?
             .map(|(k, _)| Ok(k.to_unquoted_string_str()?.into_owned()))
             .collect::<Result<BTreeSet<_>, _>>()?;
-        group_names.retain(|n| !matches!(n.as_str(), "__main__" | "__global__" | "__comment__"));
+        group_names.retain(|n| {
+            !matches!(
+                n.as_str(),
+                "__main__" | "__global__" | "__clipboard__" | "__comment__"
+            )
+        });
 
         let mut groups = BTreeMap::new();
         for (raw_name, raw_group) in value.to_object()? {
@@ -162,7 +173,7 @@ impl<'text> nojson::FromRawJsonValue<'text> for KeyBindings {
 
             if name.starts_with("__")
                 && name.ends_with("__")
-                && !matches!(name.as_ref(), "__main__" | "__global__")
+                && !matches!(name.as_ref(), "__main__" | "__global__" | "__clipboard__")
             {
                 return Err(raw_name.invalid("no such built-in group"));
             }
@@ -174,9 +185,13 @@ impl<'text> nojson::FromRawJsonValue<'text> for KeyBindings {
         let main = groups
             .remove("__main__")
             .ok_or_else(|| value.invalid("missing __main__ group"))?;
+        let clipboard = groups
+            .remove("__clipboard__")
+            .ok_or_else(|| value.invalid("missing __clipboard__ group"))?;
         let global = groups.remove("__global__");
         Ok(KeyBindings {
             main,
+            clipboard,
             global,
             groups,
         })

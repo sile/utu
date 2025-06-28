@@ -99,11 +99,16 @@ impl App {
             TerminalEvent::Input(input) => {
                 let TerminalInput::Key(key) = input;
                 self.editor.pending_keys.push(key);
+                let root_group = if self.editor.clipboard.is_some() {
+                    &self.editor.config.keybindings.clipboard
+                } else {
+                    &self.editor.config.keybindings.main
+                };
                 match self
                     .editor
                     .config
                     .keybindings
-                    .find(&self.editor.pending_keys)
+                    .find(&root_group, &self.editor.pending_keys)
                 {
                     Err(()) => {
                         self.editor
@@ -145,6 +150,7 @@ impl App {
                 // Clear any pending operations or selections
                 self.editor.pending_keys.clear();
                 self.editor.marker = None;
+                self.editor.clipboard = None;
                 self.editor.set_message("Canceled");
             }
             EditorCommand::Undo => {

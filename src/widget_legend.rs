@@ -36,10 +36,15 @@ impl Legend {
         }
 
         // Get actual possible commands based on current pending keys
+        let group = if editor.clipboard.is_some() {
+            &editor.config.keybindings.clipboard
+        } else {
+            &editor.config.keybindings.main
+        };
         let possible_commands: Vec<_> = editor
             .config
             .keybindings
-            .possible_commands(&editor.pending_keys)
+            .possible_commands(&group, &editor.pending_keys)
             .collect();
 
         // Draw the legend box
@@ -53,14 +58,20 @@ impl Legend {
         Ok(())
     }
 
+    // TODO: remove (TerminalFrame::shrink_rows())
     fn size(&self, editor: &Editor) -> TerminalSize {
         if self.hide {
             TerminalSize::rows_cols(1, Self::HIDE_COLS)
         } else {
+            let group = if editor.clipboard.is_some() {
+                &editor.config.keybindings.clipboard
+            } else {
+                &editor.config.keybindings.main
+            };
             let rows = 1 + editor
                 .config
                 .keybindings
-                .possible_commands(&editor.pending_keys)
+                .possible_commands(&group, &editor.pending_keys)
                 .count();
             TerminalSize::rows_cols(rows, Self::SHOW_COLS)
         }
