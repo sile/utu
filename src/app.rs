@@ -232,7 +232,19 @@ impl App {
             }
             EditorCommand::Save => self.editor.save().or_fail()?,
             EditorCommand::Scope(_) => unreachable!(),
-            EditorCommand::Cut => todo!(),
+            EditorCommand::Cut => {
+                if let Some(clipboard) = Clipboard::copy_marked_pixels(&mut self.editor) {
+                    // Overwrite clipboard pixel positions with canvas char
+                    let canvas_char = self.editor.config.keybindings.canvas_char();
+                    let positions_to_clear = clipboard.pixels.keys().copied();
+                    self.editor
+                        .buffer
+                        .update_bulk(positions_to_clear.map(|pos| (pos, canvas_char)));
+
+                    self.editor.clipboard = Some(clipboard);
+                    self.editor.set_message("Enter clipboard mode");
+                }
+            }
             EditorCommand::Copy => {
                 if let Some(clipboard) = Clipboard::copy_marked_pixels(&mut self.editor) {
                     self.editor.clipboard = Some(clipboard);
