@@ -57,10 +57,18 @@ impl TextView {
                     row: current_row,
                     col: current_col,
                 };
+                let (c, is_clipboard) = editor
+                    .clipboard
+                    .as_ref()
+                    .and_then(|cb| cb.get(position).map(|c| (c, true)))
+                    .unwrap_or((c, false));
                 current_col += c.width().unwrap_or_default();
 
-                // Check if this position is marked
-                if marked_positions.contains(&position) {
+                if is_clipboard {
+                    let style = TerminalStyle::new().reverse().underline();
+                    let reset = TerminalStyle::RESET;
+                    write!(frame, "{}{}{}", style, c, reset).or_fail()?;
+                } else if marked_positions.contains(&position) {
                     // Render with highlight style
                     let style = TerminalStyle::new().reverse();
                     //let style = TerminalStyle::new().bg_color(TerminalColor::new(200, 200, 200));

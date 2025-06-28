@@ -26,4 +26,15 @@ impl Clipboard {
             .collect();
         Some(Self { position, pixels })
     }
+
+    pub fn get(&self, pos: TextPosition) -> Option<char> {
+        let (Some(row), Some(col)) = (
+            pos.row.checked_sub(self.position.row),
+            pos.col.checked_sub(self.position.col),
+        ) else {
+            return None;
+        };
+        let rel_pos = TextPosition { row, col };
+        self.pixels.get(&rel_pos).copied()
+    }
 }
