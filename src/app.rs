@@ -81,9 +81,11 @@ impl App {
             self.legend.render(&self.editor, frame).or_fail()
         })?;
 
-        // Set cursor position for text editing
-        let cursor_pos = self.text_view.cursor_terminal_position(&self.editor);
-        self.terminal.set_cursor(Some(cursor_pos));
+        if self.editor.clipboard.is_none() {
+            // Set cursor position for text editing
+            let cursor_pos = self.text_view.cursor_terminal_position(&self.editor);
+            self.terminal.set_cursor(Some(cursor_pos));
+        }
 
         self.terminal.draw(frame).or_fail()?;
 
