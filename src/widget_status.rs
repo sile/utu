@@ -22,18 +22,19 @@ impl StatusLine {
         // Show file status, cursor position, and mode information
         writeln!(
             frame,
-            "{style}{}[{}:{}:{}] {} {filler}{reset}",
+            "{style}{}[{}:{}:{}] [CANVAS:{:?}] {}{filler}{reset}",
             if editor.dirty.content { '*' } else { ' ' }, // Dirty indicator
             editor.path.file_name().and_then(|n| n.to_str()).or_fail()?,
             editor.cursor.row + 1,
             editor.cursor.col + 1,
+            editor.config.keybindings.canvas_char()
             if let Some(m) = &editor.marker {
                 m.name()
             } else if editor.clipboard.is_some() {
                 "CLIPBOARD"
             } else {
                 "DRAW"
-            }
+            },
         )
         .or_fail()?;
 
