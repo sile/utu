@@ -101,6 +101,10 @@ impl KeyBindings {
         })
     }
 
+    pub fn canvas_char(&self) -> char {
+        self.fg_chars().next().unwrap_or(' ')
+    }
+
     fn all_commands(&self) -> impl Iterator<Item = &EditorCommand> {
         self.main
             .entries

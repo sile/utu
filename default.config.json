@@ -13,8 +13,8 @@
       "↓,k": "next-line",
       "←,j": "prev-char",
       "→,l": "next-char",
-      "d": "dot(o)",
       " ": "dot( )",
+      "d": "dot(o)",
       "w": "cut",
       "W": "copy",
       "m": "scope(marker)"
