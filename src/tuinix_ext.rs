@@ -66,6 +66,11 @@ impl TerminalRegion {
         self
     }
 
+    pub fn left_cols(mut self, cols: usize) -> Self {
+        self.size.cols = self.size.cols.min(cols);
+        self
+    }
+
     pub fn without_bottom_rows(mut self, rows: usize) -> Self {
         self.size.rows = self.size.rows.saturating_sub(rows);
         self

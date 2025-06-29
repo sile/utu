@@ -41,20 +41,19 @@ impl Preview {
         Ok(())
     }
 
-    pub fn size(&self, _editor: &Editor) -> TerminalSize {
+    pub fn size(&self, editor: &Editor) -> TerminalSize {
         if self.hide {
-            TerminalSize::rows_cols(0, 0)
+            TerminalSize::rows_cols(1, 4)
         } else {
-            // TODO: Calculate actual preview size based on content
-            TerminalSize::rows_cols(10, 40) // Placeholder dimensions
+            let config = &editor.config.preview;
+            TerminalSize::rows_cols(config.height + 1, config.width + 1)
         }
     }
 
     pub fn region(&self, editor: &Editor, size: TerminalSize) -> TerminalRegion {
-        // let preview_size = self.size(editor);
-        // size.to_region()
-        //     .bottom_rows(preview_size.rows)
-        //     .left_cols(preview_size.cols)
-        todo!()
+        let preview_size = self.size(editor);
+        size.to_region()
+            .bottom_rows(preview_size.rows)
+            .left_cols(preview_size.cols)
     }
 }

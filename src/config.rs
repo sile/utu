@@ -33,8 +33,8 @@ impl Default for Config {
 
 #[derive(Debug)]
 pub struct PreviewConfig {
-    pub width: u32,
-    pub height: u32,
+    pub width: usize,
+    pub height: usize,
 }
 
 impl<'text> nojson::FromRawJsonValue<'text> for PreviewConfig {
