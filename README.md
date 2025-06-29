@@ -1,4 +1,4 @@
-# pixed (or doted)
+# utu
 
 TUI Text editor for pixel arts.
 

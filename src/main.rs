@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use orfail::OrFail;
-use pixed::app::App;
+use utu::app::App;
 
 fn main() -> noargs::Result<()> {
     let mut args = noargs::raw_args();

@@ -27,17 +27,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "aba2212a0fddd290c8209fb9b0393382435ede29c24a71f245d7fa92f0f3442e"
 
 [[package]]
-name = "pixed"
-version = "0.1.0"
-dependencies = [
- "noargs",
- "nojson",
- "orfail",
- "tuinix",
- "unicode-width",
-]
-
-[[package]]
 name = "tuinix"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -51,3 +40,14 @@ name = "unicode-width"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4a1a07cc7db3810833284e8d372ccdc6da29741639ecc70c9ec107df0fa6154c"
+
+[[package]]
+name = "utu"
+version = "0.1.0"
+dependencies = [
+ "noargs",
+ "nojson",
+ "orfail",
+ "tuinix",
+ "unicode-width",
+]
