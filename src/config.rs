@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use crate::{keybinding::KeyBindings, nojson_ext::RawJsonValueExt};
+use crate::keybinding::KeyBindings;
 
 #[derive(Debug)]
 pub struct Config {

@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use tuinix::KeyInput;
 
-use crate::{editor_command::EditorCommand, nojson_ext::RawJsonValueExt, tuinix_ext::KeyInputExt};
+use crate::{editor_command::EditorCommand, tuinix_ext::KeyInputExt};
 
 #[derive(Debug, Default)]
 pub struct KeySequence(pub Vec<KeyInput>);
