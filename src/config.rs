@@ -13,10 +13,12 @@ impl<'text> nojson::FromRawJsonValue<'text> for Config {
     fn from_raw_json_value(
         value: nojson::RawJsonValue<'text, '_>,
     ) -> Result<Self, nojson::JsonParseError> {
-        let ([keybindings, preview], []) = value.to_fixed_object(["keybindings", "preview"], [])?;
+        let ([keybindings, preview, palette], []) =
+            value.to_fixed_object(["keybindings", "preview", "palette"], [])?;
         Ok(Config {
             keybindings: keybindings.try_to()?,
-            preview: preview.try_to()?,
+            preview: preview.try_to()?, // TODO: optional
+            palette: palette.try_to()?,
         })
     }
 }
@@ -50,6 +52,15 @@ impl<'text> nojson::FromRawJsonValue<'text> for PreviewConfig {
 #[derive(Debug)]
 pub struct Palette {
     pub colors: BTreeMap<char, Color>,
+}
+
+impl<'text> nojson::FromRawJsonValue<'text> for Palette {
+    fn from_raw_json_value(
+        value: nojson::RawJsonValue<'text, '_>,
+    ) -> Result<Self, nojson::JsonParseError> {
+        let colors = value.try_to()?;
+        Ok(Palette { colors })
+    }
 }
 
 #[derive(Debug)]
