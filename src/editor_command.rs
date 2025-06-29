@@ -3,6 +3,7 @@
 pub enum EditorCommand {
     Quit,
     Legend,
+    Preview,
     Background(char),
     Cancel,
     Save,
@@ -30,6 +31,7 @@ impl std::fmt::Display for EditorCommand {
         match self {
             EditorCommand::Quit => write!(f, "quit"),
             EditorCommand::Legend => write!(f, "legend"),
+            EditorCommand::Preview => write!(f, "preview"),
             EditorCommand::Background(c) => write!(f, "bg({})", c),
             EditorCommand::Cancel => write!(f, "cancel"),
             EditorCommand::Save => write!(f, "save"),
@@ -59,6 +61,7 @@ impl std::str::FromStr for EditorCommand {
         match s {
             "quit" => Ok(EditorCommand::Quit),
             "legend" => Ok(EditorCommand::Legend),
+            "preview" => Ok(EditorCommand::Preview),
             "cancel" => Ok(EditorCommand::Cancel),
             "save" => Ok(EditorCommand::Save),
             "undo" => Ok(EditorCommand::Undo),

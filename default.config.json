@@ -3,6 +3,7 @@
     "__global__": {
       "C-c": "quit",
       "C-h": "legend",
+      "C-p": "preview",
       "g": "cancel"
     },
     "__main__": {
