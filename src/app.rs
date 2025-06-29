@@ -11,6 +11,7 @@ use crate::{
     tuinix_ext::{TerminalFrameExt, TerminalSizeExt, UnicodeCharWidthEstimator},
     widget_legend::Legend,
     widget_message::MessageLine,
+    widget_preview::Preview,
     widget_status::StatusLine,
     widget_text::TextView,
 };
@@ -22,6 +23,7 @@ pub struct App {
     text_view: TextView,
     status_line: StatusLine,
     message_line: MessageLine,
+    preview: Preview,
     legend: Legend,
 }
 
@@ -34,6 +36,7 @@ impl App {
             text_view: TextView::new(),
             status_line: StatusLine,
             message_line: MessageLine,
+            preview: Preview::default(),
             legend: Legend::new(),
         })
     }
@@ -76,6 +79,9 @@ impl App {
         })?;
         frame.draw_in_region(message_region, |frame| {
             self.message_line.render(&self.editor, frame).or_fail()
+        })?;
+        frame.draw_in_region(self.preview.region(&self.editor, frame.size()), |frame| {
+            self.preview.render(&self.editor, frame).or_fail()
         })?;
         frame.draw_in_region(self.legend.region(&self.editor, frame.size()), |frame| {
             self.legend.render(&self.editor, frame).or_fail()

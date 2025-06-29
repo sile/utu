@@ -29,14 +29,19 @@ impl Preview {
         editor: &Editor,
         frame: &mut TerminalFrame<UnicodeCharWidthEstimator>,
     ) -> orfail::Result<()> {
+        if frame.size().cols != self.size(editor).cols {
+            return Ok(());
+        }
+
         if self.hide {
+            writeln!(frame, "┌───").or_fail()?;
             return Ok(());
         }
 
         // TODO: Implement preview rendering logic
         // This will depend on what kind of preview functionality is needed
         // For now, just render a placeholder
-        writeln!(frame, "Preview content here").or_fail()?;
+        writeln!(frame, "┌───").or_fail()?;
 
         Ok(())
     }
@@ -46,14 +51,15 @@ impl Preview {
             TerminalSize::rows_cols(1, 4)
         } else {
             let config = &editor.config.preview;
-            TerminalSize::rows_cols(config.height + 1, config.width + 1)
+            TerminalSize::rows_cols(config.height / 2 + 1, config.width + 1)
         }
     }
 
     pub fn region(&self, editor: &Editor, size: TerminalSize) -> TerminalRegion {
         let preview_size = self.size(editor);
         size.to_region()
+            .without_bottom_rows(2)
             .bottom_rows(preview_size.rows)
-            .left_cols(preview_size.cols)
+            .right_cols(preview_size.cols)
     }
 }
