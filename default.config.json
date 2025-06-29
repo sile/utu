@@ -43,7 +43,8 @@
     }
   },
   "preview": {
-    "size": "32x32"
+    "width": 32,
+    "height": 32
   },
   "palette": {
     " ": "#FFFFFF",
