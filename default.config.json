@@ -41,5 +41,12 @@
         "v": "flip-vertical"
       }
     }
+  },
+  "preview": {
+    "size": "32x32"
+  },
+  "palette": {
+    " ": "#FFFFFF",
+    "o": "#000000"
   }
 }
