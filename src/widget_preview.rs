@@ -4,6 +4,7 @@ use orfail::OrFail;
 use tuinix::{TerminalFrame, TerminalSize};
 
 use crate::{
+    config::Color,
     editor::Editor,
     tuinix_ext::{TerminalRegion, TerminalSizeExt, UnicodeCharWidthEstimator},
 };
@@ -38,12 +39,91 @@ impl Preview {
             return Ok(());
         }
 
-        // TODO: Implement preview rendering logic
-        // This will depend on what kind of preview functionality is needed
-        // For now, just render a placeholder
-        writeln!(frame, "┌───").or_fail()?;
+        // Render preview border and content
+        let preview_size = self.size(editor);
+
+        // Top border
+        writeln!(
+            frame,
+            "┌{}─",
+            "─".repeat(preview_size.cols.saturating_sub(2))
+        )
+        .or_fail()?;
+
+        // Content area - render as pixels using block characters
+        let content_height = preview_size.rows.saturating_sub(1); // Subtract top border only
+        let content_width = preview_size.cols.saturating_sub(1); // Subtract left border only
+
+        for terminal_row in 0..content_height {
+            write!(frame, "│").or_fail()?;
+
+            // Each terminal row represents 2 pixel rows (using ▄ character)
+            let pixel_row_top = terminal_row * 2;
+            let pixel_row_bottom = terminal_row * 2 + 1;
+
+            for pixel_col in 0..content_width {
+                // Get colors for top and bottom pixels
+                let top_color = self.get_pixel_color(editor, pixel_row_top, pixel_col);
+                let bottom_color = self.get_pixel_color(editor, pixel_row_bottom, pixel_col);
+
+                // Convert to terminal colors
+                let top_terminal_color =
+                    tuinix::TerminalColor::new(top_color.r, top_color.g, top_color.b);
+                let bottom_terminal_color =
+                    tuinix::TerminalColor::new(bottom_color.r, bottom_color.g, bottom_color.b);
+
+                // Use ▄ character with foreground as bottom pixel and background as top pixel
+                write!(
+                    frame,
+                    "{}▄",
+                    tuinix::TerminalStyle::new()
+                        .fg_color(bottom_terminal_color)
+                        .bg_color(top_terminal_color)
+                )
+                .or_fail()?;
+            }
+
+            writeln!(frame, "{}", tuinix::TerminalStyle::RESET).or_fail()?;
+        }
 
         Ok(())
+    }
+
+    fn get_pixel_color(&self, editor: &Editor, pixel_row: usize, pixel_col: usize) -> Color {
+        let buffer = &editor.buffer;
+        let default_bg = editor.config.keybindings.canvas_char();
+        let default_bg = editor
+            .config
+            .palette
+            .colors
+            .get(&default_bg)
+            .copied()
+            .expect("TODO: validate when loading json");
+
+        // Check if we're within buffer bounds
+        if pixel_row >= buffer.rows() {
+            return default_bg;
+        }
+
+        // Get the character at this position
+        let text_pos = crate::buffer::TextPosition {
+            row: pixel_row,
+            col: pixel_col,
+        };
+
+        if let Some(ch) = buffer.get_char_at(text_pos) {
+            // Look up color in palette
+            return editor
+                .config
+                .palette
+                .colors
+                .get(&ch)
+                .copied()
+                .expect("TODO: validate too");
+        }
+
+        // Return background color for empty spaces or unmapped characters
+        default_bg
     }
 
     pub fn size(&self, editor: &Editor) -> TerminalSize {

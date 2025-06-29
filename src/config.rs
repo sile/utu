@@ -63,7 +63,7 @@ impl<'text> nojson::FromRawJsonValue<'text> for Palette {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Color {
     pub r: u8,
     pub g: u8,

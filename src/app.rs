@@ -149,7 +149,6 @@ impl App {
             EditorCommand::Preview => {
                 self.preview.toggle_hide(&mut self.editor);
             }
-
             EditorCommand::Background(c) => {
                 if self.editor.buffer.filter.bg_char.take().is_none() {
                     self.editor.buffer.filter.bg_char = Some(*c);
