@@ -54,17 +54,29 @@ impl Preview {
         let content_height = preview_size.rows.saturating_sub(1); // Subtract top border only
         let content_width = preview_size.cols.saturating_sub(1); // Subtract left border only
 
+        let cursor_pixel_row = editor.cursor.row;
+        let cursor_pixel_col = editor.cursor.col;
+
+        // Calculate the viewport offset to center the cursor
+        let viewport_height = content_height * 2; // Each terminal row shows 2 pixel rows
+        let viewport_width = content_width;
+
+        let viewport_start_row = cursor_pixel_row.saturating_sub(viewport_height / 2);
+        let viewport_start_col = cursor_pixel_col.saturating_sub(viewport_width / 2);
+
         for terminal_row in 0..content_height {
             write!(frame, "│").or_fail()?;
 
             // Each terminal row represents 2 pixel rows (using ▄ character)
-            let pixel_row_top = terminal_row * 2;
-            let pixel_row_bottom = terminal_row * 2 + 1;
+            let pixel_row_top = viewport_start_row + terminal_row * 2;
+            let pixel_row_bottom = viewport_start_row + terminal_row * 2 + 1;
 
             for pixel_col in 0..content_width {
+                let actual_pixel_col = viewport_start_col + pixel_col;
+
                 // Get colors for top and bottom pixels
-                let top_color = self.get_pixel_color(editor, pixel_row_top, pixel_col);
-                let bottom_color = self.get_pixel_color(editor, pixel_row_bottom, pixel_col);
+                let top_color = self.get_pixel_color(editor, pixel_row_top, actual_pixel_col);
+                let bottom_color = self.get_pixel_color(editor, pixel_row_bottom, actual_pixel_col);
 
                 // Convert to terminal colors
                 let top_terminal_color =
