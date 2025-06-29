@@ -10,5 +10,6 @@ pub mod nojson_ext;
 pub mod tuinix_ext;
 pub mod widget_legend;
 pub mod widget_message;
+pub mod widget_preview;
 pub mod widget_status;
 pub mod widget_text;
