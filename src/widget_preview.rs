@@ -103,14 +103,7 @@ impl Preview {
 
     fn get_pixel_color(&self, editor: &Editor, pixel_row: usize, pixel_col: usize) -> Color {
         let buffer = &editor.buffer;
-        let default_bg = editor.config.keybindings.canvas_char();
-        let default_bg = editor
-            .config
-            .palette
-            .colors
-            .get(&default_bg)
-            .copied()
-            .expect("TODO: validate when loading json");
+        let default_bg = Color::rgb(200, 200, 200); // TODO: configurable
 
         // Check if we're within buffer bounds
         if pixel_row >= buffer.rows() {
