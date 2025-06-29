@@ -2,13 +2,18 @@ use tuinix::{KeyCode, TerminalFrame, TerminalPosition, TerminalSize};
 use unicode_width::UnicodeWidthChar;
 
 pub trait TerminalFrameExt {
-    fn draw_in_region<F, E>(&mut self, region: TerminalRegion, f: F) -> Result<(), E>
+    /// Draws content within a specified terminal region using a closure.
+    ///
+    /// This method creates a sub-frame for the given region and allows the closure
+    /// to draw content into it. The sub-frame is then composed onto the main frame
+    /// at the region's position.
+    fn draw_within<F, E>(&mut self, region: TerminalRegion, f: F) -> Result<(), E>
     where
         F: FnOnce(&mut TerminalFrame<UnicodeCharWidthEstimator>) -> Result<(), E>;
 }
 
 impl<W: tuinix::EstimateCharWidth> TerminalFrameExt for TerminalFrame<W> {
-    fn draw_in_region<F, E>(&mut self, region: TerminalRegion, f: F) -> Result<(), E>
+    fn draw_within<F, E>(&mut self, region: TerminalRegion, f: F) -> Result<(), E>
     where
         F: FnOnce(&mut TerminalFrame<UnicodeCharWidthEstimator>) -> Result<(), E>,
     {

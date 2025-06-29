@@ -71,19 +71,19 @@ impl App {
         let message_region = full_region.bottom_rows(1);
 
         // Render widgets
-        frame.draw_in_region(main_region, |frame| {
+        frame.draw_within(main_region, |frame| {
             self.text_view.render(&self.editor, frame).or_fail()
         })?;
-        frame.draw_in_region(status_region, |frame| {
+        frame.draw_within(status_region, |frame| {
             self.status_line.render(&self.editor, frame).or_fail()
         })?;
-        frame.draw_in_region(message_region, |frame| {
+        frame.draw_within(message_region, |frame| {
             self.message_line.render(&self.editor, frame).or_fail()
         })?;
-        frame.draw_in_region(self.preview.region(&self.editor, frame.size()), |frame| {
+        frame.draw_within(self.preview.region(&self.editor, frame.size()), |frame| {
             self.preview.render(&self.editor, frame).or_fail()
         })?;
-        frame.draw_in_region(self.legend.region(&self.editor, frame.size()), |frame| {
+        frame.draw_within(self.legend.region(&self.editor, frame.size()), |frame| {
             self.legend.render(&self.editor, frame).or_fail()
         })?;
 
