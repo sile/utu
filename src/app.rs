@@ -67,31 +67,27 @@ impl App {
             .or_fail()?;
         frame.draw(main_region.position, &subframe);
 
-        let mut status_subframe = TerminalFrame::new(status_region.size);
+        let mut subframe = TerminalFrame::new(status_region.size);
         self.status_line
-            .render(&self.editor, &mut status_subframe)
+            .render(&self.editor, &mut subframe)
             .or_fail()?;
-        frame.draw(status_region.position, &status_subframe);
+        frame.draw(status_region.position, &subframe);
 
-        let mut message_subframe = TerminalFrame::new(message_region.size);
+        let mut subframe = TerminalFrame::new(message_region.size);
         self.message_line
-            .render(&self.editor, &mut message_subframe)
+            .render(&self.editor, &mut subframe)
             .or_fail()?;
-        frame.draw(message_region.position, &message_subframe);
+        frame.draw(message_region.position, &subframe);
 
         let preview_region = self.preview.region(&self.editor, frame.size());
-        let mut preview_subframe = TerminalFrame::new(preview_region.size);
-        self.preview
-            .render(&self.editor, &mut preview_subframe)
-            .or_fail()?;
-        frame.draw(preview_region.position, &preview_subframe);
+        let mut subframe = TerminalFrame::new(preview_region.size);
+        self.preview.render(&self.editor, &mut subframe).or_fail()?;
+        frame.draw(preview_region.position, &subframe);
 
         let legend_region = self.legend.region(&self.editor, frame.size());
-        let mut legend_subframe = TerminalFrame::new(legend_region.size);
-        self.legend
-            .render(&self.editor, &mut legend_subframe)
-            .or_fail()?;
-        frame.draw(legend_region.position, &legend_subframe);
+        let mut subframe = TerminalFrame::new(legend_region.size);
+        self.legend.render(&self.editor, &mut subframe).or_fail()?;
+        frame.draw(legend_region.position, &subframe);
 
         // Set cursor position for text editing
         let cursor_pos = self.text_view.cursor_terminal_position(&self.editor);
