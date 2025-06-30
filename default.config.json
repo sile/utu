@@ -15,7 +15,7 @@
       "←,j": "prev-char",
       "→,l": "next-char",
       " ": "dot( )",
-      "d": "dot(o)",
+      "d": "dot(█)",
       "w": "cut",
       "W": "copy",
       "m": "scope(marker)"
@@ -44,11 +44,11 @@
     }
   },
   "preview": {
-    "width": 32,
-    "height": 32
+    "width": 40,
+    "height": 40
   },
   "palette": {
     " ": "#FFFFFF",
-    "o": "#000000"
+    "█": "#000000"
   }
 }
