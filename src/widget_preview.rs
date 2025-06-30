@@ -1,13 +1,9 @@
 use std::fmt::Write;
 
 use orfail::OrFail;
-use tuinix::{TerminalFrame, TerminalSize};
+use tuinix::{TerminalRegion, TerminalSize};
 
-use crate::{
-    config::Color,
-    editor::Editor,
-    tuinix_ext::{TerminalRegion, TerminalSizeExt, UnicodeCharWidthEstimator},
-};
+use crate::{config::Color, editor::Editor, tuinix_ext::TerminalFrame};
 
 #[derive(Debug, Default)]
 pub struct Preview {
@@ -25,11 +21,7 @@ impl Preview {
         editor.dirty.render = true;
     }
 
-    pub fn render(
-        &self,
-        editor: &Editor,
-        frame: &mut TerminalFrame<UnicodeCharWidthEstimator>,
-    ) -> orfail::Result<()> {
+    pub fn render(&self, editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
         if frame.size().cols != self.size(editor).cols {
             return Ok(());
         }
@@ -143,8 +135,8 @@ impl Preview {
     pub fn region(&self, editor: &Editor, size: TerminalSize) -> TerminalRegion {
         let preview_size = self.size(editor);
         size.to_region()
-            .without_bottom_rows(2)
-            .bottom_rows(preview_size.rows)
-            .right_cols(preview_size.cols)
+            .drop_bottom(2)
+            .take_bottom(preview_size.rows)
+            .take_right(preview_size.cols)
     }
 }

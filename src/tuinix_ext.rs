@@ -1,86 +1,8 @@
-use tuinix::{KeyCode, TerminalFrame, TerminalPosition, TerminalSize};
+use tuinix::KeyCode;
+
 use unicode_width::UnicodeWidthChar;
 
-pub trait TerminalFrameExt {
-    /// Draws content within a specified terminal region using a closure.
-    ///
-    /// This method creates a sub-frame for the given region and allows the closure
-    /// to draw content into it. The sub-frame is then composed onto the main frame
-    /// at the region's position.
-    fn draw_within<F, E>(&mut self, region: TerminalRegion, f: F) -> Result<(), E>
-    where
-        F: FnOnce(&mut TerminalFrame<UnicodeCharWidthEstimator>) -> Result<(), E>;
-}
-
-impl<W: tuinix::EstimateCharWidth> TerminalFrameExt for TerminalFrame<W> {
-    fn draw_within<F, E>(&mut self, region: TerminalRegion, f: F) -> Result<(), E>
-    where
-        F: FnOnce(&mut TerminalFrame<UnicodeCharWidthEstimator>) -> Result<(), E>,
-    {
-        let mut subframe =
-            TerminalFrame::with_char_width_estimator(region.size, UnicodeCharWidthEstimator);
-        f(&mut subframe)?;
-        self.draw(region.position, &subframe);
-        Ok(())
-    }
-}
-
-pub trait TerminalSizeExt {
-    fn rows_cols(rows: usize, cols: usize) -> TerminalSize;
-    fn to_region(self) -> TerminalRegion;
-}
-
-impl TerminalSizeExt for TerminalSize {
-    fn rows_cols(rows: usize, cols: usize) -> TerminalSize {
-        Self { rows, cols }
-    }
-
-    fn to_region(self) -> TerminalRegion {
-        TerminalRegion {
-            position: TerminalPosition::ZERO,
-            size: self,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct TerminalRegion {
-    pub position: TerminalPosition,
-    pub size: TerminalSize,
-}
-
-impl TerminalRegion {
-    pub fn top_rows(mut self, rows: usize) -> Self {
-        self.size.rows = self.size.rows.min(rows);
-        self
-    }
-
-    pub fn bottom_rows(mut self, rows: usize) -> Self {
-        if let Some(offset) = self.size.rows.checked_sub(rows) {
-            self.position.row += offset;
-            self.size.rows = rows;
-        }
-        self
-    }
-
-    pub fn right_cols(mut self, cols: usize) -> Self {
-        if let Some(offset) = self.size.cols.checked_sub(cols) {
-            self.position.col += offset;
-            self.size.cols = cols;
-        }
-        self
-    }
-
-    pub fn left_cols(mut self, cols: usize) -> Self {
-        self.size.cols = self.size.cols.min(cols);
-        self
-    }
-
-    pub fn without_bottom_rows(mut self, rows: usize) -> Self {
-        self.size.rows = self.size.rows.saturating_sub(rows);
-        self
-    }
-}
+pub type TerminalFrame = tuinix::TerminalFrame<UnicodeCharWidthEstimator>;
 
 pub trait KeyInputExt {
     fn from_str(s: &str) -> Option<tuinix::KeyInput>;
@@ -177,7 +99,7 @@ impl KeyInputExt for tuinix::KeyInput {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct UnicodeCharWidthEstimator;
 
 impl tuinix::EstimateCharWidth for UnicodeCharWidthEstimator {

@@ -1,12 +1,9 @@
 use std::fmt::Write;
 
 use orfail::OrFail;
-use tuinix::{TerminalFrame, TerminalSize};
+use tuinix::{TerminalRegion, TerminalSize};
 
-use crate::{
-    editor::Editor,
-    tuinix_ext::{TerminalRegion, TerminalSizeExt, UnicodeCharWidthEstimator},
-};
+use crate::{editor::Editor, tuinix_ext::TerminalFrame};
 
 #[derive(Debug)]
 pub struct Legend {
@@ -21,11 +18,7 @@ impl Legend {
         Self { hide: false }
     }
 
-    pub fn render(
-        &self,
-        editor: &Editor,
-        frame: &mut TerminalFrame<UnicodeCharWidthEstimator>,
-    ) -> orfail::Result<()> {
+    pub fn render(&self, editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
         if frame.size().cols != self.size(editor).cols {
             return Ok(());
         }
@@ -80,8 +73,8 @@ impl Legend {
     pub fn region(&self, editor: &Editor, size: TerminalSize) -> TerminalRegion {
         let legend_size = self.size(editor);
         size.to_region()
-            .top_rows(legend_size.rows)
-            .right_cols(legend_size.cols)
+            .take_top(legend_size.rows)
+            .take_right(legend_size.cols)
     }
 
     pub fn toggle_hide(&mut self, editor: &mut Editor) {

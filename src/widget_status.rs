@@ -1,19 +1,15 @@
 use std::fmt::Write;
 
 use orfail::OrFail;
-use tuinix::{TerminalFrame, TerminalStyle};
+use tuinix::TerminalStyle;
 
-use crate::{editor::Editor, tuinix_ext::UnicodeCharWidthEstimator};
+use crate::{editor::Editor, tuinix_ext::TerminalFrame};
 
 #[derive(Debug)]
 pub struct StatusLine;
 
 impl StatusLine {
-    pub fn render(
-        &self,
-        editor: &Editor,
-        frame: &mut TerminalFrame<UnicodeCharWidthEstimator>,
-    ) -> orfail::Result<()> {
+    pub fn render(&self, editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
         // Create a styled status bar with reverse colors (dark background, light text)
         let style = TerminalStyle::new().reverse().bold();
         let reset = TerminalStyle::RESET;

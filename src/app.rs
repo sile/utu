@@ -1,19 +1,12 @@
 use std::path::PathBuf;
 
 use orfail::OrFail;
-use tuinix::{Terminal, TerminalEvent, TerminalFrame, TerminalInput};
+use tuinix::{Terminal, TerminalEvent, TerminalInput};
 
 use crate::{
-    clipboard::Clipboard,
-    config::Config,
-    editor::Editor,
-    editor_command::EditorCommand,
-    tuinix_ext::{TerminalFrameExt, TerminalSizeExt, UnicodeCharWidthEstimator},
-    widget_legend::Legend,
-    widget_message::MessageLine,
-    widget_preview::Preview,
-    widget_status::StatusLine,
-    widget_text::TextView,
+    clipboard::Clipboard, config::Config, editor::Editor, editor_command::EditorCommand,
+    tuinix_ext::TerminalFrame, widget_legend::Legend, widget_message::MessageLine,
+    widget_preview::Preview, widget_status::StatusLine, widget_text::TextView,
 };
 
 #[derive(Debug)]
@@ -59,33 +52,46 @@ impl App {
             return Ok(());
         }
 
-        let mut frame = TerminalFrame::with_char_width_estimator(
-            self.terminal.size(),
-            UnicodeCharWidthEstimator,
-        );
+        let mut frame = TerminalFrame::new(self.terminal.size());
 
         // Create regions for different UI components
         let full_region = frame.size().to_region();
-        let main_region = full_region.without_bottom_rows(2);
-        let status_region = full_region.without_bottom_rows(1).bottom_rows(1);
-        let message_region = full_region.bottom_rows(1);
+        let main_region = full_region.drop_bottom(2);
+        let status_region = full_region.drop_bottom(1).take_bottom(1);
+        let message_region = full_region.take_bottom(1);
 
         // Render widgets
-        frame.draw_within(main_region, |frame| {
-            self.text_view.render(&self.editor, frame).or_fail()
-        })?;
-        frame.draw_within(status_region, |frame| {
-            self.status_line.render(&self.editor, frame).or_fail()
-        })?;
-        frame.draw_within(message_region, |frame| {
-            self.message_line.render(&self.editor, frame).or_fail()
-        })?;
-        frame.draw_within(self.preview.region(&self.editor, frame.size()), |frame| {
-            self.preview.render(&self.editor, frame).or_fail()
-        })?;
-        frame.draw_within(self.legend.region(&self.editor, frame.size()), |frame| {
-            self.legend.render(&self.editor, frame).or_fail()
-        })?;
+        let mut subframe = TerminalFrame::new(main_region.size);
+        self.text_view
+            .render(&self.editor, &mut subframe)
+            .or_fail()?;
+        frame.draw(main_region.position, &subframe);
+
+        let mut status_subframe = TerminalFrame::new(status_region.size);
+        self.status_line
+            .render(&self.editor, &mut status_subframe)
+            .or_fail()?;
+        frame.draw(status_region.position, &status_subframe);
+
+        let mut message_subframe = TerminalFrame::new(message_region.size);
+        self.message_line
+            .render(&self.editor, &mut message_subframe)
+            .or_fail()?;
+        frame.draw(message_region.position, &message_subframe);
+
+        let preview_region = self.preview.region(&self.editor, frame.size());
+        let mut preview_subframe = TerminalFrame::new(preview_region.size);
+        self.preview
+            .render(&self.editor, &mut preview_subframe)
+            .or_fail()?;
+        frame.draw(preview_region.position, &preview_subframe);
+
+        let legend_region = self.legend.region(&self.editor, frame.size());
+        let mut legend_subframe = TerminalFrame::new(legend_region.size);
+        self.legend
+            .render(&self.editor, &mut legend_subframe)
+            .or_fail()?;
+        frame.draw(legend_region.position, &legend_subframe);
 
         // Set cursor position for text editing
         let cursor_pos = self.text_view.cursor_terminal_position(&self.editor);

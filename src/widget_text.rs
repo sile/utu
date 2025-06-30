@@ -1,10 +1,10 @@
 use std::{collections::BTreeSet, fmt::Write};
 
 use orfail::OrFail;
-use tuinix::{TerminalFrame, TerminalStyle};
+use tuinix::TerminalStyle;
 use unicode_width::UnicodeWidthChar;
 
-use crate::{buffer::TextPosition, editor::Editor, tuinix_ext::UnicodeCharWidthEstimator};
+use crate::{buffer::TextPosition, editor::Editor, tuinix_ext::TerminalFrame};
 
 #[derive(Debug)]
 pub struct TextView {
@@ -18,11 +18,7 @@ impl TextView {
         }
     }
 
-    pub fn render(
-        &mut self,
-        editor: &Editor,
-        frame: &mut TerminalFrame<UnicodeCharWidthEstimator>,
-    ) -> orfail::Result<()> {
+    pub fn render(&mut self, editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
         let terminal_size = frame.size();
 
         // Adjust scroll offset to keep cursor visible
