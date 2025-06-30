@@ -6,6 +6,7 @@ use crate::keybinding::KeyBindings;
 pub struct Config {
     pub keybindings: KeyBindings,
     pub preview: PreviewConfig,
+    // TODO: use a map to be able to switch palettes
     pub palette: Palette,
 }
 
