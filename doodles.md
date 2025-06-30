@@ -53,17 +53,17 @@
 |                   oo     oo o  |
 |                    o           |
 |        oo                      |
-|       o o                      |
-|    ooo  o           o          |
-|   o      ooooo      o          |
-|   o o         ooo  o     ooooo |
-|  o     o         oo            |
-| oo  ooo o         o    oooooo  |
-|  ooo     o ooo    o            |
-|         o o   ooo o  oooooo    |
-|        o o       o o           |
-|       o o         o o          |
-|        o           o o         |
+|       o+o                      |
+|    ooo++o           o          |
+|   o++++++ooooo      o          |
+|   o+o+++++++++ooo  o     +++++ |
+|  o+++++o+++++++++oo            |
+| oo++ooo o+++++++++o    ++++++  |
+|  ooo     o+ooo++++o            |
+|         o+o   ooo+o  ++++++    |
+|        o+o       o+o           |
+|       o+o         o+o          |
+|        o           o+o         |
 |                     o          |
 |oooooooooooooooooooooooooooooooo|
 | o o o o o o o o o o o o o o o o|

@@ -14,8 +14,10 @@
       "↓,k": "next-line",
       "←,j": "prev-char",
       "→,l": "next-char",
-      " ,s": "dot( )",
+      " ,a": "dot( )",
+      "s": "dot(+)",
       "d": "dot(o)",
+      "f": "dot(#)",
       "w": "cut",
       "W": "copy",
       "m": "scope(marker)"
@@ -49,6 +51,8 @@
   },
   "palette": {
     " ": "#FFFFFF",
-    "o": "#000000"
+    "+": "#CCCCCC",
+    "o": "#888888",
+    "#": "#000000"
   }
 }
