@@ -29,7 +29,7 @@ fn main() -> noargs::Result<()> {
     let position: TextPosition = noargs::opt("position")
         .short('p')
         .ty("ROW:COLUMN")
-        .default("0:0")
+        .default("1:1")
         .take(&mut args)
         .then(|a| a.value().parse())?;
     let file_path: PathBuf = noargs::arg("FILE_PATH")
@@ -53,7 +53,8 @@ fn main() -> noargs::Result<()> {
         return Ok(());
     }
 
-    let app = App::new(file_path, config).or_fail()?;
+    let mut app = App::new(file_path, config).or_fail()?;
+    app.editor.cursor = position;
     app.run().or_fail()?;
 
     Ok(())

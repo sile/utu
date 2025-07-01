@@ -12,7 +12,7 @@ use crate::{
 #[derive(Debug)]
 pub struct App {
     terminal: Terminal,
-    editor: Editor,
+    pub editor: Editor,
     text_view: TextView,
     status_line: StatusLine,
     message_line: MessageLine,
