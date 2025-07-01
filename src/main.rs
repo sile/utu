@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use nopng::PngRgbaImage;
 use orfail::OrFail;
 use utu::{
     app::App,
@@ -41,6 +42,10 @@ fn main() -> noargs::Result<()> {
         .ty("WIDTHxHEIGHT")
         .take(&mut args)
         .present_and_then(|a| a.value().parse())?;
+    let export: Option<PathBuf> = noargs::opt("export")
+        .ty("PATH")
+        .take(&mut args)
+        .present_and_then(|a| a.value().parse())?;
     let file_path: PathBuf = noargs::arg("FILE_PATH")
         .doc("File path to edit")
         .example("/path/to/file")
@@ -66,9 +71,57 @@ fn main() -> noargs::Result<()> {
         config.preview = size;
     }
 
-    let mut app = App::new(file_path, config).or_fail()?;
-    app.editor.cursor = position;
-    app.run().or_fail()?;
+    if let Some(output_path) = export {
+        let mut editor = utu::editor::Editor::new(file_path, config).or_fail()?;
+        editor.cursor = position;
+        editor.reload().or_fail()?;
+
+        let png = generate_png_from_buffer(&editor.buffer, &editor.config, position).or_fail()?;
+        let mut file = std::fs::File::create(&output_path).or_fail()?;
+        png.write_to(&mut file).or_fail()?;
+
+        println!("PNG exported to: {}", output_path.display());
+    } else {
+        let mut app = App::new(file_path, config).or_fail()?;
+        app.editor.cursor = position;
+        app.run().or_fail()?;
+    }
 
     Ok(())
+}
+
+fn generate_png_from_buffer(
+    buffer: &utu::buffer::TextBuffer,
+    config: &utu::config::Config,
+    offset: TextPosition,
+) -> orfail::Result<PngRgbaImage> {
+    let height = config.preview.height;
+    let width = config.preview.width;
+
+    let mut pixels = Vec::with_capacity(width * height * 4);
+
+    for row in 0..height {
+        // TODO: consider unicode width
+        for col in 0..width {
+            let pos = utu::buffer::TextPosition {
+                row: row + offset.row,
+                col: col + offset.col,
+            };
+            let pixel_color = if let Some(ch) = buffer.get_char_at(pos) {
+                // Convert char to color using the palette
+                let color = config
+                    .palette
+                    .colors
+                    .get(&ch)
+                    .expect("Character should be validated in palette");
+                [color.r, color.g, color.b, 255] // RGB + full alpha
+            } else {
+                [0, 0, 0, 255] // Black background
+            };
+            pixels.extend_from_slice(&pixel_color);
+        }
+    }
+
+    let png = PngRgbaImage::new(width as u32, height as u32, pixels).or_fail()?;
+    Ok(png)
 }
