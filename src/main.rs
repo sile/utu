@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use orfail::OrFail;
-use utu::{app::App, buffer::TextPosition};
+use utu::{app::App, buffer::TextPosition, config::FrameSize};
 
 fn main() -> noargs::Result<()> {
     let mut args = noargs::raw_args();
@@ -30,6 +30,12 @@ fn main() -> noargs::Result<()> {
         .short('p')
         .ty("ROW:COLUMN")
         .default("1:1")
+        .take(&mut args)
+        .then(|a| a.value().parse())?;
+    let frame_size: FrameSize = noargs::opt("frame-size")
+        .short('s')
+        .ty("WIDTHxHEIGHT")
+        .default("32x32")
         .take(&mut args)
         .then(|a| a.value().parse())?;
     let file_path: PathBuf = noargs::arg("FILE_PATH")

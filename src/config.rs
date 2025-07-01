@@ -5,7 +5,7 @@ use crate::keybinding::KeyBindings;
 #[derive(Debug)]
 pub struct Config {
     pub keybindings: KeyBindings,
-    pub preview: PreviewConfig,
+    pub preview: FrameSize,
     // TODO: use a map to be able to switch palettes
     pub palette: Palette,
 }
@@ -33,17 +33,34 @@ impl Default for Config {
 }
 
 #[derive(Debug)]
-pub struct PreviewConfig {
+pub struct FrameSize {
     pub width: usize,
     pub height: usize,
 }
 
-impl<'text> nojson::FromRawJsonValue<'text> for PreviewConfig {
+impl std::str::FromStr for FrameSize {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (width, height) = s
+            .split_once('x')
+            .ok_or_else(|| format!("Invalid format: expected 'WIDTHxHEIGHT', got '{}'", s))?;
+        let width = width
+            .parse()
+            .map_err(|e| format!("Invalid width '{}': {}", width, e))?;
+        let height = height
+            .parse()
+            .map_err(|e| format!("Invalid height '{}': {}", height, e))?;
+        Ok(FrameSize { width, height })
+    }
+}
+
+impl<'text> nojson::FromRawJsonValue<'text> for FrameSize {
     fn from_raw_json_value(
         value: nojson::RawJsonValue<'text, '_>,
     ) -> Result<Self, nojson::JsonParseError> {
         let ([width, height], []) = value.to_fixed_object(["width", "height"], [])?;
-        Ok(PreviewConfig {
+        Ok(FrameSize {
             width: width.try_to()?,
             height: height.try_to()?,
         })
