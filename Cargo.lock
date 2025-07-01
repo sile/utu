@@ -21,6 +21,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8fc252af38a3a531016fb3ddbd98e83f11a03baaf1d136ad59e140b06255a1b7"
 
 [[package]]
+name = "nopng"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ad67ff1c34777abd18d885fef62baf5f3ebad069a1ff2174b95c4b0a3a06e4e"
+
+[[package]]
 name = "orfail"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -47,6 +53,7 @@ version = "0.1.0"
 dependencies = [
  "noargs",
  "nojson",
+ "nopng",
  "orfail",
  "tuinix",
  "unicode-width",

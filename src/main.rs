@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use orfail::OrFail;
-use utu::app::App;
+use utu::{app::App, buffer::TextPosition};
 
 fn main() -> noargs::Result<()> {
     let mut args = noargs::raw_args();
@@ -26,6 +26,12 @@ fn main() -> noargs::Result<()> {
             Ok(config)
         })?
         .unwrap_or_default();
+    let position: TextPosition = noargs::opt("position")
+        .short('p')
+        .ty("ROW:COLUMN")
+        .default("0:0")
+        .take(&mut args)
+        .then(|a| a.value().parse())?;
     let file_path: PathBuf = noargs::arg("FILE_PATH")
         .doc("File path to edit")
         .example("/path/to/file")

@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, num::NonZeroUsize};
 
 use unicode_width::UnicodeWidthChar;
 
@@ -182,6 +182,26 @@ impl TextBuffer {
 pub struct TextPosition {
     pub row: usize,
     pub col: usize,
+}
+
+impl std::str::FromStr for TextPosition {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (row, col) = s
+            .split_once(':')
+            .ok_or_else(|| format!("Invalid format: expected 'ROW:COLUMN', got '{}'", s))?;
+        let row: NonZeroUsize = row
+            .parse()
+            .map_err(|e| format!("Invalid row number '{}': {}", row, e))?;
+        let col: NonZeroUsize = col
+            .parse()
+            .map_err(|e| format!("Invalid column number '{}': {}", col, e))?;
+        Ok(Self {
+            row: row.get() - 1,
+            col: col.get() - 1,
+        })
+    }
 }
 
 #[derive(Debug, Clone)]
