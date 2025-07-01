@@ -31,7 +31,7 @@
 |    o+++++++++++++++++++++oooo+o|
 | oooo+oo+oo++ooo+++++++++o+++++o|
 |o+++o+++++++o+++++++++++o++++++o|
-|ooooooooooooooooooooooooooooooo |
+|oooooooooooooooooooooooooooooooo|
 +--------------------------------+
 ```
 

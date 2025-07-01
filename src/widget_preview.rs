@@ -95,7 +95,8 @@ impl Preview {
 
     fn get_pixel_color(&self, editor: &Editor, pixel_row: usize, pixel_col: usize) -> Color {
         let buffer = &editor.buffer;
-        let default_bg = Color::rgb(200, 200, 200); // TODO: configurable
+        let default_bg = Color::rgb(0xFF, 0xFF, 0xFF); // TODO: configurable
+        // let default_bg = Color::rgb(200, 200, 200); // TODO: configurable
 
         // Check if we're within buffer bounds
         if pixel_row >= buffer.rows() {
