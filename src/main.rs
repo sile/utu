@@ -1,7 +1,11 @@
 use std::path::PathBuf;
 
 use orfail::OrFail;
-use utu::{app::App, buffer::TextPosition, config::FrameSize};
+use utu::{
+    app::App,
+    buffer::TextPosition,
+    config::{Config, FrameSize},
+};
 
 fn main() -> noargs::Result<()> {
     let mut args = noargs::raw_args();
@@ -14,7 +18,7 @@ fn main() -> noargs::Result<()> {
     }
     noargs::HELP_FLAG.take_help(&mut args);
 
-    let config = noargs::opt("config-file")
+    let mut config: Config = noargs::opt("config-file")
         .short('c')
         .ty("PATH")
         .doc("Configuration file path")
@@ -32,12 +36,11 @@ fn main() -> noargs::Result<()> {
         .default("1:1")
         .take(&mut args)
         .then(|a| a.value().parse())?;
-    let frame_size: FrameSize = noargs::opt("frame-size")
+    let frame_size: Option<FrameSize> = noargs::opt("frame-size")
         .short('s')
         .ty("WIDTHxHEIGHT")
-        .default("32x32")
         .take(&mut args)
-        .then(|a| a.value().parse())?;
+        .present_and_then(|a| a.value().parse())?;
     let file_path: PathBuf = noargs::arg("FILE_PATH")
         .doc("File path to edit")
         .example("/path/to/file")
@@ -57,6 +60,10 @@ fn main() -> noargs::Result<()> {
     if let Some(help) = args.finish()? {
         print!("{help}");
         return Ok(());
+    }
+
+    if let Some(size) = frame_size {
+        config.preview = size;
     }
 
     let mut app = App::new(file_path, config).or_fail()?;
