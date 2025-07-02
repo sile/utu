@@ -1,11 +1,11 @@
 # utu
 
+**WIP**
+
 TUI Text editor for pixel arts.
 
 ASCII canvas
 ------------
-
-default.keys.json
 
 ```
 +--------------------------------+
