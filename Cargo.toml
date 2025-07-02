@@ -8,7 +8,7 @@ description = "TUI pixel art editor using plain text files"
 homepage = "https://github.com/sile/utu"
 repository = "https://github.com/sile/utu"
 readme = "README.md"
-not but. but too long.
+
 [dependencies]
 noargs = "0.4.1"
 nojson = "0.1.2"
