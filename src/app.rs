@@ -264,7 +264,9 @@ impl App {
             }
             EditorCommand::Paste => {
                 if let Some(clipboard) = &self.editor.clipboard {
-                    self.editor.buffer.update_bulk(clipboard.pixels());
+                    if self.editor.buffer.update_bulk(clipboard.pixels()) {
+                        self.editor.dirty.content = true;
+                    }
                     self.editor.set_message("Pasted");
                 } else {
                     self.editor.set_message("No clipboard content");
