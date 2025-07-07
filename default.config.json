@@ -31,6 +31,7 @@
       "f": "mark-fill"
     },
     "__clipboard__": {
+      "C-u": "undo",
       "↑,i": "prev-line",
       "↓,k": "next-line",
       "←,j": "prev-char",
