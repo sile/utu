@@ -2,34 +2,34 @@
 +--------------------------------+
 |                                |
 |                                |
-|   +++++             ++         |
-|       +            + +         |
-|      +            +  +         |
-|   +++ +         +++++++ ++     |
-|                +++++++++ +     |
-|            ++ +++++++++++      |
-|       +   + + ++++++++++++     |
-|     ++    + + +++++++++++++++  |
-|   ++ +     + +++++++++++++  +  |
-|      +      ++++++++++++++ +   |
-|      +        +++++++++++++    |
-|               ++++++++++++     |
-|  +++          ++++++++++++     |
-|  ++ +      +++ ++++++++++      |
-|  ++  +    +     ++++++++       |
-|  ++   +   ++   +   ++          |
-|  ++ +  +  +    +   + +++       |
-|  ++     + +  + +    +  +       |
-|  ++   + + +++++      ++        |
-|  ++     +                      |
-|  ++ +    +++                   |
-|  ++    +    +                  |
-|  +++ +     + +     +        +  |
-|  +++    +     +   +++++  +  +  |
-|   +++       +  +   +  +   ++   |
-|    ++++         + +   +   ++   |
-|     +++++++++++++    +  ++  +  |
-|      ++++++++++++              |
+|   ooooo             oo         |
+|       o            o o         |
+|      o            o  o         |
+|   ooo o          oooooo oo     |
+|                 oooooooo o     |
+|            oo  ooo    ooo      |
+|       o   o o ooo oooo ooo     |
+|     oo    o o oo oo  oo ooooo  |
+|   oo o     o ooo o oo o oo  o  |
+|      o      oooo o oo o oo o   |
+|      o        oo oo  oo ooo    |
+|               ooo oooo ooo     |
+|  ooo          oooo    ooo      |
+|  oo o      ooo ooooooooo       |
+|  oo  o    o     ooooooo        |
+|  oo   o   oo   o   oo          |
+|  oo o  o  o    o   o ooo       |
+|  oo     o o  o o    o  o       |
+|  oo   o o ooooo      oo        |
+|  oo     o                      |
+|  oo o    ooo                   |
+|  oo    o    o                  |
+|  ooo o     o o     o        o  |
+|  ooo    o     o   ooooo  o  o  |
+|   ooo       o  o   o  o   oo   |
+|    oooo         o o   o   oo   |
+|     ooooooooooooo    o  oo  o  |
+|      oooooooooooo              |
 |                                |
 |                                |
 +--------------------------------+
