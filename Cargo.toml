@@ -11,7 +11,7 @@ readme = "README.md"
 
 [dependencies]
 noargs = "0.4.1"
-nojson = "0.1.2"
+nojson = "0.2.1"
 nopng = "0.0.1"
 orfail = "1.1.0"
 tuinix = "0.2.0"

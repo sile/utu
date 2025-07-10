@@ -10,16 +10,18 @@ pub struct Config {
     pub palette: Palette,
 }
 
-impl<'text> nojson::FromRawJsonValue<'text> for Config {
-    fn from_raw_json_value(
-        value: nojson::RawJsonValue<'text, '_>,
-    ) -> Result<Self, nojson::JsonParseError> {
-        let ([keybindings, preview, palette], []) =
-            value.to_fixed_object(["keybindings", "preview", "palette"], [])?;
+impl<'text, 'raw> TryFrom<nojson::RawJsonValue<'text, 'raw>> for Config {
+    type Error = nojson::JsonParseError;
+
+    fn try_from(value: nojson::RawJsonValue<'text, 'raw>) -> Result<Self, Self::Error> {
+        let keybindings = value.to_member("keybindings")?.required()?;
+        let preview = value.to_member("preview")?.required()?;
+        let palette = value.to_member("palette")?.required()?;
+
         Ok(Config {
-            keybindings: keybindings.try_to()?,
-            preview: preview.try_to()?, // TODO: optional
-            palette: palette.try_to()?,
+            keybindings: keybindings.try_into()?,
+            preview: preview.try_into()?, // TODO: optional
+            palette: palette.try_into()?,
         })
     }
 }
@@ -55,14 +57,16 @@ impl std::str::FromStr for FrameSize {
     }
 }
 
-impl<'text> nojson::FromRawJsonValue<'text> for FrameSize {
-    fn from_raw_json_value(
-        value: nojson::RawJsonValue<'text, '_>,
-    ) -> Result<Self, nojson::JsonParseError> {
-        let ([width, height], []) = value.to_fixed_object(["width", "height"], [])?;
+impl<'text, 'raw> TryFrom<nojson::RawJsonValue<'text, 'raw>> for FrameSize {
+    type Error = nojson::JsonParseError;
+
+    fn try_from(value: nojson::RawJsonValue<'text, 'raw>) -> Result<Self, Self::Error> {
+        let width = value.to_member("width")?.required()?;
+        let height = value.to_member("height")?.required()?;
+
         Ok(FrameSize {
-            width: width.try_to()?,
-            height: height.try_to()?,
+            width: width.try_into()?,
+            height: height.try_into()?,
         })
     }
 }
@@ -72,11 +76,11 @@ pub struct Palette {
     pub colors: BTreeMap<char, Color>,
 }
 
-impl<'text> nojson::FromRawJsonValue<'text> for Palette {
-    fn from_raw_json_value(
-        value: nojson::RawJsonValue<'text, '_>,
-    ) -> Result<Self, nojson::JsonParseError> {
-        let colors = value.try_to()?;
+impl<'text, 'raw> TryFrom<nojson::RawJsonValue<'text, 'raw>> for Palette {
+    type Error = nojson::JsonParseError;
+
+    fn try_from(value: nojson::RawJsonValue<'text, 'raw>) -> Result<Self, Self::Error> {
+        let colors = value.try_into()?;
         Ok(Palette { colors })
     }
 }
@@ -99,10 +103,10 @@ impl Color {
     }
 }
 
-impl<'text> nojson::FromRawJsonValue<'text> for Color {
-    fn from_raw_json_value(
-        value: nojson::RawJsonValue<'text, '_>,
-    ) -> Result<Self, nojson::JsonParseError> {
+impl<'text, 'raw> TryFrom<nojson::RawJsonValue<'text, 'raw>> for Color {
+    type Error = nojson::JsonParseError;
+
+    fn try_from(value: nojson::RawJsonValue<'text, 'raw>) -> Result<Self, Self::Error> {
         let hex_string = value.to_unquoted_string_str()?;
 
         // Parse hex color string (e.g., "#FFFFFF" or "#000000" or "#FFFFFFAA")

@@ -153,13 +153,13 @@ impl KeyBindings {
     }
 }
 
-impl<'text> nojson::FromRawJsonValue<'text> for KeyBindings {
-    fn from_raw_json_value(
-        value: nojson::RawJsonValue<'text, '_>,
-    ) -> Result<Self, nojson::JsonParseError> {
+impl<'text, 'raw> TryFrom<nojson::RawJsonValue<'text, 'raw>> for KeyBindings {
+    type Error = nojson::JsonParseError;
+
+    fn try_from(value: nojson::RawJsonValue<'text, 'raw>) -> Result<Self, Self::Error> {
         let mut group_names = value
             .to_object()?
-            .map(|(k, _)| Ok(k.to_unquoted_string_str()?.into_owned()))
+            .map(|(k, _)| k.to_unquoted_string_str().map(|s| s.into_owned()))
             .collect::<Result<BTreeSet<_>, _>>()?;
         group_names.retain(|n| {
             !matches!(
