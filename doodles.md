@@ -14,28 +14,29 @@
 |                                  ooo            oooo           |
 |                                                                |
 |                                                                |
+|                                                                |
 |         oooooooooooooooooo                                     |
-|        o..................oo                                   |
-|      oo.....................o                                  |
-|     o........................oo                                |
-|    o...........................o                            oo |
-|  oo.............................oo                        oo.o |
-| o.................................o                    ooo...o |
-| o..................................oo               ooo......o |
-| o....................................o            oo.........o |
-| o.....o...............................ooo      ooo...........o |
-| o.....oo.................................oooooo..............o |
-| o............................................................o |
-| o............................................................o |
-| o............................................................o |
-| o............................................................o |
-| o..........................................................oo  |
-| o........................................................oo    |
-| o.......................................................o      |
-| o...............                        ..............oo       |
-| o.............                              ........oo         |
-|  oo.........                                    ..oo           |
-|    ooooo..                                       o             |
+|        ooooooooooooooooooooo                                   |
+|      oooooooooooooooooooooooo                                  |
+|     ooooooooooooooooooooooooooo                                |
+|    ooooooooooooooooooooooooooooo                            oo |
+|  ooooooooooooooooooooooooooooooooo                        oooo |
+| ooooooooooooooooooooooooooooooooooo                    ooooooo |
+| ooooooooooooooooooooooooooooooooooooo               oooooooooo |
+| oooooooooooooooooooooooooooooooooooooo            oooooooooooo |
+| oooooo oooooooooooooooooooooooooooooooooo      ooooooooooooooo |
+| oooooo  oooooooooooooooooooooooooooooooooooooooooooooooooooooo |
+| oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo |
+| oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo |
+| oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo |
+| oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo |
+| ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo  |
+| ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo    |
+| ooooooooooooooooooooooooooooooooooooooooooooooooooooooooo      |
+| oooooooooooooooo                        oooooooooooooooo       |
+|  ooooooooooooo                              oooooooooo         |
+|   oooooooooo                                    oooo           |
+|     oooooo                                       o             |
 |         oooooo                                 oo              |
 |               ooo                            oo                |
 |                  oooooooooooooooooooooooooooo                  |
@@ -54,7 +55,6 @@
 |          oooo                                 oooo             |
 |           o oooooo                      ooooooo o              |
 |           o   o   oooooooooooooooooooooo    o   o              |
-|           o   o                             o   o              |
 |           o   o                             o   o              |
 |           o   o                             o   o              |
 |          o   o                               o   o             |
