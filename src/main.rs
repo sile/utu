@@ -23,7 +23,7 @@ fn main() -> noargs::Result<()> {
         .short('c')
         .ty("PATH")
         .doc("Configuration file path")
-        .env("PIXED_CONFIG_FILE")
+        .env("UTU_CONFIG_FILE")
         .take(&mut args)
         .present_and_then(|a| -> Result<_, Box<dyn std::error::Error>> {
             let content = std::fs::read_to_string(a.value())?;
