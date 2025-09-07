@@ -12,17 +12,17 @@
 |      o           o         o                    ooo            |
 |    oo                     o     ooo                            |
 |                       oooo        o          o                 |
-|                                 ooo         o                  |
-|       ooooooooo                   o  oo   oo             o     |
-|     ooooooooooooooo             ooo    ooo             oooo    |
-|    oooooooooooooooooooo                         oooo  ooooo    |
+|                                 ooo         ooo                |
+|       ooooooooooo                 o  oo   oo             o     |
+|     ooooooooooooooooo           ooo    ooo             oooo    |
+|    ooooooooooooooooooooo                        oooo  ooooo    |
 |   oooooooooooooooooooooooo                      ooooo oooo     |
 |  ooooooooooooooooooooooooooo                     ooooooo       |
 | oooooooooooooooooooooooooooooo                     ooooo       |
-| oooooooooooooooooooooooooooooooo                     oooo      |
-| ooooooooooooooooooooooooooooooooo                    ooooo     |
-| oooooo  oooooooooooooooooooooooooo                    ooooo    |
-| oooooo oooooooooooooooooooooooooooo                 oooooooo   |
+| ooooooooooooooooooooooooooooooo                      oooo      |
+| oooooo  oooooooooooooooooooooooo                     ooooo     |
+| oooooo oooooooooooooooooooooooooo                     ooooo    |
+| oooooooooooooooooooooooooooooooooo                  oooooooo   |
 | oooooooooooooooooooooooooooooooooooo             ooooooooooo   |
 | oooooooooooooooooooooooooooooooooooooo       ooooooooooooooo   |
 | oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo   |
