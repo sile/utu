@@ -43,13 +43,13 @@
 |                  oooooooooooooooooooooooooooo                  |
 |                          oooooooo                              |
 |                        oo  oooo  oo                            |
-|                       o  o      o  o                           |
-|                      oo   oooooo   oo                          |
-|                     oo   o      o   oo                         |
-|                    o   oo   oo   oo   o   oooo                 |
-|                    oooo    oooo    oooo  o    o                |
-|       ooo       ooo    oo   oo   oo    oo    oo   ooo          |
-|       o  oooo      ooo   o      o   oooo ooooooooo  o          |
+|                       o  o      o  o      ooo                  |
+|                      oo   oooooo   oo    o o o                 |
+|                     oo   o      o   oo   o   o                 |
+|                    o   oo   oo   oo   o o   o                  |
+|                   ooooo    oooo    ooooo  oo                   |
+|       ooo       ooo    oo   oo   oo    ooo        ooo          |
+|       o  oooo      ooo   o      o   oooo      oooo  o          |
 |       o      ooooo    oooooooooooooo    oooooo      o          |
 |       o           oooooooooooooooooooooo            o          |
 |       ooo                o     o     o            ooo          |
