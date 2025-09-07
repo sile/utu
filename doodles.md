@@ -15,6 +15,7 @@
 |                                                                |
 |                                                                |
 |                                                                |
+|                                                                |
 |         oooooooooooooooooo                                     |
 |        ooooooooooooooooooooo                                   |
 |      oooooooooooooooooooooooo                                  |
@@ -41,19 +42,19 @@
 |               ooo                            oo                |
 |                  oooooooooooooooooooooooooooo                  |
 |                          oooooooo                              |
-|                        oo   oo   oo                            |
+|                        oo  oooo  oo                            |
 |                       o  o      o  o                           |
-|                      o    oooooo    o                          |
-|                     o    o      o    o                         |
+|                      oo   oooooo   oo                          |
+|                     oo   o      o   oo                         |
 |                    o   oo   oo   oo   o   oooo                 |
-|                    oooo    o  o    oooo  o    o                |
+|                    oooo    oooo    oooo  o    o                |
 |       ooo       ooo    oo   oo   oo    oo    oo   ooo          |
-|       oo oooo      ooo   o      o   oooo ooooooooo oo          |
-|       oo     ooooo    oooooooooooooo    oooooo     oo          |
-|       oo          oooooooooooooooooooooo           oo          |
-|       ooo                                         ooo          |
-|          oooo                                 oooo             |
-|           o oooooo                      ooooooo o              |
+|       o  oooo      ooo   o      o   oooo ooooooooo  o          |
+|       o      ooooo    oooooooooooooo    oooooo      o          |
+|       o           oooooooooooooooooooooo            o          |
+|       ooo                o     o     o            ooo          |
+|          oooo           o      o              oooo             |
+|           o oooooo            o o       ooooooo o              |
 |           o   o   oooooooooooooooooooooo    o   o              |
 |           o   o                             o   o              |
 |           o   o                             o   o              |
@@ -61,7 +62,6 @@
 |          o   o                               o   o             |
 |          o   o                               o   o             |
 |          o   o                               o   o             |
-|         o   o                                 o   o            |
 |         o   o                                 o   o            |
 |         o   o                                 o   o            |
 +----------------------------------------------------------------+
