@@ -1,23 +1,19 @@
-use std::fmt::Write;
+use tuinix::{Frame, Position, Style};
+use unicode_width::UnicodeWidthStr;
 
-use tuinix::TerminalStyle;
-
-use crate::{Error, Result, editor::Editor, tuinix_ext::TerminalFrame};
+use crate::{Error, Result, editor::Editor, tuinix_ext::put_text};
 
 #[derive(Debug)]
 pub struct StatusLine;
 
 impl StatusLine {
-    pub fn render(&self, editor: &Editor, frame: &mut TerminalFrame) -> Result<()> {
+    pub fn render(&self, editor: &Editor, frame: &mut Frame) -> Result<()> {
         // Create a styled status bar with reverse colors (dark background, light text)
-        let style = TerminalStyle::new().reverse().bold();
-        let reset = TerminalStyle::RESET;
-        let filler = " ".repeat(frame.size().cols);
+        let style = Style::new().reverse().bold();
 
         // Show file status, cursor position, and mode information
-        writeln!(
-            frame,
-            "{style}{}[{}:{}:{}] [CANVAS:{:?}] {}{filler}{reset}",
+        let text = format!(
+            "{}[{}:{}:{}] [CANVAS:{:?}] {}",
             if editor.dirty.content { '*' } else { ' ' }, // Dirty indicator
             editor
                 .path
@@ -34,7 +30,14 @@ impl StatusLine {
             } else {
                 "DRAW"
             },
-        )?;
+        );
+
+        // Pad the row so the reverse style reaches the right edge. The padding
+        // is measured in columns, not characters, so a wide character in the
+        // file name does not leave the bar short.
+        let pad = frame.size().cols.saturating_sub(text.width());
+        let padded = format!("{text}{}", " ".repeat(pad));
+        put_text(frame, Position::ORIGIN, &padded, style);
 
         Ok(())
     }

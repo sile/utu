@@ -1,8 +1,11 @@
-use std::fmt::Write;
+use tuinix::{Char, Frame, Position, Region, Size, Style};
 
-use tuinix::{TerminalRegion, TerminalSize};
+use crate::{Result, config::Color, editor::Editor, tuinix_ext::put_text};
 
-use crate::{Result, config::Color, editor::Editor, tuinix_ext::TerminalFrame};
+/// The terminal color matching a palette [`Color`], ignoring its alpha.
+fn to_terminal_color(color: Color) -> tuinix::Color {
+    tuinix::Color::Rgb(color.r, color.g, color.b)
+}
 
 #[derive(Debug, Default)]
 pub struct Preview {
@@ -20,13 +23,13 @@ impl Preview {
         editor.dirty.render = true;
     }
 
-    pub fn render(&self, editor: &Editor, frame: &mut TerminalFrame) -> Result<()> {
+    pub fn render(&self, editor: &Editor, frame: &mut Frame) -> Result<()> {
         if frame.size().cols != self.size(editor).cols {
             return Ok(());
         }
 
         if self.hide {
-            writeln!(frame, "┌───")?;
+            put_text(frame, Position::ORIGIN, "┌───", Style::new());
             return Ok(());
         }
 
@@ -34,11 +37,8 @@ impl Preview {
         let preview_size = self.size(editor);
 
         // Top border
-        writeln!(
-            frame,
-            "┌{}─",
-            "─".repeat(preview_size.cols.saturating_sub(2))
-        )?;
+        let top_border = format!("┌{}─", "─".repeat(preview_size.cols.saturating_sub(2)));
+        put_text(frame, Position::ORIGIN, &top_border, Style::new());
 
         // Content area - render as pixels using block characters
         let content_height = preview_size.rows.saturating_sub(1); // Subtract top border only
@@ -55,7 +55,11 @@ impl Preview {
         let viewport_start_col = cursor_pixel_col.saturating_sub(viewport_width / 2);
 
         for terminal_row in 0..content_height {
-            write!(frame, "│")?;
+            let at = Position {
+                row: terminal_row + 1,
+                col: 0,
+            };
+            put_text(frame, at, "│", Style::new());
 
             // Each terminal row represents 2 pixel rows (using ▄ character)
             let pixel_row_top = viewport_start_row + terminal_row * 2;
@@ -68,23 +72,18 @@ impl Preview {
                 let top_color = self.get_pixel_color(editor, pixel_row_top, actual_pixel_col);
                 let bottom_color = self.get_pixel_color(editor, pixel_row_bottom, actual_pixel_col);
 
-                // Convert to terminal colors
-                let top_terminal_color =
-                    tuinix::TerminalColor::new(top_color.r, top_color.g, top_color.b);
-                let bottom_terminal_color =
-                    tuinix::TerminalColor::new(bottom_color.r, bottom_color.g, bottom_color.b);
-
                 // Use ▄ character with foreground as bottom pixel and background as top pixel
-                write!(
-                    frame,
-                    "{}▄",
-                    tuinix::TerminalStyle::new()
-                        .fg_color(bottom_terminal_color)
-                        .bg_color(top_terminal_color)
-                )?;
+                let style = Style::new()
+                    .fg_color(to_terminal_color(bottom_color))
+                    .bg_color(to_terminal_color(top_color));
+                let at = Position {
+                    row: terminal_row + 1,
+                    col: pixel_col + 1,
+                };
+                if let Some(ch) = Char::new('▄', 1, style) {
+                    frame.put_char(at, ch);
+                }
             }
-
-            writeln!(frame, "{}", tuinix::TerminalStyle::RESET)?;
         }
 
         Ok(())
@@ -121,16 +120,19 @@ impl Preview {
         default_bg
     }
 
-    pub fn size(&self, editor: &Editor) -> TerminalSize {
+    pub fn size(&self, editor: &Editor) -> Size {
         if self.hide {
-            TerminalSize::rows_cols(1, 4)
+            Size { rows: 1, cols: 4 }
         } else {
             let config = &editor.config.preview;
-            TerminalSize::rows_cols(config.height / 2 + 1, config.width + 1)
+            Size {
+                rows: config.height / 2 + 1,
+                cols: config.width + 1,
+            }
         }
     }
 
-    pub fn region(&self, editor: &Editor, size: TerminalSize) -> TerminalRegion {
+    pub fn region(&self, editor: &Editor, size: Size) -> Region {
         let preview_size = self.size(editor);
         size.to_region()
             .drop_bottom(2)

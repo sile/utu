@@ -2,7 +2,10 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use tuinix::KeyInput;
 
-use crate::{editor_command::EditorCommand, tuinix_ext::KeyInputExt};
+use crate::{
+    editor_command::EditorCommand,
+    tuinix_ext::{display_key, parse_key},
+};
 
 #[derive(Debug, Default)]
 pub struct KeySequence(pub Vec<KeyInput>);
@@ -23,7 +26,7 @@ impl std::fmt::Display for KeySequence {
             if i > 0 {
                 write!(f, " -> ")?
             }
-            key.display(f)?;
+            display_key(key, f)?;
         }
         Ok(())
     }
@@ -259,7 +262,7 @@ impl KeySet {
     fn parse(raw_keys: nojson::RawJsonValue<'_, '_>) -> Result<Self, nojson::JsonParseError> {
         let mut keys = Vec::new();
         for key in raw_keys.to_unquoted_string_str()?.split(',') {
-            let key = KeyInput::from_str(key).ok_or_else(|| raw_keys.invalid("invalid key"))?;
+            let key = parse_key(key).ok_or_else(|| raw_keys.invalid("invalid key"))?;
             keys.push(key);
         }
         Ok(Self(keys))
@@ -272,7 +275,7 @@ impl std::fmt::Display for KeySet {
             if i > 0 {
                 write!(f, ",")?;
             }
-            key.display(f)?;
+            display_key(key, f)?;
         }
         Ok(())
     }

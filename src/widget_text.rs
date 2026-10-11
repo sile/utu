@@ -1,9 +1,9 @@
-use std::{collections::BTreeSet, fmt::Write};
+use std::collections::BTreeSet;
 
-use tuinix::TerminalStyle;
+use tuinix::{Char, Frame, Position, Style};
 use unicode_width::UnicodeWidthChar;
 
-use crate::{Result, buffer::TextPosition, editor::Editor, tuinix_ext::TerminalFrame};
+use crate::{Result, buffer::TextPosition, editor::Editor};
 
 #[derive(Debug)]
 pub struct TextView {
@@ -23,7 +23,7 @@ impl TextView {
         }
     }
 
-    pub fn render(&mut self, editor: &Editor, frame: &mut TerminalFrame) -> Result<()> {
+    pub fn render(&mut self, editor: &Editor, frame: &mut Frame) -> Result<()> {
         let terminal_size = frame.size();
 
         // Adjust scroll offset to keep cursor visible
@@ -63,26 +63,29 @@ impl TextView {
                     .as_ref()
                     .and_then(|cb| cb.get(position).map(|c| (c, true)))
                     .unwrap_or((c, false));
-                current_col += c.width().unwrap_or_default();
+                let width = c.width().unwrap_or_default();
 
-                if is_clipboard {
-                    let style = TerminalStyle::new().reverse().underline();
-                    let reset = TerminalStyle::RESET;
-                    write!(frame, "{}{}{}", style, c, reset)?;
+                let style = if is_clipboard {
+                    Style::new().reverse().underline()
                 } else if marked_positions.contains(&position) {
                     // Render with highlight style
-                    let style = TerminalStyle::new().reverse();
-                    //let style = TerminalStyle::new().bg_color(TerminalColor::new(200, 200, 200));
-                    let reset = TerminalStyle::RESET;
-                    write!(frame, "{}{}{}", style, c, reset)?;
+                    Style::new().reverse()
                 } else {
                     // Render normally
-                    write!(frame, "{}", c)?;
-                }
-            }
+                    Style::new()
+                };
 
-            // Move to next line
-            writeln!(frame)?;
+                if width > 0
+                    && let Some(ch) = Char::new(c, width, style)
+                {
+                    let at = Position {
+                        row: line_index,
+                        col: current_col - self.scroll_offset.col,
+                    };
+                    frame.put_char(at, ch);
+                }
+                current_col += width;
+            }
         }
 
         Ok(())
@@ -115,8 +118,8 @@ impl TextView {
         }
     }
 
-    pub fn cursor_terminal_position(&self, editor: &Editor) -> tuinix::TerminalPosition {
-        tuinix::TerminalPosition {
+    pub fn cursor_terminal_position(&self, editor: &Editor) -> Position {
+        Position {
             row: editor.cursor.row.saturating_sub(self.scroll_offset.row),
             col: editor.cursor.col.saturating_sub(self.scroll_offset.col),
         }

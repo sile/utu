@@ -10,8 +10,9 @@ repository = "https://github.com/sile/utu"
 readme = "README.md"
 
 [dependencies]
+libc = "0.2.172"
 noargs = "0.4.1"
 nojson = "0.3.15"
 nopng = "0.1.1"
-tuinix = "0.2.0"
+tuinix = "0.7.3"
 unicode-width = "0.2.1"

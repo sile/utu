@@ -1,8 +1,6 @@
-use std::fmt::Write;
+use tuinix::{Frame, Position, Region, Size, Style};
 
-use tuinix::{TerminalRegion, TerminalSize};
-
-use crate::{Result, editor::Editor, tuinix_ext::TerminalFrame};
+use crate::{Result, editor::Editor, tuinix_ext::put_text};
 
 #[derive(Debug)]
 pub struct Legend {
@@ -23,13 +21,14 @@ impl Legend {
         Self { hide: false }
     }
 
-    pub fn render(&self, editor: &Editor, frame: &mut TerminalFrame) -> Result<()> {
+    pub fn render(&self, editor: &Editor, frame: &mut Frame) -> Result<()> {
         if frame.size().cols != self.size(editor).cols {
             return Ok(());
         }
 
+        let mut row = 0;
         if self.hide {
-            writeln!(frame, "└───")?;
+            put_text(frame, Position { row, col: 0 }, "└───", Style::new());
             return Ok(());
         }
 
@@ -47,19 +46,29 @@ impl Legend {
 
         // Draw the legend box
         for (key, command) in possible_commands.iter() {
-            writeln!(frame, "│ [{}] {}", key, command)?;
+            let line = format!("│ [{}] {}", key, command);
+            put_text(frame, Position { row, col: 0 }, &line, Style::new());
+            row += 1;
         }
 
         // Add the hide option at the bottom
-        writeln!(frame, "└─────────────────────")?;
+        put_text(
+            frame,
+            Position { row, col: 0 },
+            "└─────────────────────",
+            Style::new(),
+        );
 
         Ok(())
     }
 
-    // TODO: remove (TerminalFrame::shrink_rows())
-    fn size(&self, editor: &Editor) -> TerminalSize {
+    // TODO: remove (Frame::shrink_rows())
+    fn size(&self, editor: &Editor) -> Size {
         if self.hide {
-            TerminalSize::rows_cols(1, Self::HIDE_COLS)
+            Size {
+                rows: 1,
+                cols: Self::HIDE_COLS,
+            }
         } else {
             let group = if editor.clipboard.is_some() {
                 &editor.config.keybindings.clipboard
@@ -71,11 +80,14 @@ impl Legend {
                 .keybindings
                 .possible_commands(group, &editor.pending_keys)
                 .count();
-            TerminalSize::rows_cols(rows, Self::SHOW_COLS)
+            Size {
+                rows,
+                cols: Self::SHOW_COLS,
+            }
         }
     }
 
-    pub fn region(&self, editor: &Editor, size: TerminalSize) -> TerminalRegion {
+    pub fn region(&self, editor: &Editor, size: Size) -> Region {
         let legend_size = self.size(editor);
         size.to_region()
             .take_top(legend_size.rows)

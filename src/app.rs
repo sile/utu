@@ -1,16 +1,23 @@
+use std::io::{Read as _, Write as _};
 use std::path::PathBuf;
 
-use tuinix::{Terminal, TerminalEvent, TerminalInput};
+use tuinix::{Frame, Input, InputDecoder, TerminalDriver};
 
 use crate::{
     Result, clipboard::Clipboard, config::Config, editor::Editor, editor_command::EditorCommand,
-    tuinix_ext::TerminalFrame, widget_legend::Legend, widget_message::MessageLine,
-    widget_preview::Preview, widget_status::StatusLine, widget_text::TextView,
+    widget_legend::Legend, widget_message::MessageLine, widget_preview::Preview,
+    widget_status::StatusLine, widget_text::TextView,
 };
+
+/// How long to wait for the rest of an escape sequence before a lone `ESC` byte
+/// is treated as the Escape key.
+const ESCAPE_TIMEOUT_MS: libc::c_int = 50;
 
 #[derive(Debug)]
 pub struct App {
-    terminal: Terminal,
+    driver: TerminalDriver,
+    input: InputDecoder,
+    prev_frame: Option<Frame>,
     pub editor: Editor,
     text_view: TextView,
     status_line: StatusLine,
@@ -21,9 +28,11 @@ pub struct App {
 
 impl App {
     pub fn new(path: PathBuf, config: Config) -> Result<Self> {
-        let terminal = Terminal::new()?;
+        let driver = TerminalDriver::new()?;
         Ok(Self {
-            terminal,
+            driver,
+            input: InputDecoder::new(),
+            prev_frame: None,
             editor: Editor::new(path, config)?,
             text_view: TextView::new(),
             status_line: StatusLine,
@@ -36,11 +45,79 @@ impl App {
     pub fn run(mut self) -> Result<()> {
         self.editor.reload()?;
 
+        let mut fds = [
+            libc::pollfd {
+                fd: self.driver.resize_signal_fd(),
+                events: libc::POLLIN,
+                revents: 0,
+            },
+            libc::pollfd {
+                fd: self.driver.input_fd(),
+                events: libc::POLLIN,
+                revents: 0,
+            },
+        ];
+
         while !self.editor.exit {
             self.render()?;
 
-            if let Some(event) = self.terminal.poll_event(None)? {
-                self.handle_event(event)?;
+            // A lone `ESC` byte is ambiguous, so wait only briefly while one is
+            // held so it is reported as Escape promptly.
+            let timeout = if self.input.has_uncommitted_escape() {
+                ESCAPE_TIMEOUT_MS
+            } else {
+                -1
+            };
+            #[expect(
+                unsafe_code,
+                reason = "libc::poll is the only way to wait on the resize and input fds at once"
+            )]
+            let n = unsafe { libc::poll(fds.as_mut_ptr(), fds.len() as libc::nfds_t, timeout) };
+            if n < 0 {
+                let err = std::io::Error::last_os_error();
+                // `poll` is never restarted by `SA_RESTART`, so SIGWINCH makes it
+                // return `EINTR`; the resize byte is already in the pipe, so retry.
+                if err.kind() == std::io::ErrorKind::Interrupted {
+                    continue;
+                }
+                return Err(err.into());
+            }
+
+            if fds
+                .iter()
+                .any(|fd| fd.revents & (libc::POLLHUP | libc::POLLERR | libc::POLLNVAL) != 0)
+            {
+                return Err(crate::Error::new("terminal closed"));
+            }
+
+            if n == 0 {
+                self.input.commit_escape();
+            }
+
+            if fds[0].revents & libc::POLLIN != 0 {
+                self.driver.handle_resize_signal()?;
+                self.editor.dirty.render = true;
+            }
+
+            if fds[1].revents & libc::POLLIN != 0 {
+                self.read_input()?;
+            }
+
+            while let Some(input) = self.input.next() {
+                self.handle_input(input)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn read_input(&mut self) -> Result<()> {
+        let mut raw = [0u8; 256];
+        loop {
+            match self.driver.read(&mut raw) {
+                Ok(n @ 1..) => self.input.feed(&raw[..n]),
+                Ok(_) => break,
+                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => break,
+                Err(e) => return Err(e.into()),
             }
         }
         Ok(())
@@ -51,7 +128,7 @@ impl App {
             return Ok(());
         }
 
-        let mut frame = TerminalFrame::new(self.terminal.size());
+        let mut frame = Frame::new(self.driver.size());
 
         // Create regions for different UI components
         let full_region = frame.size().to_region();
@@ -60,74 +137,73 @@ impl App {
         let message_region = full_region.take_bottom(1);
 
         // Render widgets
-        let mut subframe = TerminalFrame::new(main_region.size);
+        let mut subframe = Frame::new(main_region.size);
         self.text_view.render(&self.editor, &mut subframe)?;
-        frame.draw(main_region.position, &subframe);
+        frame.put_frame(main_region.position, &subframe);
 
-        let mut subframe = TerminalFrame::new(status_region.size);
+        let mut subframe = Frame::new(status_region.size);
         self.status_line.render(&self.editor, &mut subframe)?;
-        frame.draw(status_region.position, &subframe);
+        frame.put_frame(status_region.position, &subframe);
 
-        let mut subframe = TerminalFrame::new(message_region.size);
+        let mut subframe = Frame::new(message_region.size);
         self.message_line.render(&self.editor, &mut subframe)?;
-        frame.draw(message_region.position, &subframe);
+        frame.put_frame(message_region.position, &subframe);
 
         let preview_region = self.preview.region(&self.editor, frame.size());
-        let mut subframe = TerminalFrame::new(preview_region.size);
+        let mut subframe = Frame::new(preview_region.size);
         self.preview.render(&self.editor, &mut subframe)?;
-        frame.draw(preview_region.position, &subframe);
+        frame.put_frame(preview_region.position, &subframe);
 
         let legend_region = self.legend.region(&self.editor, frame.size());
-        let mut subframe = TerminalFrame::new(legend_region.size);
+        let mut subframe = Frame::new(legend_region.size);
         self.legend.render(&self.editor, &mut subframe)?;
-        frame.draw(legend_region.position, &subframe);
+        frame.put_frame(legend_region.position, &subframe);
 
         // Set cursor position for text editing
         let cursor_pos = self.text_view.cursor_terminal_position(&self.editor);
-        self.terminal.set_cursor(Some(cursor_pos));
 
-        self.terminal.draw(frame)?;
+        let out = frame.render(self.prev_frame.as_ref(), Some(cursor_pos));
+        self.driver.write_all(&out)?;
+        self.driver.flush()?;
+        self.prev_frame = Some(frame);
 
         self.editor.dirty.render = false;
 
         Ok(())
     }
 
-    fn handle_event(&mut self, event: TerminalEvent) -> Result<()> {
+    fn handle_input(&mut self, input: Input) -> Result<()> {
         self.editor.clear_message();
 
-        match event {
-            TerminalEvent::Input(input) => {
-                let TerminalInput::Key(key) = input;
-                self.editor.pending_keys.push(key);
-                let root_group = if self.editor.clipboard.is_some() {
-                    &self.editor.config.keybindings.clipboard
-                } else {
-                    &self.editor.config.keybindings.main
-                };
-                match self
-                    .editor
-                    .config
-                    .keybindings
-                    .find(root_group, &self.editor.pending_keys)
-                {
-                    Err(()) => {
-                        self.editor
-                            .set_message(format!("Undefined: {}", self.editor.pending_keys));
-                        self.editor.pending_keys.clear();
-                    }
-                    Ok(None) => {
-                        self.editor
-                            .set_message(format!("[INPUT] {} ->", self.editor.pending_keys));
-                    }
-                    Ok(Some(command)) => {
-                        self.editor.pending_keys.clear();
-                        self.handle_command(&command.clone())?;
-                    }
-                }
+        // Only key events map to commands; mouse events are ignored.
+        let Input::Key(key) = input else {
+            return Ok(());
+        };
+
+        self.editor.pending_keys.push(key);
+        let root_group = if self.editor.clipboard.is_some() {
+            &self.editor.config.keybindings.clipboard
+        } else {
+            &self.editor.config.keybindings.main
+        };
+        match self
+            .editor
+            .config
+            .keybindings
+            .find(root_group, &self.editor.pending_keys)
+        {
+            Err(()) => {
+                self.editor
+                    .set_message(format!("Undefined: {}", self.editor.pending_keys));
+                self.editor.pending_keys.clear();
             }
-            TerminalEvent::Resize(_) => {
-                self.editor.dirty.render = true;
+            Ok(None) => {
+                self.editor
+                    .set_message(format!("[INPUT] {} ->", self.editor.pending_keys));
+            }
+            Ok(Some(command)) => {
+                self.editor.pending_keys.clear();
+                self.handle_command(&command.clone())?;
             }
         }
         Ok(())
