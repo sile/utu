@@ -1,5 +1,3 @@
-use tuinix::{Char, Frame, Position, Region, Size, Style};
-
 use crate::{Result, config::Color, editor::Editor, tuinix_ext::put_text};
 
 /// The terminal color matching a palette [`Color`], ignoring its alpha.
@@ -7,12 +5,15 @@ fn to_terminal_color(color: Color) -> tuinix::Color {
     tuinix::Color::Rgb(color.r, color.g, color.b)
 }
 
+/// The pixel-art preview drawn down the right edge.
 #[derive(Debug, Default)]
 pub struct Preview {
+    /// Whether the preview is collapsed to its handle.
     pub hide: bool,
 }
 
 impl Preview {
+    /// Collapses or expands the preview, with a message saying which.
     pub fn toggle_hide(&mut self, editor: &mut Editor) {
         self.hide = !self.hide;
         if self.hide {
@@ -23,13 +24,19 @@ impl Preview {
         editor.dirty.render = true;
     }
 
-    pub fn render(&self, editor: &Editor, frame: &mut Frame) -> Result<()> {
+    /// Paints the preview into `frame`, centered on the cursor.
+    pub fn render(&self, editor: &Editor, frame: &mut tuinix::Frame) -> Result<()> {
         if frame.size().cols != self.size(editor).cols {
             return Ok(());
         }
 
         if self.hide {
-            put_text(frame, Position::ORIGIN, "┌───", Style::new());
+            put_text(
+                frame,
+                tuinix::Position::ORIGIN,
+                "┌───",
+                tuinix::Style::new(),
+            );
             return Ok(());
         }
 
@@ -38,7 +45,12 @@ impl Preview {
 
         // Top border
         let top_border = format!("┌{}─", "─".repeat(preview_size.cols.saturating_sub(2)));
-        put_text(frame, Position::ORIGIN, &top_border, Style::new());
+        put_text(
+            frame,
+            tuinix::Position::ORIGIN,
+            &top_border,
+            tuinix::Style::new(),
+        );
 
         // Content area - render as pixels using block characters
         let content_height = preview_size.rows.saturating_sub(1); // Subtract top border only
@@ -55,11 +67,11 @@ impl Preview {
         let viewport_start_col = cursor_pixel_col.saturating_sub(viewport_width / 2);
 
         for terminal_row in 0..content_height {
-            let at = Position {
+            let at = tuinix::Position {
                 row: terminal_row + 1,
                 col: 0,
             };
-            put_text(frame, at, "│", Style::new());
+            put_text(frame, at, "│", tuinix::Style::new());
 
             // Each terminal row represents 2 pixel rows (using ▄ character)
             let pixel_row_top = viewport_start_row + terminal_row * 2;
@@ -73,14 +85,14 @@ impl Preview {
                 let bottom_color = self.get_pixel_color(editor, pixel_row_bottom, actual_pixel_col);
 
                 // Use ▄ character with foreground as bottom pixel and background as top pixel
-                let style = Style::new()
+                let style = tuinix::Style::new()
                     .fg_color(to_terminal_color(bottom_color))
                     .bg_color(to_terminal_color(top_color));
-                let at = Position {
+                let at = tuinix::Position {
                     row: terminal_row + 1,
                     col: pixel_col + 1,
                 };
-                if let Some(ch) = Char::new('▄', 1, style) {
+                if let Some(ch) = tuinix::Char::new('▄', 1, style) {
                     frame.put_char(at, ch);
                 }
             }
@@ -120,19 +132,21 @@ impl Preview {
         default_bg
     }
 
-    pub fn size(&self, editor: &Editor) -> Size {
+    /// Returns the size the preview needs, in terminal cells.
+    pub fn size(&self, editor: &Editor) -> tuinix::Size {
         if self.hide {
-            Size { rows: 1, cols: 4 }
+            tuinix::Size { rows: 1, cols: 4 }
         } else {
             let config = &editor.config.preview;
-            Size {
+            tuinix::Size {
                 rows: config.height / 2 + 1,
                 cols: config.width + 1,
             }
         }
     }
 
-    pub fn region(&self, editor: &Editor, size: Size) -> Region {
+    /// Returns the region of a `size`-sized frame the preview occupies.
+    pub fn region(&self, editor: &Editor, size: tuinix::Size) -> tuinix::Region {
         let preview_size = self.size(editor);
         size.to_region()
             .drop_bottom(2)

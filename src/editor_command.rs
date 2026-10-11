@@ -1,28 +1,71 @@
-// AppCommand?
+/// What a key binding runs.
+///
+/// A [`Scope`](EditorCommand::Scope) is not run like the rest: it names a
+/// nested binding table, and the keys after it are looked up there. Every
+/// other variant is carried out directly by the app.
 #[derive(Debug, Clone)]
 pub enum EditorCommand {
+    /// Quit the editor.
     Quit,
+
+    /// Toggle the legend.
     Legend,
+
+    /// Toggle the preview.
     Preview,
+
+    /// Set the background character drawn in place of hidden characters.
     Background(char),
+
+    /// Abandon the current selection or clipboard.
     Cancel,
+
+    /// Save the buffer.
     Save,
+
+    /// Undo the most recent update.
     Undo,
-    // reload
-    // call or execute or shell
+
+    /// Look up the keys that follow in the named nested table.
     Scope(String),
+
+    /// Move the cursor to the previous line.
     PrevLine,
+
+    /// Move the cursor to the next line.
     NextLine,
+
+    /// Move the cursor to the previous column.
     PrevChar,
+
+    /// Move the cursor to the next column.
     NextChar,
+
+    /// Write the given character at the cursor, or across the selection.
     Dot(char),
+
+    /// Start a freehand stroke selection.
     MarkStroke,
+
+    /// Start a straight-line selection.
     MarkLine,
+
+    /// Start a rectangle-outline selection.
     MarkRect,
+
+    /// Start a filled-rectangle selection.
     MarkFilledRect,
+
+    /// Start a flood-fill selection.
     MarkFill,
+
+    /// Cut the selection into the clipboard.
     Cut,
+
+    /// Copy the selection into the clipboard.
     Copy,
+
+    /// Paste the clipboard at the cursor.
     Paste,
 }
 

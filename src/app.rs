@@ -1,8 +1,6 @@
 use std::io::{Read as _, Write as _};
 use std::path::PathBuf;
 
-use tuinix::{Frame, Input, InputDecoder, TerminalDriver};
-
 use crate::{
     Result, clipboard::Clipboard, config::Config, editor::Editor, editor_command::EditorCommand,
     widget_legend::Legend, widget_message::MessageLine, widget_preview::Preview,
@@ -13,12 +11,16 @@ use crate::{
 /// is treated as the Escape key.
 const ESCAPE_TIMEOUT_MS: libc::c_int = 50;
 
+/// The interactive editor: the I/O edge for [`Editor`] and its widgets.
 #[derive(Debug)]
 pub struct App {
-    driver: TerminalDriver,
-    input: InputDecoder,
-    prev_frame: Option<Frame>,
+    driver: tuinix::TerminalDriver,
+    input: tuinix::InputDecoder,
+    prev_frame: Option<tuinix::Frame>,
+
+    /// The editor state the widgets paint from and the keys act on.
     pub editor: Editor,
+
     text_view: TextView,
     status_line: StatusLine,
     message_line: MessageLine,
@@ -27,11 +29,16 @@ pub struct App {
 }
 
 impl App {
+    /// Takes over the terminal and makes an app over `path`, configured by
+    /// `config`.
+    ///
+    /// The terminal is put into raw mode here and restored when the returned
+    /// value is dropped.
     pub fn new(path: PathBuf, config: Config) -> Result<Self> {
-        let driver = TerminalDriver::new()?;
+        let driver = tuinix::TerminalDriver::new()?;
         Ok(Self {
             driver,
-            input: InputDecoder::new(),
+            input: tuinix::InputDecoder::new(),
             prev_frame: None,
             editor: Editor::new(path, config)?,
             text_view: TextView::new(),
@@ -42,6 +49,7 @@ impl App {
         })
     }
 
+    /// Runs the event loop until the user quits.
     pub fn run(mut self) -> Result<()> {
         self.editor.reload()?;
 
@@ -128,7 +136,7 @@ impl App {
             return Ok(());
         }
 
-        let mut frame = Frame::new(self.driver.size());
+        let mut frame = tuinix::Frame::new(self.driver.size());
 
         // Create regions for different UI components
         let full_region = frame.size().to_region();
@@ -137,25 +145,25 @@ impl App {
         let message_region = full_region.take_bottom(1);
 
         // Render widgets
-        let mut subframe = Frame::new(main_region.size);
+        let mut subframe = tuinix::Frame::new(main_region.size);
         self.text_view.render(&self.editor, &mut subframe)?;
         frame.put_frame(main_region.position, &subframe);
 
-        let mut subframe = Frame::new(status_region.size);
+        let mut subframe = tuinix::Frame::new(status_region.size);
         self.status_line.render(&self.editor, &mut subframe)?;
         frame.put_frame(status_region.position, &subframe);
 
-        let mut subframe = Frame::new(message_region.size);
+        let mut subframe = tuinix::Frame::new(message_region.size);
         self.message_line.render(&self.editor, &mut subframe)?;
         frame.put_frame(message_region.position, &subframe);
 
         let preview_region = self.preview.region(&self.editor, frame.size());
-        let mut subframe = Frame::new(preview_region.size);
+        let mut subframe = tuinix::Frame::new(preview_region.size);
         self.preview.render(&self.editor, &mut subframe)?;
         frame.put_frame(preview_region.position, &subframe);
 
         let legend_region = self.legend.region(&self.editor, frame.size());
-        let mut subframe = Frame::new(legend_region.size);
+        let mut subframe = tuinix::Frame::new(legend_region.size);
         self.legend.render(&self.editor, &mut subframe)?;
         frame.put_frame(legend_region.position, &subframe);
 
@@ -172,11 +180,11 @@ impl App {
         Ok(())
     }
 
-    fn handle_input(&mut self, input: Input) -> Result<()> {
+    fn handle_input(&mut self, input: tuinix::Input) -> Result<()> {
         self.editor.clear_message();
 
         // Only key events map to commands; mouse events are ignored.
-        let Input::Key(key) = input else {
+        let tuinix::Input::Key(key) = input else {
             return Ok(());
         };
 

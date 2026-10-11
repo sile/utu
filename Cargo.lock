@@ -3,10 +3,22 @@
 version = 4
 
 [[package]]
+name = "arrayvec"
+version = "0.7.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d3fb67a6e08acf24fdeccbac2cb6ac4305825bd1f117462e0e6f2f193345ad56"
+
+[[package]]
 name = "libc"
 version = "0.2.190"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce5d3ddc6d3fa000eb1536d85e147bfe31aacaba692ed6a876f95cb7c855be78"
+
+[[package]]
+name = "memchr"
+version = "2.8.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 
 [[package]]
 name = "noargs"
@@ -15,16 +27,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af5b13e43c3b5f1b4f2db60f5f03c803a04f5dd0a6fd44c83b5517ca1ec42ac4"
 
 [[package]]
-name = "nojson"
-version = "0.3.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d7473c448719d0214889f9ff75d4cdb6cf96582e4a9058e6eb2a52dc8d342ae"
-
-[[package]]
 name = "nopng"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0d8886528a493733b1fbf014afcf5abbc73254ef3d336d570b709b0c9720f543"
+
+[[package]]
+name = "termnix"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "956c09677c185ed98cf492fc14c577df2c48c944cea8f6fc404b75ce7b26b06d"
+dependencies = [
+ "libc",
+ "unicode-width",
+ "vte",
+]
 
 [[package]]
 name = "tuinix"
@@ -47,8 +64,18 @@ version = "0.0.1"
 dependencies = [
  "libc",
  "noargs",
- "nojson",
  "nopng",
+ "termnix",
  "tuinix",
  "unicode-width",
+]
+
+[[package]]
+name = "vte"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a5924018406ce0063cd67f8e008104968b74b563ee1b85dde3ed1f7cb87d3dbd"
+dependencies = [
+ "arrayvec",
+ "memchr",
 ]

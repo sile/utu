@@ -1,20 +1,83 @@
-use std::collections::{BTreeMap, BTreeSet};
-
-use tuinix::KeyInput;
+use std::collections::BTreeMap;
 
 use crate::{
     editor_command::EditorCommand,
     tuinix_ext::{display_key, parse_key},
 };
 
+/// The key bindings are hard-coded here rather than loaded from a file: the
+/// tables below are the whole set, and a key that is not spelled in one of them
+/// is unbound.
+///
+/// Each table entry is a comma-separated list of the keys that run one command
+/// (so `"\u{2191},i"` binds both Up and `i`), paired with the command's name as
+/// [`EditorCommand::from_str`](std::str::FromStr::from_str) reads it. The
+/// `__main__`, `__clipboard__`, and `__global__` tables are looked up by name;
+/// every other name is a scope entered with a `scope(NAME)` binding.
+const RAW_KEYBINDINGS: &[(&str, &[(&str, &str)])] = &[
+    (
+        "__global__",
+        &[
+            ("C-c", "quit"),
+            ("C-h", "legend"),
+            ("C-p", "preview"),
+            ("g", "cancel"),
+        ],
+    ),
+    (
+        "__main__",
+        &[
+            ("C-s", "save"),
+            ("C-u", "undo"),
+            ("C-b", "bg(_)"),
+            ("\u{2191},i", "prev-line"),
+            ("\u{2193},k", "next-line"),
+            ("\u{2190},j", "prev-char"),
+            ("\u{2192},l", "next-char"),
+            (" ", "dot( )"),
+            ("a", "dot(.)"),
+            ("s", "dot(+)"),
+            ("d", "dot(o)"),
+            ("f", "dot(#)"),
+            ("w", "cut"),
+            ("W", "copy"),
+            ("m", "scope(marker)"),
+        ],
+    ),
+    (
+        "marker",
+        &[
+            ("s", "mark-stroke"),
+            ("l", "mark-line"),
+            ("r", "mark-rect"),
+            ("R", "mark-filled-rect"),
+            ("f", "mark-fill"),
+        ],
+    ),
+    (
+        "__clipboard__",
+        &[
+            ("C-u", "undo"),
+            ("\u{2191},i", "prev-line"),
+            ("\u{2193},k", "next-line"),
+            ("\u{2190},j", "prev-char"),
+            ("\u{2192},l", "next-char"),
+            ("v", "paste"),
+        ],
+    ),
+];
+
+/// The keys pressed so far for a binding that is still being typed.
 #[derive(Debug, Default)]
-pub struct KeySequence(pub Vec<KeyInput>);
+pub struct KeySequence(pub Vec<tuinix::KeyInput>);
 
 impl KeySequence {
-    pub fn push(&mut self, key: KeyInput) {
+    /// Appends `key` to the sequence.
+    pub fn push(&mut self, key: tuinix::KeyInput) {
         self.0.push(key);
     }
 
+    /// Empties the sequence.
     pub fn clear(&mut self) {
         self.0.clear();
     }
@@ -32,11 +95,21 @@ impl std::fmt::Display for KeySequence {
     }
 }
 
+/// The whole set of key bindings, split into the tables the app looks up.
+///
+/// The tables are compiled into the binary; see [`RAW_KEYBINDINGS`].
 #[derive(Debug)]
 pub struct KeyBindings {
+    /// The table used while no clipboard is open.
     pub main: KeyBindingsGroup,
+
+    /// The table used while the clipboard is open.
     pub clipboard: KeyBindingsGroup,
+
+    /// The table whose bindings are always available, if any.
     pub global: Option<KeyBindingsGroup>,
+
+    /// The other tables, reached with a `scope(NAME)` binding.
     pub groups: BTreeMap<String, KeyBindingsGroup>,
 }
 
@@ -46,6 +119,11 @@ impl KeyBindings {
         clippy::result_unit_err,
         reason = "the failure case only means no binding matches, so a named error type would add noise"
     )]
+    /// Resolves `keys` against `group`, following a `scope(NAME)` binding into
+    /// its nested table.
+    ///
+    /// Returns `Ok(None)` while `keys` is a prefix of a longer binding, and
+    /// `Err(())` when it matches no binding at all.
     pub fn find<'a>(
         &'a self,
         group: &'a KeyBindingsGroup,
@@ -54,6 +132,8 @@ impl KeyBindings {
         self.find_in_group(group, keys.0.iter().copied())
     }
 
+    /// Iterates over the bindings reachable from `prefix` in `group`, together
+    /// with the keys that trigger them.
     pub fn possible_commands(
         &self,
         group: &KeyBindingsGroup,
@@ -99,6 +179,7 @@ impl KeyBindings {
         }
     }
 
+    /// Iterates over the characters that the `dot(CHAR)` bindings write.
     pub fn fg_chars(&self) -> impl Iterator<Item = char> {
         self.all_commands().filter_map(|c| {
             if let EditorCommand::Dot(c) = c {
@@ -109,6 +190,8 @@ impl KeyBindings {
         })
     }
 
+    /// Returns the canvas character: the first character a `dot(CHAR)` binding
+    /// writes, or a space when there is none.
     pub fn canvas_char(&self) -> char {
         self.fg_chars().next().unwrap_or(' ')
     }
@@ -135,7 +218,7 @@ impl KeyBindings {
     fn find_in_group<'a>(
         &'a self,
         group: &'a KeyBindingsGroup,
-        mut keys: impl Iterator<Item = KeyInput>,
+        mut keys: impl Iterator<Item = tuinix::KeyInput>,
     ) -> Result<Option<&'a EditorCommand>, ()> {
         let Some(key) = keys.next() else {
             return Ok(None);
@@ -161,111 +244,91 @@ impl KeyBindings {
     }
 }
 
-impl<'text, 'raw> TryFrom<nojson::RawJsonValue<'text, 'raw>> for KeyBindings {
-    type Error = nojson::JsonParseError;
+impl Default for KeyBindings {
+    fn default() -> Self {
+        Self::from_raw(RAW_KEYBINDINGS)
+    }
+}
 
-    fn try_from(value: nojson::RawJsonValue<'text, 'raw>) -> Result<Self, Self::Error> {
-        let mut group_names = value
-            .to_object()?
-            .map(|(k, _)| k.to_unquoted_string_str().map(|s| s.into_owned()))
-            .collect::<Result<BTreeSet<_>, _>>()?;
-        group_names.retain(|n| {
-            !matches!(
-                n.as_str(),
-                "__main__" | "__global__" | "__clipboard__" | "__comment__"
-            )
-        });
-
+impl KeyBindings {
+    /// Builds the bindings from the hard-coded [`RAW_KEYBINDINGS`] tables.
+    ///
+    /// The three tables named `__main__`, `__clipboard__`, and `__global__`
+    /// become the fields of the same name; every other table becomes a scope
+    /// reached with a `scope(NAME)` binding.
+    ///
+    /// The tables are compiled into the binary, so a malformed entry is a bug
+    /// rather than user input: the key and command parsers are the same ones
+    /// the tables are written against, and a failure here panics.
+    pub fn from_raw(raw: &[(&str, &[(&str, &str)])]) -> Self {
         let mut groups = BTreeMap::new();
-        for (raw_name, raw_group) in value.to_object()? {
-            let name = raw_name.to_unquoted_string_str()?;
-            if name == "__comment__" {
-                continue;
-            }
-
-            if name.starts_with("__")
-                && name.ends_with("__")
-                && !matches!(name.as_ref(), "__main__" | "__global__" | "__clipboard__")
-            {
-                return Err(raw_name.invalid("no such built-in group"));
-            }
-
-            let group = KeyBindingsGroup::parse(raw_group, &group_names)?;
-            groups.insert(name.into_owned(), group);
+        for &(name, entries) in raw {
+            let group = KeyBindingsGroup::from_raw(entries);
+            groups.insert(name.to_owned(), group);
         }
 
-        let main = groups
-            .remove("__main__")
-            .ok_or_else(|| value.invalid("missing __main__ group"))?;
+        let main = groups.remove("__main__").expect("bug: no __main__ group");
         let clipboard = groups
             .remove("__clipboard__")
-            .ok_or_else(|| value.invalid("missing __clipboard__ group"))?;
+            .expect("bug: no __clipboard__ group");
         let global = groups.remove("__global__");
-        Ok(KeyBindings {
+        KeyBindings {
             main,
             clipboard,
             global,
             groups,
-        })
+        }
     }
 }
 
+/// One table of key bindings.
 #[derive(Debug)]
 pub struct KeyBindingsGroup {
+    /// The bindings, in the order the legend lists them.
     pub entries: Vec<KeyBindingEntry>,
 }
 
 impl KeyBindingsGroup {
-    fn parse(
-        raw_entries: nojson::RawJsonValue<'_, '_>,
-        group_names: &BTreeSet<String>,
-    ) -> Result<Self, nojson::JsonParseError> {
-        let mut entries = Vec::new();
-        for (key, value) in raw_entries.to_object()? {
-            let entry = KeyBindingEntry::parse(key, value, group_names)?;
-            entries.push(entry);
-        }
-        Ok(Self { entries })
+    fn from_raw(raw: &[(&str, &str)]) -> Self {
+        let entries = raw
+            .iter()
+            .map(|&(keys, command)| KeyBindingEntry::from_raw(keys, command))
+            .collect();
+        Self { entries }
     }
 }
 
+/// One binding: the keys that trigger it and the command they run.
 #[derive(Debug)]
 pub struct KeyBindingEntry {
+    /// The keys that trigger the binding; any one of them is enough.
     pub keys: KeySet,
+
+    /// The command the keys run.
     pub command: EditorCommand,
 }
 
 impl KeyBindingEntry {
-    fn parse(
-        raw_keys: nojson::RawJsonValue<'_, '_>,
-        raw_command: nojson::RawJsonValue<'_, '_>,
-        group_names: &BTreeSet<String>,
-    ) -> Result<Self, nojson::JsonParseError> {
-        let keys = KeySet::parse(raw_keys)?;
-        let command = raw_command
-            .to_unquoted_string_str()?
-            .parse::<EditorCommand>()
-            .map_err(|e| raw_command.invalid(e))?;
-        if let EditorCommand::Scope(group_name) = &command
-            && !group_names.contains(group_name)
-        {
-            return Err(raw_command.invalid("no such group"));
-        }
-        Ok(Self { keys, command })
+    fn from_raw(raw_keys: &str, raw_command: &str) -> Self {
+        let keys = KeySet::from_raw(raw_keys);
+        let command = raw_command.parse::<EditorCommand>().expect("bug");
+        Self { keys, command }
     }
 }
 
+/// The keys that trigger one binding, any one of which is enough.
+///
+/// The order is the order the legend shows them in.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct KeySet(pub Vec<KeyInput>);
+pub struct KeySet(pub Vec<tuinix::KeyInput>);
 
 impl KeySet {
-    fn parse(raw_keys: nojson::RawJsonValue<'_, '_>) -> Result<Self, nojson::JsonParseError> {
-        let mut keys = Vec::new();
-        for key in raw_keys.to_unquoted_string_str()?.split(',') {
-            let key = parse_key(key).ok_or_else(|| raw_keys.invalid("invalid key"))?;
-            keys.push(key);
-        }
-        Ok(Self(keys))
+    fn from_raw(raw_keys: &str) -> Self {
+        let keys = raw_keys
+            .split(',')
+            .map(|key| parse_key(key).expect("bug"))
+            .collect();
+        Self(keys)
     }
 }
 
@@ -277,22 +340,6 @@ impl std::fmt::Display for KeySet {
             }
             display_key(key, f)?;
         }
-        Ok(())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::Result;
-
-    use super::*;
-
-    #[test]
-    fn parse_key_bindings() -> Result<()> {
-        let json = include_str!("../default.config.json");
-        let json = nojson::RawJson::parse(json)?;
-        let keybindings = json.value().to_member("keybindings")?.required()?;
-        KeyBindings::try_from(keybindings)?;
         Ok(())
     }
 }

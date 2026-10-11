@@ -1,10 +1,10 @@
 use std::collections::BTreeSet;
 
-use tuinix::{Char, Frame, Position, Style};
 use unicode_width::UnicodeWidthChar;
 
 use crate::{Result, buffer::TextPosition, editor::Editor};
 
+/// The scrolling view of the buffer drawn in the main area.
 #[derive(Debug)]
 pub struct TextView {
     scroll_offset: TextPosition,
@@ -17,13 +17,16 @@ impl Default for TextView {
 }
 
 impl TextView {
+    /// Makes a view scrolled to the top-left.
     pub fn new() -> Self {
         Self {
             scroll_offset: TextPosition::default(),
         }
     }
 
-    pub fn render(&mut self, editor: &Editor, frame: &mut Frame) -> Result<()> {
+    /// Scrolls to keep the cursor visible, then paints the buffer into
+    /// `frame`.
+    pub fn render(&mut self, editor: &Editor, frame: &mut tuinix::Frame) -> Result<()> {
         let terminal_size = frame.size();
 
         // Adjust scroll offset to keep cursor visible
@@ -66,19 +69,19 @@ impl TextView {
                 let width = c.width().unwrap_or_default();
 
                 let style = if is_clipboard {
-                    Style::new().reverse().underline()
+                    tuinix::Style::new().reverse().underline()
                 } else if marked_positions.contains(&position) {
                     // Render with highlight style
-                    Style::new().reverse()
+                    tuinix::Style::new().reverse()
                 } else {
                     // Render normally
-                    Style::new()
+                    tuinix::Style::new()
                 };
 
                 if width > 0
-                    && let Some(ch) = Char::new(c, width, style)
+                    && let Some(ch) = tuinix::Char::new(c, width, style)
                 {
-                    let at = Position {
+                    let at = tuinix::Position {
                         row: line_index,
                         col: current_col - self.scroll_offset.col,
                     };
@@ -118,8 +121,9 @@ impl TextView {
         }
     }
 
-    pub fn cursor_terminal_position(&self, editor: &Editor) -> Position {
-        Position {
+    /// Returns the cursor's position within the text area.
+    pub fn cursor_terminal_position(&self, editor: &Editor) -> tuinix::Position {
+        tuinix::Position {
             row: editor.cursor.row.saturating_sub(self.scroll_offset.row),
             col: editor.cursor.col.saturating_sub(self.scroll_offset.col),
         }

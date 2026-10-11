@@ -38,12 +38,6 @@ impl From<fmt::Error> for Error {
     }
 }
 
-impl From<nojson::JsonParseError> for Error {
-    fn from(e: nojson::JsonParseError) -> Self {
-        Self::new(e.to_string())
-    }
-}
-
 impl From<nopng::Error> for Error {
     fn from(e: nopng::Error) -> Self {
         Self::new(e.to_string())

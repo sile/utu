@@ -1,15 +1,16 @@
-use tuinix::{Frame, Position, Style};
 use unicode_width::UnicodeWidthStr;
 
 use crate::{Error, Result, editor::Editor, tuinix_ext::put_text};
 
+/// The reversed status bar drawn above the message line.
 #[derive(Debug)]
 pub struct StatusLine;
 
 impl StatusLine {
-    pub fn render(&self, editor: &Editor, frame: &mut Frame) -> Result<()> {
+    /// Paints the file name, cursor position, and mode into `frame`.
+    pub fn render(&self, editor: &Editor, frame: &mut tuinix::Frame) -> Result<()> {
         // Create a styled status bar with reverse colors (dark background, light text)
-        let style = Style::new().reverse().bold();
+        let style = tuinix::Style::new().reverse().bold();
 
         // Show file status, cursor position, and mode information
         let text = format!(
@@ -37,7 +38,7 @@ impl StatusLine {
         // file name does not leave the bar short.
         let pad = frame.size().cols.saturating_sub(text.width());
         let padded = format!("{text}{}", " ".repeat(pad));
-        put_text(frame, Position::ORIGIN, &padded, style);
+        put_text(frame, tuinix::Position::ORIGIN, &padded, style);
 
         Ok(())
     }

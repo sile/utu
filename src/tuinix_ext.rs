@@ -1,5 +1,3 @@
-use tuinix::KeyCode;
-
 use unicode_width::UnicodeWidthChar;
 
 /// Paints `text` into `frame` starting at `at`, using `style` for every
@@ -44,23 +42,23 @@ pub fn display_key(key: &tuinix::KeyInput, f: &mut std::fmt::Formatter<'_>) -> s
 
     // Write the key code
     match key.code {
-        KeyCode::Up => write!(f, "↑"),
-        KeyCode::Down => write!(f, "↓"),
-        KeyCode::Left => write!(f, "←"),
-        KeyCode::Right => write!(f, "→"),
-        KeyCode::Enter => write!(f, "↵"),
-        KeyCode::Escape => write!(f, "⎋"),
-        KeyCode::Backspace => write!(f, "⌫"),
-        KeyCode::Tab => write!(f, "⇥"),
-        KeyCode::BackTab => write!(f, "⇤"),
-        KeyCode::Delete => write!(f, "⌦"),
-        KeyCode::Insert => write!(f, "⎀"),
-        KeyCode::Home => write!(f, "⇱"),
-        KeyCode::End => write!(f, "⇲"),
-        KeyCode::PageUp => write!(f, "⇞"),
-        KeyCode::PageDown => write!(f, "⇟"),
-        KeyCode::F(n) => write!(f, "F{}", n),
-        KeyCode::Char(c) => write!(f, "{}", c),
+        tuinix::KeyCode::Up => write!(f, "↑"),
+        tuinix::KeyCode::Down => write!(f, "↓"),
+        tuinix::KeyCode::Left => write!(f, "←"),
+        tuinix::KeyCode::Right => write!(f, "→"),
+        tuinix::KeyCode::Enter => write!(f, "↵"),
+        tuinix::KeyCode::Escape => write!(f, "⎋"),
+        tuinix::KeyCode::Backspace => write!(f, "⌫"),
+        tuinix::KeyCode::Tab => write!(f, "⇥"),
+        tuinix::KeyCode::BackTab => write!(f, "⇤"),
+        tuinix::KeyCode::Delete => write!(f, "⌦"),
+        tuinix::KeyCode::Insert => write!(f, "⎀"),
+        tuinix::KeyCode::Home => write!(f, "⇱"),
+        tuinix::KeyCode::End => write!(f, "⇲"),
+        tuinix::KeyCode::PageUp => write!(f, "⇞"),
+        tuinix::KeyCode::PageDown => write!(f, "⇟"),
+        tuinix::KeyCode::F(n) => write!(f, "F{}", n),
+        tuinix::KeyCode::Char(c) => write!(f, "{}", c),
     }
 }
 
@@ -84,28 +82,28 @@ pub fn parse_key(s: &str) -> Option<tuinix::KeyInput> {
 
     // Special keys
     match s {
-        "↑" => return Some(key(KeyCode::Up)),
-        "↓" => return Some(key(KeyCode::Down)),
-        "←" => return Some(key(KeyCode::Left)),
-        "→" => return Some(key(KeyCode::Right)),
-        "↵" => return Some(key(KeyCode::Enter)),
-        "⎋" => return Some(key(KeyCode::Escape)),
-        "⌫" => return Some(key(KeyCode::Backspace)),
-        "⇥" => return Some(key(KeyCode::Tab)),
-        "⇤" => return Some(key(KeyCode::BackTab)),
-        "⌦" => return Some(key(KeyCode::Delete)),
-        "⎀" => return Some(key(KeyCode::Insert)),
-        "⇱" => return Some(key(KeyCode::Home)),
-        "⇲" => return Some(key(KeyCode::End)),
-        "⇞" => return Some(key(KeyCode::PageUp)),
-        "⇟" => return Some(key(KeyCode::PageDown)),
+        "↑" => return Some(key(tuinix::KeyCode::Up)),
+        "↓" => return Some(key(tuinix::KeyCode::Down)),
+        "←" => return Some(key(tuinix::KeyCode::Left)),
+        "→" => return Some(key(tuinix::KeyCode::Right)),
+        "↵" => return Some(key(tuinix::KeyCode::Enter)),
+        "⎋" => return Some(key(tuinix::KeyCode::Escape)),
+        "⌫" => return Some(key(tuinix::KeyCode::Backspace)),
+        "⇥" => return Some(key(tuinix::KeyCode::Tab)),
+        "⇤" => return Some(key(tuinix::KeyCode::BackTab)),
+        "⌦" => return Some(key(tuinix::KeyCode::Delete)),
+        "⎀" => return Some(key(tuinix::KeyCode::Insert)),
+        "⇱" => return Some(key(tuinix::KeyCode::Home)),
+        "⇲" => return Some(key(tuinix::KeyCode::End)),
+        "⇞" => return Some(key(tuinix::KeyCode::PageUp)),
+        "⇟" => return Some(key(tuinix::KeyCode::PageDown)),
         _ => {}
     }
 
     // Normal keys
     let mut chars = s.chars();
     match (chars.next(), chars.next()) {
-        (Some(c), None) if !c.is_control() => Some(key(KeyCode::Char(c))),
+        (Some(c), None) if !c.is_control() => Some(key(tuinix::KeyCode::Char(c))),
         _ => None,
     }
 }

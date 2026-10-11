@@ -1,10 +1,14 @@
+//! The `utu` binary: parse arguments and hand the terminal to the I/O edge.
+//!
+//! The Sans I/O core lives in the `utu` library; the edge (raw mode, the poll
+//! loop, and file access) lives in the library's `app` module, which is where
+//! the one `libc::poll` call lives. This binary holds no `unsafe` of its own.
+
+#![forbid(unsafe_code)]
+
 use std::path::PathBuf;
 
-use utu::{
-    app::App,
-    buffer::TextPosition,
-    config::{Config, FrameSize},
-};
+use utu::{App, Config, Editor, FrameSize, Result, TextBuffer, TextPosition};
 
 fn main() -> noargs::Result<()> {
     let mut args = noargs::raw_args();
@@ -17,18 +21,7 @@ fn main() -> noargs::Result<()> {
     }
     noargs::HELP_FLAG.take_help(&mut args);
 
-    let mut config: Config = noargs::opt("config-file")
-        .short('c')
-        .ty("PATH")
-        .doc("Configuration file path")
-        .env("UTU_CONFIG_FILE")
-        .take(&mut args)
-        .present_and_then(|a| -> std::result::Result<_, Box<dyn std::error::Error>> {
-            let content = std::fs::read_to_string(a.value())?;
-            let config = content.parse().map(|nojson::Json(v)| v)?;
-            Ok(config)
-        })?
-        .unwrap_or_default();
+    let mut config = Config::default();
     let position: TextPosition = noargs::opt("position")
         .short('p')
         .ty("ROW:COLUMN")
@@ -70,7 +63,7 @@ fn main() -> noargs::Result<()> {
     }
 
     if let Some(output_path) = export {
-        let mut editor = utu::editor::Editor::new(file_path, config)?;
+        let mut editor = Editor::new(file_path, config)?;
         editor.cursor = position;
         editor.reload()?;
 
@@ -88,10 +81,10 @@ fn main() -> noargs::Result<()> {
 }
 
 fn generate_png_from_buffer(
-    buffer: &utu::buffer::TextBuffer,
-    config: &utu::config::Config,
+    buffer: &TextBuffer,
+    config: &Config,
     offset: TextPosition,
-) -> utu::Result<Vec<u8>> {
+) -> Result<Vec<u8>> {
     let height = config.preview.height;
     let width = config.preview.width;
 
@@ -100,7 +93,7 @@ fn generate_png_from_buffer(
     for row in 0..height {
         // TODO: consider unicode width
         for col in 0..width {
-            let pos = utu::buffer::TextPosition {
+            let pos = TextPosition {
                 row: row + offset.row,
                 col: col + offset.col,
             };

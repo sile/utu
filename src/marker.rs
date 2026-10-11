@@ -2,36 +2,56 @@ use std::collections::BTreeSet;
 
 use crate::{buffer::TextPosition, editor::Editor};
 
+/// An active selection, one variant per marking mode.
+///
+/// Every kind grows from where the cursor was when the mode started and follows
+/// the cursor as it moves; the marked positions are read back with
+/// [`marked_positions()`](Marker::marked_positions).
 #[derive(Debug, Clone)]
 pub enum Marker {
+    /// A freehand stroke.
     Stroke(StrokeMarker),
+
+    /// A straight line.
     Line(LineMarker),
+
+    /// A rectangle outline.
     Rect(RectMarker),
+
+    /// A filled rectangle.
     FilledRect(FilledRectMarker),
+
+    /// A flood fill.
     Fill(FillMarker),
 }
 
 impl Marker {
+    /// Starts a freehand stroke at the cursor.
     pub fn new_stroke(editor: &Editor) -> Self {
         Self::Stroke(StrokeMarker::new(editor))
     }
 
+    /// Starts a straight line at the cursor.
     pub fn new_line(editor: &Editor) -> Self {
         Self::Line(LineMarker::new(editor))
     }
 
+    /// Starts a rectangle outline at the cursor.
     pub fn new_rect(editor: &Editor) -> Self {
         Self::Rect(RectMarker::new(editor))
     }
 
+    /// Starts a flood fill at the cursor.
     pub fn new_fill(editor: &Editor) -> Self {
         Self::Fill(FillMarker::new(editor))
     }
 
+    /// Starts a filled rectangle at the cursor.
     pub fn new_filled_rect(editor: &Editor) -> Self {
         Self::FilledRect(FilledRectMarker::new(editor))
     }
 
+    /// Returns the name of the marking mode, for the status line.
     pub fn name(&self) -> &'static str {
         match self {
             Marker::Stroke(_) => "MARK(STROKE)",
@@ -42,6 +62,7 @@ impl Marker {
         }
     }
 
+    /// Iterates over the currently marked positions.
     pub fn marked_positions(&self) -> Box<dyn '_ + Iterator<Item = TextPosition>> {
         match self {
             Marker::Stroke(m) => Box::new(m.positions.iter().copied()),
@@ -52,6 +73,7 @@ impl Marker {
         }
     }
 
+    /// Grows the selection to follow the cursor's new position.
     pub fn handle_cursor_move(&mut self, editor: &Editor) {
         match self {
             Marker::Stroke(m) => m.handle_cursor_move(editor),
@@ -63,6 +85,7 @@ impl Marker {
     }
 }
 
+/// A freehand stroke: every position the cursor has visited.
 #[derive(Debug, Clone)]
 pub struct StrokeMarker {
     positions: BTreeSet<TextPosition>,
@@ -80,6 +103,7 @@ impl StrokeMarker {
     }
 }
 
+/// A straight line from where the cursor started to where it is now.
 #[derive(Debug, Clone)]
 pub struct LineMarker {
     start: TextPosition,
@@ -125,6 +149,7 @@ impl LineMarker {
     }
 }
 
+/// A rectangle outline between where the cursor started and where it is now.
 #[derive(Debug, Clone)]
 pub struct RectMarker {
     start: TextPosition,
@@ -167,6 +192,7 @@ impl RectMarker {
     }
 }
 
+/// A filled rectangle between where the cursor started and where it is now.
 #[derive(Debug, Clone)]
 pub struct FilledRectMarker {
     start: TextPosition,
@@ -201,6 +227,7 @@ impl FilledRectMarker {
     }
 }
 
+/// A flood fill: the connected run of the same character around the cursor.
 #[derive(Debug, Clone)]
 pub struct FillMarker {
     position: TextPosition,

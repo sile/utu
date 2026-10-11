@@ -1,42 +1,62 @@
+//! The editor's compile-time configuration: the preview size and the palette.
+//!
+//! The key bindings live in [`crate::keybinding`], and nothing here is read
+//! from a file: every value is a constant in this module.
+
 use std::collections::BTreeMap;
 
 use crate::keybinding::KeyBindings;
 
+/// The default preview width, in pixels.
+pub const PREVIEW_WIDTH: usize = 40;
+
+/// The default preview height, in pixels.
+pub const PREVIEW_HEIGHT: usize = 40;
+
+/// The character-to-color palette, as `(character, rrggbb)` pairs.
+///
+/// Each color is a `#RRGGBB` hex string; the alpha channel is always opaque.
+const RAW_PALETTE: &[(char, &str)] = &[
+    (' ', "C8C8A8"),
+    ('.', "B8B8A8"),
+    ('+', "A0A088"),
+    ('o', "686850"),
+    ('#', "282818"),
+];
+
+/// Everything the editor is configured with.
 #[derive(Debug)]
 pub struct Config {
+    /// The key bindings, hard-coded in [`crate::keybinding`].
     pub keybindings: KeyBindings,
+
+    /// The preview frame size, in pixels.
     pub preview: FrameSize,
-    // TODO: use a map to be able to switch palettes
+
+    /// The character-to-color palette used by the preview.
     pub palette: Palette,
-}
-
-impl<'text, 'raw> TryFrom<nojson::RawJsonValue<'text, 'raw>> for Config {
-    type Error = nojson::JsonParseError;
-
-    fn try_from(value: nojson::RawJsonValue<'text, 'raw>) -> Result<Self, Self::Error> {
-        let keybindings = value.to_member("keybindings")?.required()?;
-        let preview = value.to_member("preview")?.required()?;
-        let palette = value.to_member("palette")?.required()?;
-
-        Ok(Config {
-            keybindings: keybindings.try_into()?,
-            preview: preview.try_into()?, // TODO: optional
-            palette: palette.try_into()?,
-        })
-    }
 }
 
 impl Default for Config {
     fn default() -> Self {
-        let json = include_str!("../default.config.json");
-        let nojson::Json(config) = json.parse().expect("bug");
-        config
+        Config {
+            keybindings: KeyBindings::default(),
+            preview: FrameSize {
+                width: PREVIEW_WIDTH,
+                height: PREVIEW_HEIGHT,
+            },
+            palette: Palette::default(),
+        }
     }
 }
 
+/// The size of the preview frame, in pixels.
 #[derive(Debug)]
 pub struct FrameSize {
+    /// The width in pixels.
     pub width: usize,
+
+    /// The height in pixels.
     pub height: usize,
 }
 
@@ -57,92 +77,64 @@ impl std::str::FromStr for FrameSize {
     }
 }
 
-impl<'text, 'raw> TryFrom<nojson::RawJsonValue<'text, 'raw>> for FrameSize {
-    type Error = nojson::JsonParseError;
-
-    fn try_from(value: nojson::RawJsonValue<'text, 'raw>) -> Result<Self, Self::Error> {
-        let width = value.to_member("width")?.required()?;
-        let height = value.to_member("height")?.required()?;
-
-        Ok(FrameSize {
-            width: width.try_into()?,
-            height: height.try_into()?,
-        })
-    }
-}
-
+/// The character-to-color palette the preview draws with.
 #[derive(Debug)]
 pub struct Palette {
+    /// The color of each character, keyed by the character itself.
     pub colors: BTreeMap<char, Color>,
 }
 
-impl<'text, 'raw> TryFrom<nojson::RawJsonValue<'text, 'raw>> for Palette {
-    type Error = nojson::JsonParseError;
-
-    fn try_from(value: nojson::RawJsonValue<'text, 'raw>) -> Result<Self, Self::Error> {
-        let colors = value.try_into()?;
-        Ok(Palette { colors })
+impl Default for Palette {
+    fn default() -> Self {
+        let colors = RAW_PALETTE
+            .iter()
+            .map(|&(ch, hex)| (ch, Color::from_hex(hex).expect("bug: bad palette entry")))
+            .collect();
+        Palette { colors }
     }
 }
 
+/// A 32-bit RGBA color.
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
+    /// The red channel.
     pub r: u8,
+
+    /// The green channel.
     pub g: u8,
+
+    /// The blue channel.
     pub b: u8,
+
+    /// The alpha channel.
     pub a: u8,
 }
 
 impl Color {
+    /// Makes an opaque [`Color`] from its red, green, and blue channels.
     pub const fn rgb(r: u8, g: u8, b: u8) -> Self {
         Self::rgba(r, g, b, 255)
     }
 
+    /// Makes a [`Color`] from its four channels.
     pub const fn rgba(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self { r, g, b, a }
     }
-}
 
-impl<'text, 'raw> TryFrom<nojson::RawJsonValue<'text, 'raw>> for Color {
-    type Error = nojson::JsonParseError;
-
-    fn try_from(value: nojson::RawJsonValue<'text, 'raw>) -> Result<Self, Self::Error> {
-        let hex_string = value.to_unquoted_string_str()?;
-
-        // Parse hex color string (e.g., "#FFFFFF" or "#000000" or "#FFFFFFAA")
-        let hex = hex_string
-            .strip_prefix('#')
-            .ok_or_else(|| value.invalid("Color must start with #"))?;
-
-        // Support both #RRGGBB and #RRGGBBAA formats
-        let (r, g, b, a) = match hex.len() {
-            6 => {
-                // #RRGGBB format - default to full opacity
-                let r = u8::from_str_radix(&hex[0..2], 16)
-                    .map_err(|_| value.invalid("Invalid hex color format"))?;
-                let g = u8::from_str_radix(&hex[2..4], 16)
-                    .map_err(|_| value.invalid("Invalid hex color format"))?;
-                let b = u8::from_str_radix(&hex[4..6], 16)
-                    .map_err(|_| value.invalid("Invalid hex color format"))?;
-                (r, g, b, 255)
-            }
-            8 => {
-                // #RRGGBBAA format - includes alpha channel
-                let r = u8::from_str_radix(&hex[0..2], 16)
-                    .map_err(|_| value.invalid("Invalid hex color format"))?;
-                let g = u8::from_str_radix(&hex[2..4], 16)
-                    .map_err(|_| value.invalid("Invalid hex color format"))?;
-                let b = u8::from_str_radix(&hex[4..6], 16)
-                    .map_err(|_| value.invalid("Invalid hex color format"))?;
-                let a = u8::from_str_radix(&hex[6..8], 16)
-                    .map_err(|_| value.invalid("Invalid hex color format"))?;
-                (r, g, b, a)
-            }
-            _ => {
-                return Err(value.invalid("Color must be 6 or 8 hex digits"));
-            }
+    /// Parses a `RRGGBB` or `RRGGBBAA` hex string, without a leading `#`.
+    fn from_hex(hex: &str) -> Result<Self, String> {
+        let parse = |range: std::ops::Range<usize>| {
+            u8::from_str_radix(&hex[range], 16).map_err(|_| "invalid hex color".to_string())
         };
-
-        Ok(Color::rgba(r, g, b, a))
+        match hex.len() {
+            6 => Ok(Color::rgba(parse(0..2)?, parse(2..4)?, parse(4..6)?, 255)),
+            8 => Ok(Color::rgba(
+                parse(0..2)?,
+                parse(2..4)?,
+                parse(4..6)?,
+                parse(6..8)?,
+            )),
+            _ => Err("color must be 6 or 8 hex digits".to_string()),
+        }
     }
 }
