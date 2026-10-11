@@ -10,6 +10,12 @@ pub struct Legend {
     pub hide: bool,
 }
 
+impl Default for Legend {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Legend {
     const HIDE_COLS: usize = 4;
     const SHOW_COLS: usize = 20;
@@ -37,7 +43,7 @@ impl Legend {
         let possible_commands: Vec<_> = editor
             .config
             .keybindings
-            .possible_commands(&group, &editor.pending_keys)
+            .possible_commands(group, &editor.pending_keys)
             .collect();
 
         // Draw the legend box
@@ -64,7 +70,7 @@ impl Legend {
             let rows = 1 + editor
                 .config
                 .keybindings
-                .possible_commands(&group, &editor.pending_keys)
+                .possible_commands(group, &editor.pending_keys)
                 .count();
             TerminalSize::rows_cols(rows, Self::SHOW_COLS)
         }

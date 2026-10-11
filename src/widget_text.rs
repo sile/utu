@@ -11,6 +11,12 @@ pub struct TextView {
     scroll_offset: TextPosition,
 }
 
+impl Default for TextView {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TextView {
     pub fn new() -> Self {
         Self {

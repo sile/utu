@@ -11,6 +11,12 @@ pub struct TextBuffer {
     pub filter: TextBufferFilter,
 }
 
+impl Default for TextBuffer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TextBuffer {
     pub fn new() -> Self {
         Self {

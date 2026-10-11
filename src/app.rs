@@ -116,7 +116,7 @@ impl App {
                     .editor
                     .config
                     .keybindings
-                    .find(&root_group, &self.editor.pending_keys)
+                    .find(root_group, &self.editor.pending_keys)
                 {
                     Err(()) => {
                         self.editor

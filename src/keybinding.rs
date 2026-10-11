@@ -38,6 +38,11 @@ pub struct KeyBindings {
 }
 
 impl KeyBindings {
+    // The error carries no information: it only means "no binding matches".
+    #[expect(
+        clippy::result_unit_err,
+        reason = "the failure case only means no binding matches, so a named error type would add noise"
+    )]
     pub fn find<'a>(
         &'a self,
         group: &'a KeyBindingsGroup,
@@ -80,11 +85,11 @@ impl KeyBindings {
                     results.insert(entry.keys.clone(), entry.command.clone()); // TODO} remove clone
                 } else if prefix.0.len() == 1 && prefix.0[0] == key {
                     // This key matches our prefix, check what comes next
-                    if let EditorCommand::Scope(scope_name) = &entry.command {
-                        if let Some(scoped_group) = self.groups.get(scope_name) {
-                            let empty_prefix = KeySequence(vec![]);
-                            self.collect_possible_commands(scoped_group, &empty_prefix, results);
-                        }
+                    if let EditorCommand::Scope(scope_name) = &entry.command
+                        && let Some(scoped_group) = self.groups.get(scope_name)
+                    {
+                        let empty_prefix = KeySequence(vec![]);
+                        self.collect_possible_commands(scoped_group, &empty_prefix, results);
                     }
                 }
             }
@@ -238,10 +243,10 @@ impl KeyBindingEntry {
             .to_unquoted_string_str()?
             .parse::<EditorCommand>()
             .map_err(|e| raw_command.invalid(e))?;
-        if let EditorCommand::Scope(group_name) = &command {
-            if !group_names.contains(group_name) {
-                return Err(raw_command.invalid("no such group"));
-            }
+        if let EditorCommand::Scope(group_name) = &command
+            && !group_names.contains(group_name)
+        {
+            return Err(raw_command.invalid("no such group"));
         }
         Ok(Self { keys, command })
     }
@@ -275,7 +280,6 @@ impl std::fmt::Display for KeySet {
 
 #[cfg(test)]
 mod tests {
-    use nojson::FromRawJsonValue;
     use orfail::OrFail;
 
     use super::*;
@@ -284,11 +288,13 @@ mod tests {
     fn parse_key_bindings() -> orfail::Result<()> {
         let json = include_str!("../default.config.json");
         let json = nojson::RawJson::parse(json).or_fail()?;
-        let ([keybindings], []) = json
+        let keybindings = json
             .value()
-            .to_fixed_object(["keybindings"], [])
+            .to_member("keybindings")
+            .or_fail()?
+            .required()
             .or_fail()?;
-        KeyBindings::from_raw_json_value(keybindings).or_fail()?;
+        KeyBindings::try_from(keybindings).or_fail()?;
         Ok(())
     }
 }
