@@ -22,9 +22,9 @@ checksum = "1d7473c448719d0214889f9ff75d4cdb6cf96582e4a9058e6eb2a52dc8d342ae"
 
 [[package]]
 name = "nopng"
-version = "0.0.1"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ad67ff1c34777abd18d885fef62baf5f3ebad069a1ff2174b95c4b0a3a06e4e"
+checksum = "0d8886528a493733b1fbf014afcf5abbc73254ef3d336d570b709b0c9720f543"
 
 [[package]]
 name = "tuinix"

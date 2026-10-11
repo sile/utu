@@ -1,6 +1,5 @@
 use std::path::PathBuf;
 
-use nopng::PngRgbaImage;
 use utu::{
     app::App,
     buffer::TextPosition,
@@ -76,8 +75,7 @@ fn main() -> noargs::Result<()> {
         editor.reload()?;
 
         let png = generate_png_from_buffer(&editor.buffer, &editor.config, position)?;
-        let mut file = std::fs::File::create(&output_path)?;
-        png.write_to(&mut file)?;
+        std::fs::write(&output_path, &png)?;
 
         println!("PNG exported to: {}", output_path.display());
     } else {
@@ -93,7 +91,7 @@ fn generate_png_from_buffer(
     buffer: &utu::buffer::TextBuffer,
     config: &utu::config::Config,
     offset: TextPosition,
-) -> utu::Result<PngRgbaImage> {
+) -> utu::Result<Vec<u8>> {
     let height = config.preview.height;
     let width = config.preview.width;
 
@@ -121,7 +119,7 @@ fn generate_png_from_buffer(
         }
     }
 
-    let png = PngRgbaImage::new(width as u32, height as u32, pixels)
-        .ok_or_else(|| utu::Error::new("invalid PNG image dimensions or pixel data"))?;
+    let spec = nopng::ImageSpec::new(width as u32, height as u32, nopng::PixelFormat::Rgba8);
+    let png = nopng::encode_image(&spec, &pixels)?;
     Ok(png)
 }

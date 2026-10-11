@@ -44,6 +44,12 @@ impl From<nojson::JsonParseError> for Error {
     }
 }
 
+impl From<nopng::Error> for Error {
+    fn from(e: nopng::Error) -> Self {
+        Self::new(e.to_string())
+    }
+}
+
 /// This crate specific [`Result`](std::result::Result) type.
 pub type Result<T> = std::result::Result<T, Error>;
 
