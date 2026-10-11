@@ -4,21 +4,21 @@ version = 4
 
 [[package]]
 name = "libc"
-version = "0.2.174"
+version = "0.2.190"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1171693293099992e19cddea4e8b849964e9846f4acee11b3948bcc337be8776"
+checksum = "ce5d3ddc6d3fa000eb1536d85e147bfe31aacaba692ed6a876f95cb7c855be78"
 
 [[package]]
 name = "noargs"
-version = "0.4.1"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe77e710319d3ff009f93efc433d879e80e6336f5b87ace6d6db7ca5951085c3"
+checksum = "af5b13e43c3b5f1b4f2db60f5f03c803a04f5dd0a6fd44c83b5517ca1ec42ac4"
 
 [[package]]
 name = "nojson"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f79bcf4dfb2f1beb2574b9234e49147be3f21a715ae9242dbe52f0856849bd20"
+checksum = "89345dbd882b70c0af02720ff2d2527197361a4556c713c86d8110a8697a7e77"
 
 [[package]]
 name = "nopng"
@@ -34,18 +34,18 @@ checksum = "aba2212a0fddd290c8209fb9b0393382435ede29c24a71f245d7fa92f0f3442e"
 
 [[package]]
 name = "tuinix"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91fff680c7c85c9807ee4e5f5bc5f65d60b2b7cb08d77c6e41654d5cfcfa09b1"
+checksum = "7d4e84931e3c6c70178413e9d1bbc2de6cc14f6152d8b45d73f1ef75578a4b95"
 dependencies = [
  "libc",
 ]
 
 [[package]]
 name = "unicode-width"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a1a07cc7db3810833284e8d372ccdc6da29741639ecc70c9ec107df0fa6154c"
+checksum = "b4ac048d71ede7ee76d585517add45da530660ef4390e49b098733c6e897f254"
 
 [[package]]
 name = "utu"
