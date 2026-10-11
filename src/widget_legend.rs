@@ -1,9 +1,8 @@
 use std::fmt::Write;
 
-use orfail::OrFail;
 use tuinix::{TerminalRegion, TerminalSize};
 
-use crate::{editor::Editor, tuinix_ext::TerminalFrame};
+use crate::{Result, editor::Editor, tuinix_ext::TerminalFrame};
 
 #[derive(Debug)]
 pub struct Legend {
@@ -24,13 +23,13 @@ impl Legend {
         Self { hide: false }
     }
 
-    pub fn render(&self, editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
+    pub fn render(&self, editor: &Editor, frame: &mut TerminalFrame) -> Result<()> {
         if frame.size().cols != self.size(editor).cols {
             return Ok(());
         }
 
         if self.hide {
-            writeln!(frame, "└───").or_fail()?;
+            writeln!(frame, "└───")?;
             return Ok(());
         }
 
@@ -48,11 +47,11 @@ impl Legend {
 
         // Draw the legend box
         for (key, command) in possible_commands.iter() {
-            writeln!(frame, "│ [{}] {}", key, command).or_fail()?;
+            writeln!(frame, "│ [{}] {}", key, command)?;
         }
 
         // Add the hide option at the bottom
-        writeln!(frame, "└─────────────────────").or_fail()?;
+        writeln!(frame, "└─────────────────────")?;
 
         Ok(())
     }

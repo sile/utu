@@ -1,10 +1,9 @@
 use std::path::PathBuf;
 
-use orfail::OrFail;
 use tuinix::{Terminal, TerminalEvent, TerminalInput};
 
 use crate::{
-    clipboard::Clipboard, config::Config, editor::Editor, editor_command::EditorCommand,
+    Result, clipboard::Clipboard, config::Config, editor::Editor, editor_command::EditorCommand,
     tuinix_ext::TerminalFrame, widget_legend::Legend, widget_message::MessageLine,
     widget_preview::Preview, widget_status::StatusLine, widget_text::TextView,
 };
@@ -21,11 +20,11 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(path: PathBuf, config: Config) -> orfail::Result<Self> {
-        let terminal = Terminal::new().or_fail()?;
+    pub fn new(path: PathBuf, config: Config) -> Result<Self> {
+        let terminal = Terminal::new()?;
         Ok(Self {
             terminal,
-            editor: Editor::new(path, config).or_fail()?,
+            editor: Editor::new(path, config)?,
             text_view: TextView::new(),
             status_line: StatusLine,
             message_line: MessageLine,
@@ -34,20 +33,20 @@ impl App {
         })
     }
 
-    pub fn run(mut self) -> orfail::Result<()> {
-        self.editor.reload().or_fail()?;
+    pub fn run(mut self) -> Result<()> {
+        self.editor.reload()?;
 
         while !self.editor.exit {
-            self.render().or_fail()?;
+            self.render()?;
 
-            if let Some(event) = self.terminal.poll_event(None).or_fail()? {
-                self.handle_event(event).or_fail()?;
+            if let Some(event) = self.terminal.poll_event(None)? {
+                self.handle_event(event)?;
             }
         }
         Ok(())
     }
 
-    fn render(&mut self) -> orfail::Result<()> {
+    fn render(&mut self) -> Result<()> {
         if !self.editor.dirty.render {
             return Ok(());
         }
@@ -62,45 +61,39 @@ impl App {
 
         // Render widgets
         let mut subframe = TerminalFrame::new(main_region.size);
-        self.text_view
-            .render(&self.editor, &mut subframe)
-            .or_fail()?;
+        self.text_view.render(&self.editor, &mut subframe)?;
         frame.draw(main_region.position, &subframe);
 
         let mut subframe = TerminalFrame::new(status_region.size);
-        self.status_line
-            .render(&self.editor, &mut subframe)
-            .or_fail()?;
+        self.status_line.render(&self.editor, &mut subframe)?;
         frame.draw(status_region.position, &subframe);
 
         let mut subframe = TerminalFrame::new(message_region.size);
-        self.message_line
-            .render(&self.editor, &mut subframe)
-            .or_fail()?;
+        self.message_line.render(&self.editor, &mut subframe)?;
         frame.draw(message_region.position, &subframe);
 
         let preview_region = self.preview.region(&self.editor, frame.size());
         let mut subframe = TerminalFrame::new(preview_region.size);
-        self.preview.render(&self.editor, &mut subframe).or_fail()?;
+        self.preview.render(&self.editor, &mut subframe)?;
         frame.draw(preview_region.position, &subframe);
 
         let legend_region = self.legend.region(&self.editor, frame.size());
         let mut subframe = TerminalFrame::new(legend_region.size);
-        self.legend.render(&self.editor, &mut subframe).or_fail()?;
+        self.legend.render(&self.editor, &mut subframe)?;
         frame.draw(legend_region.position, &subframe);
 
         // Set cursor position for text editing
         let cursor_pos = self.text_view.cursor_terminal_position(&self.editor);
         self.terminal.set_cursor(Some(cursor_pos));
 
-        self.terminal.draw(frame).or_fail()?;
+        self.terminal.draw(frame)?;
 
         self.editor.dirty.render = false;
 
         Ok(())
     }
 
-    fn handle_event(&mut self, event: TerminalEvent) -> orfail::Result<()> {
+    fn handle_event(&mut self, event: TerminalEvent) -> Result<()> {
         self.editor.clear_message();
 
         match event {
@@ -129,7 +122,7 @@ impl App {
                     }
                     Ok(Some(command)) => {
                         self.editor.pending_keys.clear();
-                        self.handle_command(&command.clone()).or_fail()?;
+                        self.handle_command(&command.clone())?;
                     }
                 }
             }
@@ -140,7 +133,7 @@ impl App {
         Ok(())
     }
 
-    fn handle_command(&mut self, command: &EditorCommand) -> orfail::Result<()> {
+    fn handle_command(&mut self, command: &EditorCommand) -> Result<()> {
         match command {
             EditorCommand::Quit => {
                 self.editor.exit = true;
@@ -214,7 +207,7 @@ impl App {
                     cb.cursor = self.editor.cursor;
                 }
             }
-            EditorCommand::Dot(c) => self.editor.dot(*c).or_fail()?,
+            EditorCommand::Dot(c) => self.editor.dot(*c)?,
             EditorCommand::MarkStroke => {
                 self.editor.marker = Some(crate::marker::Marker::new_stroke(&self.editor));
                 self.editor.set_message("Stroke marking mode started");
@@ -241,7 +234,7 @@ impl App {
                 self.editor.set_message("Fill marking mode started");
                 self.editor.dirty.render = true;
             }
-            EditorCommand::Save => self.editor.save().or_fail()?,
+            EditorCommand::Save => self.editor.save()?,
             EditorCommand::Scope(_) => unreachable!(),
             EditorCommand::Cut => {
                 if let Some(clipboard) = Clipboard::copy_marked_pixels(&mut self.editor) {

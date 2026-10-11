@@ -1,9 +1,8 @@
 use std::fmt::Write;
 
-use orfail::OrFail;
 use tuinix::{TerminalRegion, TerminalSize};
 
-use crate::{config::Color, editor::Editor, tuinix_ext::TerminalFrame};
+use crate::{Result, config::Color, editor::Editor, tuinix_ext::TerminalFrame};
 
 #[derive(Debug, Default)]
 pub struct Preview {
@@ -21,13 +20,13 @@ impl Preview {
         editor.dirty.render = true;
     }
 
-    pub fn render(&self, editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
+    pub fn render(&self, editor: &Editor, frame: &mut TerminalFrame) -> Result<()> {
         if frame.size().cols != self.size(editor).cols {
             return Ok(());
         }
 
         if self.hide {
-            writeln!(frame, "┌───").or_fail()?;
+            writeln!(frame, "┌───")?;
             return Ok(());
         }
 
@@ -39,8 +38,7 @@ impl Preview {
             frame,
             "┌{}─",
             "─".repeat(preview_size.cols.saturating_sub(2))
-        )
-        .or_fail()?;
+        )?;
 
         // Content area - render as pixels using block characters
         let content_height = preview_size.rows.saturating_sub(1); // Subtract top border only
@@ -57,7 +55,7 @@ impl Preview {
         let viewport_start_col = cursor_pixel_col.saturating_sub(viewport_width / 2);
 
         for terminal_row in 0..content_height {
-            write!(frame, "│").or_fail()?;
+            write!(frame, "│")?;
 
             // Each terminal row represents 2 pixel rows (using ▄ character)
             let pixel_row_top = viewport_start_row + terminal_row * 2;
@@ -83,11 +81,10 @@ impl Preview {
                     tuinix::TerminalStyle::new()
                         .fg_color(bottom_terminal_color)
                         .bg_color(top_terminal_color)
-                )
-                .or_fail()?;
+                )?;
             }
 
-            writeln!(frame, "{}", tuinix::TerminalStyle::RESET).or_fail()?;
+            writeln!(frame, "{}", tuinix::TerminalStyle::RESET)?;
         }
 
         Ok(())

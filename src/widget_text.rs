@@ -1,10 +1,9 @@
 use std::{collections::BTreeSet, fmt::Write};
 
-use orfail::OrFail;
 use tuinix::TerminalStyle;
 use unicode_width::UnicodeWidthChar;
 
-use crate::{buffer::TextPosition, editor::Editor, tuinix_ext::TerminalFrame};
+use crate::{Result, buffer::TextPosition, editor::Editor, tuinix_ext::TerminalFrame};
 
 #[derive(Debug)]
 pub struct TextView {
@@ -24,7 +23,7 @@ impl TextView {
         }
     }
 
-    pub fn render(&mut self, editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
+    pub fn render(&mut self, editor: &Editor, frame: &mut TerminalFrame) -> Result<()> {
         let terminal_size = frame.size();
 
         // Adjust scroll offset to keep cursor visible
@@ -69,21 +68,21 @@ impl TextView {
                 if is_clipboard {
                     let style = TerminalStyle::new().reverse().underline();
                     let reset = TerminalStyle::RESET;
-                    write!(frame, "{}{}{}", style, c, reset).or_fail()?;
+                    write!(frame, "{}{}{}", style, c, reset)?;
                 } else if marked_positions.contains(&position) {
                     // Render with highlight style
                     let style = TerminalStyle::new().reverse();
                     //let style = TerminalStyle::new().bg_color(TerminalColor::new(200, 200, 200));
                     let reset = TerminalStyle::RESET;
-                    write!(frame, "{}{}{}", style, c, reset).or_fail()?;
+                    write!(frame, "{}{}{}", style, c, reset)?;
                 } else {
                     // Render normally
-                    write!(frame, "{}", c).or_fail()?;
+                    write!(frame, "{}", c)?;
                 }
             }
 
             // Move to next line
-            writeln!(frame).or_fail()?;
+            writeln!(frame)?;
         }
 
         Ok(())

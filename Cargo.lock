@@ -27,12 +27,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ad67ff1c34777abd18d885fef62baf5f3ebad069a1ff2174b95c4b0a3a06e4e"
 
 [[package]]
-name = "orfail"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aba2212a0fddd290c8209fb9b0393382435ede29c24a71f245d7fa92f0f3442e"
-
-[[package]]
 name = "tuinix"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -54,7 +48,6 @@ dependencies = [
  "noargs",
  "nojson",
  "nopng",
- "orfail",
  "tuinix",
  "unicode-width",
 ]

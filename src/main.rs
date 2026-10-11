@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 
 use nopng::PngRgbaImage;
-use orfail::OrFail;
 use utu::{
     app::App,
     buffer::TextPosition,
@@ -25,7 +24,7 @@ fn main() -> noargs::Result<()> {
         .doc("Configuration file path")
         .env("UTU_CONFIG_FILE")
         .take(&mut args)
-        .present_and_then(|a| -> Result<_, Box<dyn std::error::Error>> {
+        .present_and_then(|a| -> std::result::Result<_, Box<dyn std::error::Error>> {
             let content = std::fs::read_to_string(a.value())?;
             let config = content.parse().map(|nojson::Json(v)| v)?;
             Ok(config)
@@ -72,19 +71,19 @@ fn main() -> noargs::Result<()> {
     }
 
     if let Some(output_path) = export {
-        let mut editor = utu::editor::Editor::new(file_path, config).or_fail()?;
+        let mut editor = utu::editor::Editor::new(file_path, config)?;
         editor.cursor = position;
-        editor.reload().or_fail()?;
+        editor.reload()?;
 
-        let png = generate_png_from_buffer(&editor.buffer, &editor.config, position).or_fail()?;
-        let mut file = std::fs::File::create(&output_path).or_fail()?;
-        png.write_to(&mut file).or_fail()?;
+        let png = generate_png_from_buffer(&editor.buffer, &editor.config, position)?;
+        let mut file = std::fs::File::create(&output_path)?;
+        png.write_to(&mut file)?;
 
         println!("PNG exported to: {}", output_path.display());
     } else {
-        let mut app = App::new(file_path, config).or_fail()?;
+        let mut app = App::new(file_path, config)?;
         app.editor.cursor = position;
-        app.run().or_fail()?;
+        app.run()?;
     }
 
     Ok(())
@@ -94,7 +93,7 @@ fn generate_png_from_buffer(
     buffer: &utu::buffer::TextBuffer,
     config: &utu::config::Config,
     offset: TextPosition,
-) -> orfail::Result<PngRgbaImage> {
+) -> utu::Result<PngRgbaImage> {
     let height = config.preview.height;
     let width = config.preview.width;
 
@@ -122,6 +121,7 @@ fn generate_png_from_buffer(
         }
     }
 
-    let png = PngRgbaImage::new(width as u32, height as u32, pixels).or_fail()?;
+    let png = PngRgbaImage::new(width as u32, height as u32, pixels)
+        .ok_or_else(|| utu::Error::new("invalid PNG image dimensions or pixel data"))?;
     Ok(png)
 }

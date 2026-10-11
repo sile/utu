@@ -280,21 +280,16 @@ impl std::fmt::Display for KeySet {
 
 #[cfg(test)]
 mod tests {
-    use orfail::OrFail;
+    use crate::Result;
 
     use super::*;
 
     #[test]
-    fn parse_key_bindings() -> orfail::Result<()> {
+    fn parse_key_bindings() -> Result<()> {
         let json = include_str!("../default.config.json");
-        let json = nojson::RawJson::parse(json).or_fail()?;
-        let keybindings = json
-            .value()
-            .to_member("keybindings")
-            .or_fail()?
-            .required()
-            .or_fail()?;
-        KeyBindings::try_from(keybindings).or_fail()?;
+        let json = nojson::RawJson::parse(json)?;
+        let keybindings = json.value().to_member("keybindings")?.required()?;
+        KeyBindings::try_from(keybindings)?;
         Ok(())
     }
 }

@@ -1,8 +1,7 @@
 use std::path::PathBuf;
 
-use orfail::OrFail;
-
 use crate::{
+    Result,
     buffer::{TextBuffer, TextPosition},
     clipboard::Clipboard,
     config::Config,
@@ -25,7 +24,7 @@ pub struct Editor {
 }
 
 impl Editor {
-    pub fn new(path: PathBuf, config: Config) -> orfail::Result<Self> {
+    pub fn new(path: PathBuf, config: Config) -> Result<Self> {
         let mut buffer = TextBuffer::new();
         buffer.filter.fg_chars = config.keybindings.fg_chars().collect();
 
@@ -57,7 +56,7 @@ impl Editor {
         }
     }
 
-    pub fn dot(&mut self, c: char) -> orfail::Result<()> {
+    pub fn dot(&mut self, c: char) -> Result<()> {
         if let Some(marker) = self.marker.take() {
             // Handle marker: apply character to all marked positions
             let positions: Vec<_> = marker.marked_positions().collect();
@@ -81,7 +80,7 @@ impl Editor {
         Ok(())
     }
 
-    pub fn save(&mut self) -> orfail::Result<()> {
+    pub fn save(&mut self) -> Result<()> {
         if !self.dirty.content {
             self.set_message("No changes to save");
             return Ok(());
@@ -89,7 +88,7 @@ impl Editor {
 
         let mut content = self.buffer.lines().collect::<Vec<&str>>().join("\n");
         content.push('\n');
-        std::fs::write(&self.path, content).or_fail()?;
+        std::fs::write(&self.path, content)?;
 
         self.dirty.content = false;
         self.set_message(format!("Saved {}", self.path.display()));
@@ -97,8 +96,8 @@ impl Editor {
         Ok(())
     }
 
-    pub fn reload(&mut self) -> orfail::Result<()> {
-        let text = std::fs::read_to_string(&self.path).or_fail()?;
+    pub fn reload(&mut self) -> Result<()> {
+        let text = std::fs::read_to_string(&self.path)?;
         self.buffer.set_text(text);
         self.set_message(format!("Loaded {}", self.path.display()));
 

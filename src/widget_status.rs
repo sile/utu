@@ -1,15 +1,14 @@
 use std::fmt::Write;
 
-use orfail::OrFail;
 use tuinix::TerminalStyle;
 
-use crate::{editor::Editor, tuinix_ext::TerminalFrame};
+use crate::{Error, Result, editor::Editor, tuinix_ext::TerminalFrame};
 
 #[derive(Debug)]
 pub struct StatusLine;
 
 impl StatusLine {
-    pub fn render(&self, editor: &Editor, frame: &mut TerminalFrame) -> orfail::Result<()> {
+    pub fn render(&self, editor: &Editor, frame: &mut TerminalFrame) -> Result<()> {
         // Create a styled status bar with reverse colors (dark background, light text)
         let style = TerminalStyle::new().reverse().bold();
         let reset = TerminalStyle::RESET;
@@ -20,7 +19,11 @@ impl StatusLine {
             frame,
             "{style}{}[{}:{}:{}] [CANVAS:{:?}] {}{filler}{reset}",
             if editor.dirty.content { '*' } else { ' ' }, // Dirty indicator
-            editor.path.file_name().and_then(|n| n.to_str()).or_fail()?,
+            editor
+                .path
+                .file_name()
+                .and_then(|n| n.to_str())
+                .ok_or_else(|| Error::new("file name is not valid UTF-8"))?,
             editor.cursor.row + 1,
             editor.cursor.col + 1,
             editor.config.keybindings.canvas_char(),
@@ -31,8 +34,7 @@ impl StatusLine {
             } else {
                 "DRAW"
             },
-        )
-        .or_fail()?;
+        )?;
 
         Ok(())
     }
